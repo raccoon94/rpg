@@ -441,7 +441,9 @@
     font-size:120px; filter:drop-shadow(0 10px 16px #000a); transition:opacity .2s; }
   /* 캐릭터 일러 모드 — 상반신 클로즈업(버스트업): 일러를 크게 키워 하반신은 대사창 뒤/화면 밖으로 */
   #vnPortrait.art { bottom:-46vh; font-size:0; height:132vh; display:flex; align-items:flex-end; }
-  #vnPortrait.art img { height:100%; width:auto; object-fit:contain; filter:drop-shadow(0 12px 24px #000b); }
+  #vnPortrait.art img { height:100%; width:auto; object-fit:contain; filter:drop-shadow(0 12px 24px #000b); transition:filter .25s; }
+  /* 주인공/내레이션 차례: 미소녀는 화면에 남고 살짝 어두워진다 (미연시 문법) */
+  #vnPortrait.dim img { filter:brightness(.45) saturate(.85) drop-shadow(0 12px 24px #000b); }
   #vnPortrait.enter { animation:vnEnter .35s cubic-bezier(.2,1.2,.4,1); }
   @keyframes vnEnter { 0%{ opacity:0; transform:translateX(-50%) translateY(16px) scale(.97); } 100%{ opacity:1; transform:translateX(-50%) translateY(0) scale(1); } }
   /* 대사창: 화면 하단 가로 풀폭 바 */
@@ -2116,6 +2118,8 @@ let vnTypeTimer=null, vnTyping=false, vnFullText='', vnAuto=false, vnAutoTimer=n
 function playVN(script, onEnd, charName, bg){
   vnScript=script.slice(); vnIdx=0; vnEnd=onEnd||null; vnChar=charName||null; vnLastWho=null; vnLogArr=[];
   vnAuto=false; updateAutoBtn();
+  const p=document.getElementById('vnPortrait');
+  p.innerHTML=''; p.style.opacity=0; p.classList.remove('art','dim','enter');
   setVNBg(bg||null);
   document.getElementById('vnLog').style.display='none';
   document.getElementById('vn').style.display='flex';
@@ -2157,21 +2161,28 @@ function showVNLine(node){
   const portrait=document.getElementById('vnPortrait');
   const nameEl=document.getElementById('vnNamePlate');
   document.getElementById('vnChoices').innerHTML='';
-  if(who===''){
-    portrait.style.opacity=.18; nameEl.style.display='none'; portrait.classList.remove('art'); portrait.textContent='💭';
-  } else if(who==='나'){
-    nameEl.style.display='block'; nameEl.textContent='나';
-    nameEl.style.background='linear-gradient(90deg,#1c4f7a,#2a7ab8 72%, transparent)';
-    portrait.classList.remove('art'); portrait.textContent='🧑'; portrait.style.opacity=1;
-  } else {
+  const isChar = who!=='' && who!=='나' && who!=='???';   // 일러를 띄우는 화자인가
+  if(isChar){
     nameEl.style.display='block'; nameEl.textContent=who; nameEl.style.background='';
-    portrait.style.opacity=1; portrait.classList.add('art');
+    portrait.style.opacity=1; portrait.classList.remove('dim'); portrait.classList.add('art');
     const emo=vnEmoji(who);
     portrait.innerHTML=`<img src="${charArt(who)+AV}" onerror="this.parentElement.classList.remove('art');this.parentElement.textContent='${emo}'">`;
+    // 화자가 바뀌면 등장 애니메이션
+    if(who!==vnLastWho){ portrait.classList.remove('enter'); void portrait.offsetWidth; portrait.classList.add('enter'); }
+    vnLastWho=who;
+  } else {
+    // 미연시 문법: 주인공('나')·내레이션·정체불명 화자는 일러를 띄우지 않는다.
+    // 직전 미소녀는 화면에 남기고 어둡게 (아직 아무도 안 나왔으면 빈 화면)
+    if(portrait.querySelector('img')) portrait.classList.add('dim');
+    else { portrait.style.opacity=0; portrait.textContent=''; }
+    if(who==='나'){
+      nameEl.style.display='block'; nameEl.textContent='나';
+      nameEl.style.background='linear-gradient(90deg,#1c4f7a,#2a7ab8 72%, transparent)';
+    } else if(who){   // ??? 등 정체불명 화자
+      nameEl.style.display='block'; nameEl.textContent=who;
+      nameEl.style.background='linear-gradient(90deg,#222230,#3a3a55 72%, transparent)';
+    } else nameEl.style.display='none';
   }
-  // 화자가 바뀌면 등장 애니메이션
-  if(who && who!==vnLastWho){ portrait.classList.remove('enter'); void portrait.offsetWidth; portrait.classList.add('enter'); }
-  vnLastWho=who;
   if(node.bg) setVNBg(node.bg);   // 컷 단위 배경 전환
   vnLogArr.push({who, text:node.text});
   // 두근두근 연출: heart 플래그 또는 💗/두근 포함 대사 → 핑크 글로우 + 하트 파티클
