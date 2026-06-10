@@ -641,6 +641,7 @@
 <script>
 // ===== 게임 상태 =====
 const G = {
+  playerName: '',              // 플레이어 닉네임 (동료들이 불러주는 이름)
   gold: 50, gem: 0, plv: 1, exp: 0,
   stage: 1, kills: 0,
   atk: 10, critRate: 0.15, critDmg: 2.0,
@@ -771,7 +772,7 @@ const WORLD = {
   prologue:[
     {who:"", text:"별이 떨어지던 밤, 하늘에 균열이 열렸다."},
     {who:"", text:"균열에서 쏟아지는 마수에 맞서, 사람들은 모험가의 도시 '루멘'에 길드를 세웠다."},
-    {who:"", text:"그리고 오늘 — 너는 길드에 이름을 올렸다. 신참 파티의, 리더로서."},
+    {who:"", text:"'{이름}' — 너는 오늘, 길드 명부에 그 이름을 올렸다. 신참 파티의 리더로서."},
     {who:"린", text:"…네가 새 리더? 흐음. 눈은 나쁘지 않네."},
     {who:"린", text:"좋아, 첫 동료는 나야. 빠르고 정확하게 — 따라와. 세계의 끝을 막으러."},
     {who:"", text:"— 동료들과 유대를 쌓고, 종말의 별 '노바'로부터 세계를 지켜라."},
@@ -883,6 +884,7 @@ CHARACTERS["린"].episodes = [
     {who:"린", text:"별 떨어지는 거에 빌면 안 돼. …떨어진 별이 어떻게 되는지, 아니까."},
     {who:"", text:"(사이. 린이 처음으로 나를 정면으로 본다)"},
     {who:"린", text:"……리더. 아니—"},
+    {who:"린", text:"{이름}."},
     {who:"린", text:"…이름, 불러봤어. 나쁘지 않네. 💗", heart:true},
     {who:"린", text:"교대 시간이야. 가서 자. …같이 있어줘서, 고마워."},
   ]},
@@ -898,7 +900,7 @@ CHARACTERS["린"].episodes = [
     {who:"린", text:"그 뒤로 난 한 번도 안 빗나갔어. 그날부터 지금까지, 단 한 번도."},
     {who:"린", text:"…누가 알아주지도 않는데."},
     {choice:[
-      {text:"이제 내가 알아", aff:5, then:[{who:"린", text:"……그 말, 무르기 없어. 💗", heart:true}]},
+      {text:"이제 내가 알아", aff:5, then:[{who:"린", text:"……그 말, 무르기 없어. {이름}. 💗", heart:true}]},
       {text:"그 한 발까지가 너야. 전부 데리고 가자", aff:5, then:[{who:"린", text:"…빗나간 것까지, 라. 너는 정말… 💗", heart:true}]},
     ]},
     {who:"", text:"(눈이 내리기 시작한다. 린이 하늘을 본다)"},
@@ -1046,7 +1048,7 @@ const CHAR_FAV = { 린:'jewel', 루비아:'book', 실비아:'cake', 사피라:'r
 // 호감도 70+ 전용 심쿵 대사 (두근/💗 포함 시 하트 연출 자동 발동)
 const CHAR_TALK_HIGH = {
   린: [
-    '…오늘은 좀 늦었네. 별일 없었어? …딱히 기다린 건 아니고. …아니, 맞아. 기다렸어. 💗',
+    '…오늘은 좀 늦었네, {이름}. 별일 없었어? …딱히 기다린 건 아니고. …아니, 맞아. 기다렸어. 💗',
     '옆에 있으면 조준이 흐트러져. …네 탓이야. 책임져.',
     '단 거 먹을래? 반 나눠줄게. …너한테만이야.',
   ],
@@ -1902,6 +1904,27 @@ function popReward(title, body){
   document.getElementById('overlay').style.display='flex';
 }
 
+// ===== 플레이어 닉네임 — 대사 속 {이름}이 이 이름으로 치환된다 =====
+function pName(){ return G.playerName||'리더'; }
+let _pNameCb = null;
+function askPlayerName(onDone){
+  popReward('✏️ 모험가 등록', `
+    <div class="small" style="margin-bottom:8px;text-align:left">길드 명부에 올릴 <b>당신의 이름</b>을 정해주세요.<br>동료들이 이 이름으로 불러줘요.</div>
+    <input id="pNameInput" maxlength="8" placeholder="이름 (최대 8자)" value="${vnEsc(G.playerName||'')}"
+      style="width:100%;padding:12px;border-radius:10px;border:1px solid #4a5090;background:#0f1020;color:#fff;font-size:16px;text-align:center">
+    <button class="btn gem" style="width:100%;margin-top:10px" onclick="confirmPlayerName()">길드 명부에 등록</button>`);
+  document.querySelector('#popup>button').style.display = G.playerName ? '' : 'none';  // 첫 등록은 건너뛸 수 없음
+  _pNameCb = onDone||null;
+  setTimeout(()=>{ const i=document.getElementById('pNameInput'); if(i) i.focus(); }, 60);
+}
+function confirmPlayerName(){
+  const i=document.getElementById('pNameInput');
+  const v=(i&&i.value||'').trim().slice(0,8);
+  if(!v){ if(i){ i.style.borderColor='#ff5e7a'; i.placeholder='이름을 입력해주세요!'; } return; }
+  G.playerName=v; saveGame(); closePopup();
+  const cb=_pNameCb; _pNameCb=null; if(cb) cb();
+}
+
 // ===== 풀스크린 서브 화면 (홈 메뉴에서 진입) =====
 let currentScreen = null;
 function openScreen(name){
@@ -2158,6 +2181,7 @@ let vnLastWho = null;
 function vnEmoji(who){ return (HERO_POOL.find(x=>x.name===who)||{}).emoji||'❓'; }
 function showVNLine(node){
   const who=node.who||'';
+  const txt=(node.text||'').replace(/\{이름\}/g, pName());   // 닉네임 치환
   const portrait=document.getElementById('vnPortrait');
   const nameEl=document.getElementById('vnNamePlate');
   document.getElementById('vnChoices').innerHTML='';
@@ -2176,7 +2200,7 @@ function showVNLine(node){
     if(portrait.querySelector('img')) portrait.classList.add('dim');
     else { portrait.style.opacity=0; portrait.textContent=''; }
     if(who==='나'){
-      nameEl.style.display='block'; nameEl.textContent='나';
+      nameEl.style.display='block'; nameEl.textContent=pName();   // 닉네임으로 표시
       nameEl.style.background='linear-gradient(90deg,#1c4f7a,#2a7ab8 72%, transparent)';
     } else if(who){   // ??? 등 정체불명 화자
       nameEl.style.display='block'; nameEl.textContent=who;
@@ -2184,13 +2208,13 @@ function showVNLine(node){
     } else nameEl.style.display='none';
   }
   if(node.bg) setVNBg(node.bg);   // 컷 단위 배경 전환
-  vnLogArr.push({who, text:node.text});
+  vnLogArr.push({who:(who==='나'?pName():who), text:txt});
   // 두근두근 연출: heart 플래그 또는 💗/두근 포함 대사 → 핑크 글로우 + 하트 파티클
   const box=document.getElementById('vnBox');
-  if(node.heart || /💗|두근/.test(node.text)){ box.classList.add('heartGlow'); spawnVNHearts(); }
+  if(node.heart || /💗|두근/.test(txt)){ box.classList.add('heartGlow'); spawnVNHearts(); }
   else box.classList.remove('heartGlow');
   if(node.shake){ const v=document.getElementById('vn'); v.classList.remove('shake'); void v.offsetWidth; v.classList.add('shake'); }
-  typeText(node.text);
+  typeText(txt);
 }
 // 타자기 효과
 function typeText(text){
@@ -2227,7 +2251,7 @@ function vnSkip(){
   if(cur && cur.choice) return;   // 선택지에서는 스킵 불가
   clearTimeout(vnTypeTimer); vnTyping=false;
   vnIdx++;
-  while(vnIdx<vnScript.length && !vnScript[vnIdx].choice){ const n=vnScript[vnIdx]; vnLogArr.push({who:n.who||'', text:n.text}); vnIdx++; }
+  while(vnIdx<vnScript.length && !vnScript[vnIdx].choice){ const n=vnScript[vnIdx]; vnLogArr.push({who:(n.who==='나'?pName():(n.who||'')), text:(n.text||'').replace(/\{이름\}/g, pName())}); vnIdx++; }
   if(vnIdx>=vnScript.length){ closeVN(); const f=vnEnd; vnEnd=null; if(f) f(); return; }
   vnStep();   // 선택지에서 멈춤
 }
@@ -2275,7 +2299,9 @@ function bondBadge(){
 }
 function viewBond(){
   const names=[...new Set(G.heroes.map(h=>h.name))];
-  let h=`<div class="card small">함께 모험하며 동료와의 <b>호감도</b>를 쌓아보세요. 호감도가 오르면 <b>전용 에피소드</b>가 열리고 공격력도 올라요!</div>`;
+  let h=`<div class="card small">함께 모험하며 동료와의 <b>호감도</b>를 쌓아보세요. 호감도가 오르면 <b>전용 에피소드</b>가 열리고 공격력도 올라요!
+    <div class="row" style="margin-top:8px;align-items:center"><div style="flex:1;text-align:left">내 이름: <b style="color:#ffd866">${vnEsc(pName())}</b></div>
+    <button class="btn" onclick="askPlayerName(()=>{ if(currentScreen==='bond') renderScreen(); })">✏️ 변경</button></div></div>`;
   if(names.length===0) h+=`<div class="card small">아직 만난 동료가 없어요. '소환'에서 영입해 보세요!</div>`;
   names.forEach(name=>{
     const c=charData(name); const aff=G.affinity[name]||0;
@@ -3012,6 +3038,7 @@ function loadGame(){
       if(G.lastSeen==null) G.lastSeen = 0;
       if(!G.attend) G.attend = { last:'', day:0 };
       if(!G.affinity) G.affinity = {};
+      if(G.playerName==null) G.playerName = '';
       if(!G.storyDone) G.storyDone = [];
       if(!G.epDone) G.epDone = [];
       if(!G.talkDate) G.talkDate = {};
@@ -3043,7 +3070,9 @@ renderHeroRow();
 refreshTop();
 setTab('hunt');
 goHome(); // 시작은 홈(로비) 화면
-if(!G.seenPrologue){ playVN(WORLD.prologue, ()=>{ G.seenPrologue=true; saveGame(); if(pendingOffline) showOfflinePopup(); }, null, VN_BG.field); }
+function startPrologue(){ playVN(WORLD.prologue, ()=>{ G.seenPrologue=true; saveGame(); if(pendingOffline) showOfflinePopup(); }, null, VN_BG.field); }
+if(!G.playerName){ askPlayerName(()=>{ if(!G.seenPrologue) startPrologue(); }); }
+else if(!G.seenPrologue){ startPrologue(); }
 else if(pendingOffline) showOfflinePopup(); // 홈 위에 방치 보상 팝업
 restartAuto(); // 자동사냥 시작
 setInterval(useSkill, 6000); // 6초마다 직업 스킬 자동 발동
