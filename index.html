@@ -129,10 +129,20 @@
   .heroSlot .slotHeroImg { width:104px; height:104px; max-width:none; max-height:none; object-fit:contain; }
   .heroSlot .slotHeroEmoji { font-size:58px; line-height:1; }
   .heroSlot.atk { animation:heroSdAttack .32s ease-out; }
+  .heroSlot.downed { filter:grayscale(1) brightness(.55) drop-shadow(0 8px 7px #0009); opacity:.72; }
+  .heroSlot.hit { animation:heroHit .22s ease-out; }
+  .heroHpMini { position:absolute; left:8px; right:8px; bottom:-3px; height:6px; border-radius:6px; overflow:hidden;
+    background:#1a1c38cc; border:1px solid #0008; box-shadow:0 1px 4px #0009; }
+  .heroHpMini i { display:block; height:100%; width:100%; background:linear-gradient(90deg,#3be38b,#b6ff6b); transition:width .18s; }
   @keyframes heroSdAttack {
     0%{ transform:translate(0,0) scale(1) rotate(0); }
     45%{ transform:translate(34px,-10px) scale(1.13) rotate(-4deg); }
     100%{ transform:translate(0,0) scale(1) rotate(0); }
+  }
+  @keyframes heroHit {
+    0%,100%{ transform:translateX(0); }
+    35%{ transform:translateX(-8px) rotate(-3deg); }
+    70%{ transform:translateX(6px) rotate(2deg); }
   }
 
   /* 하단 탭 */
@@ -676,6 +686,9 @@ const G = {
   pets: [],                    // 보유 펫
   activePet: -1,               // 착용 펫 인덱스
   guild: { joined:false, coin:0, lastCheck:'' }, // 길드
+  heroHp: {},                  // 전투 중 영웅 체력 {uid: hp}
+  wipeCount: 0,                // 전멸 횟수
+  wallStage: 0,                // 최근 막힌 스테이지
 };
 // 7일 출석 보상 (순환)
 const ATTEND_REWARDS = [
@@ -753,6 +766,7 @@ const GRADE_GRAD = {           // 등급별 배경 그라데이션
   UR:'linear-gradient(160deg,#8b5cf6,#ff4fd8,#ffd24a)',
 };
 let autoTimer = null;
+let monsterTimer = null;
 let heroDetailIdx = null;      // 영웅 상세(장비) 화면에서 보고있는 영웅
 let summonView = 'hero';
 let partyPickUid = null;       // 영웅 탭에서 배치 슬롯을 고르는 중인 영웅
@@ -1171,6 +1185,29 @@ function heroRawAtk(h){
   return Math.round((h.atk||50) * mult + (heroLevel(h)-1) * 12 * mult + heroAscCount(h) * 120 * mult);
 }
 function heroEffAtk(h){ return Math.round(heroRawAtk(h) * (1 + heroEquipSum(h)*0.10) * (1 + heroAffinity(h)*0.003)); } // 레벨/초월/등급 + 장비 +10%/단계, 호감도 +0.3%/포인트
+function heroMaxHp(h){
+  const mult = heroGradeMult(h);
+  const role = h.cls==='tank' ? 1.45 : h.cls==='healer' ? 1.12 : h.cls==='assassin' ? .88 : 1;
+  return Math.round((520 + heroLevel(h)*72 + heroAscCount(h)*680 + (h.atk||50)*5) * mult * role * (1 + (h.equip?.방어구||0)*0.16));
+}
+function heroDef(h){
+  const mult = heroGradeMult(h);
+  const role = h.cls==='tank' ? 1.55 : h.cls==='healer' ? 1.15 : h.cls==='assassin' ? .82 : 1;
+  return Math.round((28 + heroLevel(h)*5 + heroAscCount(h)*55 + (h.equip?.방어구||0)*38 + (h.equip?.장신구||0)*14) * mult * role);
+}
+function ensureHeroHp(h){
+  if(!h || !h.uid) return 0;
+  if(!G.heroHp) G.heroHp = {};
+  const max = heroMaxHp(h);
+  if(G.heroHp[h.uid]==null || G.heroHp[h.uid] > max) G.heroHp[h.uid] = max;
+  return G.heroHp[h.uid];
+}
+function livingPartyHeroes(){ return partyHeroes().filter(h=>ensureHeroHp(h)>0); }
+function healPartyFull(){
+  if(!G.heroHp) G.heroHp = {};
+  partyHeroes().forEach(h=>{ G.heroHp[h.uid] = heroMaxHp(h); });
+  renderHeroRow();
+}
 function heroLevelCost(h){ return Math.floor(180 * Math.pow(heroLevel(h), 1.45) * heroGradeMult(h)); }
 function heroMatKey(h){ return HERO_MAT[h.name] || 'chaos'; }
 function heroTransCost(h){
@@ -1222,11 +1259,15 @@ function autoInterval(){ return Math.max(100, 600 - (G.autoSpeed-1)*5); } // 공
 
 // ===== 몬스터 =====
 let isBoss = false;
+function monsterAtk(){
+  return Math.floor((22 + 5 * Math.pow(G.stage, 1.10)) * (1 + G.kills*0.03) * (isBoss?2.2:1));
+}
 function spawnMonster(){
   const idx = (G.stage-1) % MONSTERS.length;
   isBoss = (G.stage % 10 === 0);  // 10층마다 보스
   monHpMax = Math.floor(40 * Math.pow(1.25, G.stage-1) * (1 + G.kills*0.05) * (isBoss?6:1));
   monHp = monHpMax;
+  partyHeroes().forEach(ensureHeroHp);
   const mEl = document.getElementById('monster'), nEl = document.getElementById('monName');
   mEl.textContent = MONSTERS[idx];
   mEl.classList.toggle('boss', isBoss);
@@ -1234,6 +1275,7 @@ function spawnMonster(){
   nEl.textContent = (isBoss?'👑 BOSS ':'') + MON_NAMES[idx] + (G.stage>10? " +"+Math.floor(G.stage/10):"");
   if(isBoss) showToast('⚠️ BOSS 등장!', '#ff5e7a', true);
   updateHp();
+  renderHeroRow();
 }
 function updateHp(){
   const pct = Math.max(0, monHp/monHpMax*100);
@@ -1327,6 +1369,7 @@ function attack(isManual){
   hitEffects(crit, activeCls());
 }
 function dealDamage(dmg, crit){
+  if(livingPartyHeroes().length===0) return;
   monHp -= dmg;
   showDmg(dmg, crit);
   bumpCombo();
@@ -1334,6 +1377,47 @@ function dealDamage(dmg, crit){
   m.classList.add('hit'); setTimeout(()=>m.classList.remove('hit'),80);
   if(monHp <= 0) killMonster();
   updateHp();
+}
+function showHeroDmg(slotIndex, amount){
+  const b = document.getElementById('battle');
+  const d = document.createElement('div');
+  d.className = 'dmg';
+  d.style.color = '#ff9aad';
+  d.style.fontSize = '15px';
+  d.textContent = '-' + Math.ceil(amount).toLocaleString();
+  d.style.left = (15 + (slotIndex%2)*13) + '%';
+  d.style.top = (45 + Math.floor(slotIndex/2)*12) + '%';
+  b.appendChild(d);
+  setTimeout(()=>d.remove(), 650);
+}
+function monsterAttack(){
+  if(document.getElementById('home').style.display==='flex') return;
+  if(document.getElementById('charView').style.display==='block') return;
+  if(monHp<=0) return;
+  const slots = partySlots();
+  const living = slots.map((h,i)=>h?{h,i}:null).filter(x=>x && ensureHeroHp(x.h)>0);
+  if(!living.length){ partyWipe(); return; }
+  const target = living[Math.floor(Math.random()*living.length)];
+  const raw = monsterAtk();
+  const dmg = Math.max(1, Math.floor(raw * 100 / (100 + heroDef(target.h))));
+  G.heroHp[target.h.uid] = Math.max(0, ensureHeroHp(target.h) - dmg);
+  const el = document.querySelectorAll('#heroRow .heroSlot')[target.i];
+  if(el){ el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit'); setTimeout(()=>el.classList.remove('hit'),220); }
+  showHeroDmg(target.i, dmg);
+  renderHeroRow();
+  if(!slots.some(h=>h && ensureHeroHp(h)>0)) partyWipe();
+}
+function partyWipe(){
+  G.wipeCount = (G.wipeCount||0) + 1;
+  G.wallStage = G.stage;
+  const prev = Math.max(1, G.stage-1);
+  if(G.stage>1){ G.stage = prev; G.kills = 0; }
+  showToast(`전멸! 스테이지 ${G.stage} 반복 사냥`, '#ff8aa0', true);
+  setTimeout(()=>showToast('강화하거나 소환상점에서 영웅을 늘려보세요', '#ffd866', true), 900);
+  healPartyFull();
+  spawnMonster();
+  refreshTop();
+  if(['hunt','hero','gacha','shop','gear'].includes(currentTab)) renderPanel();
 }
 
 // ===== 콤보 =====
@@ -1393,6 +1477,10 @@ function monsterExplode(){
 function restartAuto(){
   if(autoTimer) clearInterval(autoTimer);
   autoTimer = setInterval(()=>attack(false), autoInterval());
+}
+function restartMonsterAttack(){
+  if(monsterTimer) clearInterval(monsterTimer);
+  monsterTimer = setInterval(monsterAttack, 1250);
 }
 
 // ===== 스킬 (직업별 자동 발동) =====
@@ -1494,7 +1582,13 @@ function killMonster(){
     document.getElementById('battle').appendChild(ring); setTimeout(()=>ring.remove(),700);
   }
   G.kills++;
-  if(G.kills >= 10){ G.kills = 0; G.stage++; if(G.stage%10!==1) showToast('STAGE '+G.stage, '#7fd0ff'); }
+  partyHeroes().forEach(h=>{ G.heroHp[h.uid] = Math.min(heroMaxHp(h), ensureHeroHp(h) + heroMaxHp(h)*0.14); });
+  if(G.kills >= 10){
+    G.kills = 0;
+    G.stage++;
+    healPartyFull();
+    if(G.stage%10!==1) showToast('STAGE '+G.stage, '#7fd0ff');
+  }
   spawnMonster();
   refreshTop();
   if(['gear','hero','hunt','gacha','shop'].includes(currentTab)) renderPanel();
@@ -1521,6 +1615,7 @@ function makeHeroFromGrade(grade){
 }
 function addHero(hero){
   if(!hero.uid) hero.uid = newHeroUid();
+  ensureHeroHp(hero);
   G.heroes.push(hero);
   G.heroes.sort((a,b)=>heroEffAtk(b)-heroEffAtk(a)); // 강한 순 정렬(상위 5명이 파티)
   if(!Array.isArray(G.party)) G.party = [];
@@ -1614,9 +1709,12 @@ function renderHeroRow(){
     const h = party[i];
     const d=document.createElement('div');
     if(h){
-      d.className='heroSlot';
+      const hp = ensureHeroHp(h), max = heroMaxHp(h), pct = Math.max(0, Math.min(100, hp/max*100));
+      d.className='heroSlot' + (hp<=0 ? ' downed' : '');
+      d.title = `${h.name} HP ${Math.ceil(hp).toLocaleString()} / ${max.toLocaleString()} · DEF ${heroDef(h).toLocaleString()}`;
       const art = heroSdArt(h);
-      d.innerHTML = `${art.img ? `<img class="slotHeroImg" src="${art.img}${AV}" alt="${h.name}">` : `<span class="slotHeroEmoji">${h.emoji}</span>`}`;
+      d.innerHTML = `${art.img ? `<img class="slotHeroImg" src="${art.img}${AV}" alt="${h.name}">` : `<span class="slotHeroEmoji">${h.emoji}</span>`}
+        <span class="heroHpMini"><i style="width:${pct}%"></i></span>`;
     } else {
       d.className='heroSlot empty';
       d.title = '영웅 배치칸';
@@ -2632,8 +2730,13 @@ function viewHunt(){
   const spdOne = huntCostMany(70, G.autoSpeed, SPEED_MAX_LEVEL, 1);
   const spdTen = huntCostMany(70, G.autoSpeed, SPEED_MAX_LEVEL, 10);
   const coin = '<span class="goldIcon"></span>';
+  const wallTip = G.wallStage ? `<div class="card" style="border-color:#ff8aa0;background:linear-gradient(160deg,#3a1d34,#1b1427)">
+      <div style="font-weight:900;color:#ffd866">스테이지 ${G.wallStage}에서 전멸했어요</div>
+      <div class="small" style="margin-top:4px">현재는 이전 스테이지를 반복 클리어합니다. 공격력/자동공격을 강화하거나 소환상점에서 영웅을 늘려 다시 도전하세요.</div>
+    </div>` : '';
   return `<h3>⚔️ 일반 사냥터 강화</h3>
     <div class="card small">전투 화면 아무 곳이나 <b>터치</b>하면 몬스터를 공격해요. 터치공격과 자동공격은 Lv.${HUNT_MAX_LEVEL}, 자동 공격속도는 Lv.${SPEED_MAX_LEVEL}까지 강화할 수 있어요.</div>
+    ${wallTip}
     <div class="card" style="border-color:#ffb74d"><div class="row">
       <div style="font-size:26px">👆</div>
       <div style="flex:1">
@@ -2707,6 +2810,7 @@ function assignPartySlot(uid, slot){
   while(G.party.length<5) G.party.push(null);
   G.party = G.party.map(id=>id===uid ? null : id);
   G.party[slot] = uid;
+  G.heroHp[uid] = heroMaxHp(hero);
   partyPickUid = null;
   renderHeroRow();
   refreshTop();
@@ -2735,6 +2839,8 @@ function heroGrowthHtml(i, mode='panel'){
     <div class="growGrid">
       <div class="growPill">기본 전투력<br><b style="color:#ffd866">${heroRawAtk(hero).toLocaleString()}</b></div>
       <div class="growPill">최종 전투력<br><b style="color:#ffd866">${heroEffAtk(hero).toLocaleString()}</b></div>
+      <div class="growPill">체력<br><b style="color:#3be38b">${heroMaxHp(hero).toLocaleString()}</b></div>
+      <div class="growPill">방어력<br><b style="color:#7fd0ff">${heroDef(hero).toLocaleString()}</b></div>
     </div>
     <div class="row" style="margin-top:8px">
       <button class="btn gold" onclick="upHeroLevel(${i},'${mode}')" ${(!canLevel||G.gold<lvCost)?'disabled':''}>${canLevel?`<span class="goldIcon"></span>${lvCost.toLocaleString()} 레벨업`:'초월 필요'}</button>
@@ -2760,6 +2866,7 @@ function upHeroLevel(i, mode='panel'){
   if(G.gold<cost) return;
   G.gold -= cost;
   hero.level = lv + 1;
+  G.heroHp[hero.uid] = heroMaxHp(hero);
   refreshHeroViews(mode);
 }
 function transcendHero(i, mode='panel'){
@@ -2777,6 +2884,7 @@ function transcendHero(i, mode='panel'){
   } else {
     hero.cap = Math.min(HERO_MAX_LEVEL, cap + 10);
   }
+  G.heroHp[hero.uid] = heroMaxHp(hero);
   refreshHeroViews(mode);
 }
 function viewHero(){
@@ -2795,7 +2903,7 @@ function viewHero(){
       </div>
       <div style="flex:1">
         <div class="txt-${hero.grade}" style="font-weight:bold">[${hero.grade}] ${hero.name} Lv.${heroLevel(hero)} ${inParty?`<span style="font-size:10px;color:#3be38b">●${slotNo}번 배치</span>`:''}</div>
-        <div class="small"><span style="color:${heroCls(hero).color}">${heroCls(hero).hit}${heroCls(hero).name}</span> · 전투력 ${heroEffAtk(hero)} · ${heroCls(hero).skill}</div>
+        <div class="small"><span style="color:${heroCls(hero).color}">${heroCls(hero).hit}${heroCls(hero).name}</span> · 전투력 ${heroEffAtk(hero)} · HP ${heroMaxHp(hero).toLocaleString()} · DEF ${heroDef(hero).toLocaleString()}</div>
       </div>
       <button class="btn gem" style="padding:7px 10px" onclick="event.stopPropagation();openPartyPicker('${hero.uid}')">배치</button>
       <div class="small">장비 ▸</div>
@@ -3101,13 +3209,16 @@ function loadGame(){
       if(!G.pets) G.pets = [];
       if(G.activePet==null) G.activePet = -1;
       if(!G.guild) G.guild = { joined:false, coin:0, lastCheck:'' };
+      if(!G.heroHp) G.heroHp = {};
+      if(!G.wipeCount) G.wipeCount = 0;
+      if(!G.wallStage) G.wallStage = 0;
       if(!G.tapPower) G.tapPower = 1;
       if(!G.autoPower) G.autoPower = 1;
       if(!G.autoSpeed) G.autoSpeed = 1;
       G.tapPower = Math.min(HUNT_MAX_LEVEL, Math.max(1, G.tapPower));
       G.autoPower = Math.min(HUNT_MAX_LEVEL, Math.max(1, G.autoPower));
       G.autoSpeed = Math.min(SPEED_MAX_LEVEL, Math.max(1, G.autoSpeed));
-      G.heroes.forEach(h=>{ if(!h.uid) h.uid=newHeroUid(); if(!h.equip) h.equip={무기:0,방어구:0,장신구:0}; if(!h.cls) h.cls="sword"; });
+      G.heroes.forEach(h=>{ if(!h.uid) h.uid=newHeroUid(); if(!h.equip) h.equip={무기:0,방어구:0,장신구:0}; if(!h.cls) h.cls="sword"; ensureHeroHp(h); });
       normalizeHeroCatalog();
       if(!hadParty || !Array.isArray(G.party)) G.party = G.heroes.slice(0,5).map(h=>h.uid);
       while(G.party.length<5) G.party.push(null);
@@ -3129,6 +3240,7 @@ if(!G.playerName){ askPlayerName(()=>{ if(!G.seenPrologue) startPrologue(); }); 
 else if(!G.seenPrologue){ startPrologue(); }
 else if(pendingOffline) showOfflinePopup(); // 홈 위에 방치 보상 팝업
 restartAuto(); // 자동사냥 시작
+restartMonsterAttack(); // 몬스터도 배치 영웅을 공격
 setInterval(useSkill, 6000); // 6초마다 직업 스킬 자동 발동
 setInterval(spawnSkinFx, 700); // 코스튬 분위기 이펙트
 setInterval(petAttack, 1400); // 펫 동료 공격
