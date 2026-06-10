@@ -432,9 +432,10 @@
     #vnPortrait { left:24%; }
   }
 
-  /* ===== 비주얼노벨 대화 ===== */
+  /* ===== 비주얼노벨 대화 (미연시 UI) ===== */
   #vn { position:fixed; inset:0; max-width:480px; margin:0 auto; z-index:120; display:none; flex-direction:column;
     justify-content:flex-end; cursor:pointer; overflow:hidden; }
+  #vn.shake { animation:bshake .25s ease; }
   #vnBg { position:absolute; inset:0; z-index:0; background:
     radial-gradient(ellipse at 50% 30%, rgba(154,160,208,.22), transparent 60%),
     linear-gradient(180deg,#1a1535,#0f1020); }
@@ -445,13 +446,33 @@
   #vnPortrait.art img { height:100%; max-width:92vw; object-fit:contain; filter:drop-shadow(0 12px 24px #000b); }
   #vnPortrait.enter { animation:vnEnter .35s cubic-bezier(.2,1.2,.4,1); }
   @keyframes vnEnter { 0%{ opacity:0; transform:translateX(-50%) translateY(16px) scale(.97); } 100%{ opacity:1; transform:translateX(-50%) translateY(0) scale(1); } }
-  #vnBox { position:relative; z-index:2; margin:12px; padding:16px; border-radius:16px; min-height:118px;
-    background:rgba(15,16,32,.92); border:1px solid #3a3f70; box-shadow:0 -4px 24px #0008; }
-  #vnName { font-weight:900; font-size:16px; color:#ffd866; margin-bottom:8px; text-shadow:0 1px 3px #000; }
-  #vnText { font-size:15px; line-height:1.6; color:#eef; min-height:46px; }
+  #vnBox { position:relative; z-index:2; margin:0 10px 4px; padding:20px 16px 12px; border-radius:14px; min-height:118px;
+    background:linear-gradient(180deg, rgba(26,17,48,.94), rgba(12,10,28,.96));
+    border:1px solid #6a5fc055; box-shadow:0 -4px 24px #0008, inset 0 1px 0 #ffffff12; transition:border-color .3s, box-shadow .3s; }
+  #vnBox.heartGlow { border-color:#ff8ab4aa; box-shadow:0 0 24px #ff5e7a55, inset 0 1px 0 #ffffff12; }
+  #vnNamePlate { position:absolute; top:-15px; left:10px; padding:5px 26px 5px 14px; font-weight:900; font-size:15px; color:#fff;
+    background:linear-gradient(90deg,#5b2a86,#8b4fd0 72%, transparent); border-left:3px solid #ffd866;
+    text-shadow:0 1px 3px #000; border-radius:4px 14px 0 4px; letter-spacing:3px; display:none; }
+  #vnText { font-size:15px; line-height:1.65; color:#f2efff; min-height:50px; text-shadow:0 1px 2px #0008; }
+  #vnText .twCursor { display:inline-block; width:9px; color:#c7b9ff; animation:pulse .8s infinite; }
   #vnNext { text-align:right; font-size:12px; color:#9aa0d0; margin-top:8px; animation:pulse 1.4s ease-in-out infinite; }
   #vnChoices { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
-  .vnChoice { background:#222850; color:#fff; border:1px solid #4a5090; padding:12px; border-radius:12px; font-size:14px; text-align:left; }
+  .vnChoice { background:linear-gradient(160deg,#2a2458,#1b1740); color:#fff; border:1px solid #5a4fa0; padding:12px 14px; border-radius:12px;
+    font-size:14px; text-align:left; box-shadow:0 2px 8px #0006, inset 0 1px 0 #ffffff14; }
+  .vnChoice:active { transform:scale(.98); border-color:#ff8ab4; }
+  /* 하단 메뉴바 (AUTO/SKIP/LOG) */
+  #vnBar { position:relative; z-index:3; display:flex; justify-content:flex-end; gap:5px; padding:0 12px 10px; }
+  .vnBtn { background:#1b1438cc; border:1px solid #4a4090; color:#b9aaff; font-size:11px; letter-spacing:2px; padding:5px 11px;
+    border-radius:8px; font-weight:bold; }
+  .vnBtn.on { color:#ffd866; border-color:#ffd866; box-shadow:0 0 8px #ffd86655; }
+  /* 두근두근 하트 파티클 */
+  .vnHeart { position:absolute; z-index:5; font-size:18px; pointer-events:none; opacity:0; animation:heartFloat 1.7s ease-out forwards; }
+  @keyframes heartFloat { 0%{opacity:0; transform:translateY(0) scale(.5);} 15%{opacity:1;} 100%{opacity:0; transform:translateY(-130px) scale(1.35) rotate(14deg);} }
+  /* 대화 기록(LOG) */
+  #vnLog { position:absolute; inset:0; z-index:8; background:#0c0a1cee; display:none; flex-direction:column; padding:16px; cursor:default; }
+  #vnLogList { flex:1; overflow-y:auto; padding-right:4px; }
+  .vnLogItem { margin-bottom:11px; font-size:13px; line-height:1.55; color:#cfc8f5; border-left:2px solid #3a3f70; padding-left:9px; }
+  .vnLogItem b { color:#ffd866; margin-right:6px; }
 </style>
 </head>
 <body>
@@ -574,10 +595,19 @@
   <div id="vnBg"></div>
   <div id="vnPortrait"></div>
   <div id="vnBox">
-    <div id="vnName"></div>
+    <div id="vnNamePlate"></div>
     <div id="vnText"></div>
     <div id="vnChoices"></div>
     <div id="vnNext">▼ 탭하여 계속</div>
+  </div>
+  <div id="vnBar">
+    <button class="vnBtn" id="vnAutoBtn" onclick="event.stopPropagation();vnToggleAuto()">AUTO</button>
+    <button class="vnBtn" onclick="event.stopPropagation();vnSkip()">SKIP</button>
+    <button class="vnBtn" onclick="event.stopPropagation();vnShowLog()">LOG</button>
+  </div>
+  <div id="vnLog" onclick="event.stopPropagation();this.style.display='none'">
+    <h3 style="margin:0 0 10px">📜 대화 기록 <span style="font-size:11px;color:#9aa0d0;font-weight:normal">(탭하여 닫기)</span></h3>
+    <div id="vnLogList"></div>
   </div>
 </div>
 
@@ -802,6 +832,73 @@ const CHARACTERS = {
     episodes:[] },
 };
 function charData(name){ return CHARACTERS[name] || {title:"환령", persona:"", profile:"", talk:["…"], episodes:[]}; }
+// ===== 린 개인 에피소드 (story/04 세로 슬라이스 — 다른 캐릭터의 기준 샘플) =====
+CHARACTERS["린"].episodes = [
+  { title:"1막 · 백발백중의 조건", need:20, reward:{gem:100}, script:[
+    {who:"", text:"(루멘 외곽 사격 훈련장. 늦은 오후 — 총성이 한 발, 울린다)"},
+    {who:"린", text:"…7시 방향, 230. 바람은 좌측으로 2."},
+    {who:"린", text:"심심하던 참이야. 너, 잘 왔어."},
+    {who:"린", text:"내기 하나 할래? 저기 끝에 매달린 빈 병— 맞히면 내 소원 하나 들어주기."},
+    {choice:[
+      {text:"네가 빗나가는 걸 본 적이 없는데?", aff:2, then:[{who:"린", text:"알면서 받아주는 거야? …나쁘지 않네."}]},
+      {text:"좋아. 대신 빗나가면 내 소원이다", aff:2, then:[{who:"린", text:"오— 배짱 있네. 좋아, 그 조건."}]},
+    ]},
+    {who:"", text:"(총성. 병이 깨진다. 당연하다는 얼굴이다)"},
+    {who:"린", text:"자, 소원. ……단 거."},
+    {who:"린", text:"다음 보급 때, 단 거 하나만 챙겨줘. 사탕이든 뭐든."},
+    {choice:[
+      {text:"…그게 다야?", aff:1, then:[{who:"린", text:"왜. 총잡이는 단 거 먹으면 안 돼? …웃지 마."}]},
+      {text:"몇 개라도 사줄게", aff:3, then:[{who:"린", text:"…과녁보다 다루기 쉽네, 너. 💗", heart:true}]},
+    ]},
+    {who:"", text:"(해가 진다. 린이 말없이 총을 닦는다)"},
+    {who:"린", text:"총은 좋아. 거짓말을 안 하거든. 겨눈 만큼 가고, 빗나가면 내 탓이야."},
+    {who:"린", text:"…사람보다 낫지."},
+    {who:"린", text:"오늘은 여기까지. 단 거, 잊지 마. — 빠르고 정확하게."},
+  ]},
+  { title:"2막 · 새벽 불침번", need:45, reward:{gem:150}, script:[
+    {who:"", text:"(원정 야영지의 새벽. 불침번 교대를 하러 나오자 — 린이 이미 깨어 있다)"},
+    {who:"린", text:"…잠이 안 와서. 교대까진 아직이야. 들어가."},
+    {choice:[
+      {text:"옆에 있을게", aff:3, then:[{who:"린", text:"…마음대로 해. (못 이기는 척, 자리를 내준다)"}]},
+      {text:"잠이 안 오는 이유, 물어봐도 돼?", aff:2, then:[{who:"린", text:"…질문이 빠르네. 앉아. 길어질지도 모르니까."}]},
+    ]},
+    {who:"", text:"(모닥불 앞. 린은 외투도 없이 새벽 공기 속에 앉아 있다)"},
+    {who:"나", text:"안 추워?"},
+    {who:"린", text:"난 추위 안 타. ……원래부터."},
+    {who:"린", text:"너는 안 무서워? 우리 같은 거… 어디서 왔는지도 모르는 걸 데리고 다니는 거."},
+    {choice:[
+      {text:"무섭지 않아. 너희가 누구든", aff:2, then:[{who:"린", text:"…단순하긴. 그게 네 장점이지만."}]},
+      {text:"무서워도, 알고 싶어", aff:3, then:[{who:"린", text:"……그 대답은 반칙이야. 💗", heart:true}]},
+    ]},
+    {who:"린", text:"옛날에… 나 같은 거에게 잘해주던 사람이 있었어. …그 얘긴 다음에. 아직 나도 정리가 안 돼서."},
+    {who:"", text:"(새벽 하늘 — 별똥별 하나가 길게 떨어진다)"},
+    {who:"나", text:"소원 안 빌어?"},
+    {who:"린", text:"별 떨어지는 거에 빌면 안 돼. …떨어진 별이 어떻게 되는지, 아니까."},
+    {who:"", text:"(사이. 린이 처음으로 나를 정면으로 본다)"},
+    {who:"린", text:"……소환사. 아니—"},
+    {who:"린", text:"…이름, 불러봤어. 나쁘지 않네. 💗", heart:true},
+    {who:"린", text:"교대 시간이야. 가서 자. …같이 있어줘서, 고마워."},
+  ]},
+  { title:"3막 · 마지막 한 발", need:70, reward:{gem:300}, script:[
+    {who:"", text:"(눈 덮인 폐촌 — 린이 먼저 와, 무너진 종탑을 올려다보고 있다)"},
+    {who:"린", text:"…여기, 내 마을이었어."},
+    {who:"린", text:"웃기지. 길을 하나도 안 잊어버렸더라. 빵집 자리, 종탑 자리… 전부."},
+    {who:"린", text:"마수가 넘어온 날, 싸울 수 있는 게 나뿐이었어. 사람들을 골짜기로 보내고, 나는 여기 남았어."},
+    {who:"린", text:"한 발에 하나. 빗나가면 누군가 죽어. \"빠르고 정확하게\"— 그건 멋이 아니라, 그래야만 했던 거야."},
+    {who:"", text:"(린이 숨을 고른다. 담담해서, 더 아픈 목소리로)"},
+    {who:"린", text:"마지막 한 발이… 빗나갔어.", shake:true},
+    {who:"린", text:"손이 얼어서. 탄이 한 뼘 옆으로. …제일 늦게 뛰던 막내가—"},
+    {who:"린", text:"그 뒤로 난 한 번도 안 빗나갔어. 죽고 나서도, 환령이 되어서도, 단 한 번도."},
+    {who:"린", text:"…누가 알아주지도 않는데."},
+    {choice:[
+      {text:"이제 내가 알아", aff:5, then:[{who:"린", text:"……그 말, 무르기 없어. 💗", heart:true}]},
+      {text:"그 한 발까지가 너야. 전부 데리고 가자", aff:5, then:[{who:"린", text:"…빗나간 것까지, 라. 너는 정말… 💗", heart:true}]},
+    ]},
+    {who:"", text:"(눈이 내리기 시작한다. 린이 하늘을 본다)"},
+    {who:"린", text:"추위를 안 탄다고 했지. …거짓말이야. 그날 추위를 아직 기억해. 그래서 더는, 안 느껴지는 것뿐."},
+    {who:"린", text:"오늘 옆에 있어줘서… 그 말은, 두 번 해도 되겠다."},
+  ]},
+];
 const HERO_NAME_MIGRATION = {
   리네아:'린', 비올라:'루비아', 세레스:'사피라', 아멜리아:'실비아',
   녹시아:'카이라', 루미엘:'카이론', 포레:'에메리아', 드라카:'카엘'
@@ -835,6 +932,49 @@ const GIFTS = [
   {id:'jewel',  name:'별빛 목걸이',   emoji:'📿', aff:25, gem:150},
 ];
 const CHAR_FAV = { 린:'jewel', 루비아:'book', 실비아:'cake', 사피라:'ring', 카엘:'ring', 에메리아:'flower', 카이라:'jewel', 카이론:'book' };
+// 호감도 70+ 전용 심쿵 대사 (두근/💗 포함 시 하트 연출 자동 발동)
+const CHAR_TALK_HIGH = {
+  린: [
+    '…오늘은 좀 늦었네. 별일 없었어? …딱히 기다린 건 아니고. …아니, 맞아. 기다렸어. 💗',
+    '옆에 있으면 조준이 흐트러져. …네 탓이야. 책임져.',
+    '단 거 먹을래? 반 나눠줄게. …너한테만이야.',
+  ],
+  루비아: [
+    '있지있지! 오늘 네 생각하다가 마력이 폭주할 뻔했어! 어떻게 책임질 거야?! 💗',
+    '내 불꽃보다 네 얼굴이 더 뜨겁게 느껴지는 건… 기분 탓이지? 응? 기분 탓이라고 해줘!',
+    '손! 잡아도 돼? 아니, 잡을래! 거부권 없음! …두근거리는 건 비밀이야.',
+  ],
+  실비아: [
+    '네 뒤는 내가 지켜. …그러니까 가끔은, 내 옆에도 있어줘. 💗',
+    '방패 너머로 너를 볼 때가… 제일 안심돼. 이상하지.',
+    '오늘도 수고했어. …머리, 쓰다듬어 줄까? 농담… 아니야.',
+  ],
+  사피라: [
+    '검을 쥐면 마음이 고요해지는데… 너를 보면 흔들려. …이상하지. 💗',
+    '오늘의 너도, 눈에 새겨뒀어. 검보다 선명하게.',
+    '조용히… 잠깐만 이대로 있자. 검도, 말도 내려놓고.',
+  ],
+  카엘: [
+    '왔냐! 네 얼굴 보니 오늘도 든든하군!',
+    '내 등은 네 거다. 단장으로서가 아니라— 친구로서. 잊지 마라.',
+    '상처는 훈장이라 했지. 너랑 쌓은 시간도… 훈장이다.',
+  ],
+  에메리아: [
+    '당신이 무사한 걸 보면… 오늘 하루의 기도가 전부 이뤄진 기분이에요. 💗',
+    '가까이 와요. 다친 곳 없는지 봐야 하니까. …핑계냐고요? ……네.',
+    '당신 곁은 따뜻해요. …세계수보다도.',
+  ],
+  카이라: [
+    '뒤에 있는 거, 알고 있었지? …심장 소리까지 들리는데. 두근두근. 💗',
+    '오늘은 네 그림자 말고… 옆자리에 있을래.',
+    '암살자가 한 사람만 바라보면 직업 실격인데. …뭐, 실격당해 줄게.',
+  ],
+  카이론: [
+    '…왔는가. 오늘도 무사해서 다행이다. …진심이다.',
+    '내 검은 왕국의 것이었다. 지금은… 네 것이다.',
+    '가까이 있어라. 지키기 쉽도록. …그 이유만은, 아니지만.',
+  ],
+};
 // 캐릭터 일러 (VN 대화용). 명시 매핑 없으면 assets/char/<이름>.png 시도 → 없으면 이모지 폴백
 const CHAR_ART = { 린:'assets/skins/lin.png', 루비아:'assets/skins/rubia.png', 사피라:'assets/skins/sapphira.png', 실비아:'assets/skins/silvia.png' };
 function charArt(name){ return CHAR_ART[name] || ('assets/char/'+encodeURIComponent(name)+'.png'); }
@@ -1860,12 +2000,13 @@ function claimAttend(){
   popReward('📅 출석 완료!', `<div style="font-size:18px;font-weight:bold">${rewardText(r)}</div><div class="small">연속 ${G.attend.day}일째</div>`);
 }
 
-// ===== 비주얼노벨 대화 시스템 =====
+// ===== 비주얼노벨 대화 시스템 (미연시 UI: 타자기/AUTO/SKIP/LOG/두근두근) =====
 let vnScript=null, vnIdx=0, vnEnd=null, vnChar=null;
+let vnTypeTimer=null, vnTyping=false, vnFullText='', vnAuto=false, vnAutoTimer=null, vnLogArr=[];
 function playVN(script, onEnd, charName){
-  vnScript=script; vnIdx=0; vnEnd=onEnd||null; vnChar=charName||null; vnLastWho=null;
-  const skin = charName ? null : null;
-  document.getElementById('vn').style.setProperty('--glow', '#ff8ab4');
+  vnScript=script.slice(); vnIdx=0; vnEnd=onEnd||null; vnChar=charName||null; vnLastWho=null; vnLogArr=[];
+  vnAuto=false; updateAutoBtn();
+  document.getElementById('vnLog').style.display='none';
   document.getElementById('vn').style.display='flex';
   vnStep();
 }
@@ -1877,6 +2018,8 @@ function vnStep(){
 }
 function vnNext(){
   if(!vnScript) return;
+  if(document.getElementById('vnLog').style.display==='flex') return;
+  if(vnTyping){ finishTyping(); return; }   // 타이핑 중 탭 → 전문 즉시 표시
   const node=vnScript[vnIdx];
   if(node && node.choice) return;   // 선택지는 골라야 진행
   vnIdx++; vnStep();
@@ -1887,6 +2030,7 @@ function vnChoose(i){
   const c = node.choice[i];
   if(!c) return;
   if(c.aff && vnChar) addAffinity(vnChar, c.aff);
+  if(c.then) vnScript.splice(vnIdx+1, 0, ...[].concat(c.then));  // 선택에 대한 반응 대사 삽입
   vnIdx++; vnStep();
 }
 let vnLastWho = null;
@@ -1894,16 +2038,16 @@ function vnEmoji(who){ return (HERO_POOL.find(x=>x.name===who)||{}).emoji||'❓'
 function showVNLine(node){
   const who=node.who||'';
   const portrait=document.getElementById('vnPortrait');
-  const nameEl=document.getElementById('vnName');
+  const nameEl=document.getElementById('vnNamePlate');
   document.getElementById('vnChoices').innerHTML='';
-  document.getElementById('vnNext').style.display='block';
   if(who===''){
     portrait.style.opacity=.18; nameEl.style.display='none'; portrait.classList.remove('art'); portrait.textContent='💭';
   } else if(who==='나'){
-    nameEl.style.display='block'; nameEl.textContent='나'; nameEl.style.color='#7fd0ff';
+    nameEl.style.display='block'; nameEl.textContent='나';
+    nameEl.style.background='linear-gradient(90deg,#1c4f7a,#2a7ab8 72%, transparent)';
     portrait.classList.remove('art'); portrait.textContent='🧑'; portrait.style.opacity=1;
   } else {
-    nameEl.style.display='block'; nameEl.textContent=who; nameEl.style.color='#ffd866';
+    nameEl.style.display='block'; nameEl.textContent=who; nameEl.style.background='';
     portrait.style.opacity=1; portrait.classList.add('art');
     const emo=vnEmoji(who);
     portrait.innerHTML=`<img src="${charArt(who)+AV}" onerror="this.parentElement.classList.remove('art');this.parentElement.textContent='${emo}'">`;
@@ -1911,19 +2055,84 @@ function showVNLine(node){
   // 화자가 바뀌면 등장 애니메이션
   if(who && who!==vnLastWho){ portrait.classList.remove('enter'); void portrait.offsetWidth; portrait.classList.add('enter'); }
   vnLastWho=who;
-  document.getElementById('vnText').textContent=node.text;
+  vnLogArr.push({who, text:node.text});
+  // 두근두근 연출: heart 플래그 또는 💗/두근 포함 대사 → 핑크 글로우 + 하트 파티클
+  const box=document.getElementById('vnBox');
+  if(node.heart || /💗|두근/.test(node.text)){ box.classList.add('heartGlow'); spawnVNHearts(); }
+  else box.classList.remove('heartGlow');
+  if(node.shake){ const v=document.getElementById('vn'); v.classList.remove('shake'); void v.offsetWidth; v.classList.add('shake'); }
+  typeText(node.text);
+}
+// 타자기 효과
+function typeText(text){
+  clearTimeout(vnTypeTimer); vnFullText=text; vnTyping=true;
+  const el=document.getElementById('vnText');
+  document.getElementById('vnNext').style.display='none';
+  let i=0;
+  (function tick(){
+    if(i>=text.length){ finishTyping(); return; }
+    i++;
+    el.innerHTML=vnEsc(text.slice(0,i))+'<span class="twCursor">▌</span>';
+    vnTypeTimer=setTimeout(tick, 26);
+  })();
+}
+function finishTyping(){
+  clearTimeout(vnTypeTimer); vnTyping=false;
+  document.getElementById('vnText').textContent=vnFullText;
+  document.getElementById('vnNext').style.display='block';
+  if(vnAuto) scheduleAuto();
+}
+function vnEsc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+// AUTO / SKIP / LOG
+function vnToggleAuto(){ vnAuto=!vnAuto; updateAutoBtn(); if(vnAuto && !vnTyping) scheduleAuto(); else if(!vnAuto) clearTimeout(vnAutoTimer); }
+function updateAutoBtn(){ const b=document.getElementById('vnAutoBtn'); if(b) b.classList.toggle('on', vnAuto); }
+function scheduleAuto(){
+  clearTimeout(vnAutoTimer);
+  vnAutoTimer=setTimeout(()=>{
+    if(vnAuto && vnScript && !vnTyping){ const n=vnScript[vnIdx]; if(!(n&&n.choice)){ vnIdx++; vnStep(); } }
+  }, 1500);
+}
+function vnSkip(){
+  if(!vnScript) return;
+  const cur=vnScript[vnIdx];
+  if(cur && cur.choice) return;   // 선택지에서는 스킵 불가
+  clearTimeout(vnTypeTimer); vnTyping=false;
+  vnIdx++;
+  while(vnIdx<vnScript.length && !vnScript[vnIdx].choice){ const n=vnScript[vnIdx]; vnLogArr.push({who:n.who||'', text:n.text}); vnIdx++; }
+  if(vnIdx>=vnScript.length){ closeVN(); const f=vnEnd; vnEnd=null; if(f) f(); return; }
+  vnStep();   // 선택지에서 멈춤
+}
+function vnShowLog(){
+  const list=document.getElementById('vnLogList');
+  list.innerHTML = vnLogArr.map(l=>`<div class="vnLogItem">${l.who?`<b>${vnEsc(l.who)}</b>`:''}${vnEsc(l.text)}</div>`).join('') || '<div class="small">아직 기록이 없어요.</div>';
+  document.getElementById('vnLog').style.display='flex';
+  list.scrollTop=list.scrollHeight;
+}
+function spawnVNHearts(){
+  const v=document.getElementById('vn');
+  for(let i=0;i<7;i++){
+    const h=document.createElement('div'); h.className='vnHeart'; h.textContent=['💗','💕','💓'][i%3];
+    h.style.left=(28+Math.random()*44)+'%';
+    h.style.bottom=(170+Math.random()*70)+'px';
+    h.style.animationDelay=(Math.random()*0.55)+'s';
+    v.appendChild(h); setTimeout(()=>h.remove(), 2400);
+  }
 }
 function renderVNChoice(choices){
+  clearTimeout(vnTypeTimer); vnTyping=false;
   document.getElementById('vnNext').style.display='none';
   const el=document.getElementById('vnChoices'); el.innerHTML='';
-  document.getElementById('vnText').textContent='…';
+  document.getElementById('vnText').textContent='— 어떻게 할까? —';
   choices.forEach((c,i)=>{
-    const b=document.createElement('button'); b.className='vnChoice'; b.textContent='▸ '+c.text;
+    const b=document.createElement('button'); b.className='vnChoice'; b.textContent='💬 '+c.text;
     b.onclick=(ev)=>{ ev.stopPropagation(); vnChoose(i); };
     el.appendChild(b);
   });
 }
-function closeVN(){ document.getElementById('vn').style.display='none'; vnScript=null; }
+function closeVN(){
+  clearTimeout(vnTypeTimer); clearTimeout(vnAutoTimer); vnAuto=false; vnTyping=false;
+  document.getElementById('vn').style.display='none'; vnScript=null;
+}
 
 // ===== 교감 / 호감도 =====
 function addAffinity(name, amt){ G.affinity[name]=Math.min(100,(G.affinity[name]||0)+amt); refreshTop(); }
@@ -1965,7 +2174,10 @@ function viewBond(){
   return h;
 }
 function talkChar(name){
-  const c=charData(name); const line=c.talk[Math.floor(Math.random()*c.talk.length)];
+  const c=charData(name); const aff=G.affinity[name]||0;
+  // 호감도 70 이상이면 심쿵 대사 풀로 전환 (두근두근 모드)
+  const pool=(aff>=70 && CHAR_TALK_HIGH[name]) ? CHAR_TALK_HIGH[name] : c.talk;
+  const line=pool[Math.floor(Math.random()*pool.length)];
   let gainNode;
   if(G.talkDate[name]!==todayStr()){ G.talkDate[name]=todayStr(); addAffinity(name,5); dailyInc('talk',1); gainNode={who:'',text:'(호감도 +5 💗)'}; }
   else gainNode={who:'',text:'(오늘은 이미 대화했어요. 내일 또 와요!)'};
