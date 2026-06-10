@@ -290,7 +290,7 @@
 
   /* ===== 마을 로비(홈) ===== */
   #townBg { position:absolute; inset:0; z-index:0; background:url('assets/bg/home_town_20260609.png?v=1') center/cover no-repeat; }
-  #menuBtn { position:relative; width:34px; height:32px; border-radius:10px; border:1px solid #343a66;
+  #menuBtn, #storyBtn, #bondBtn { position:relative; width:34px; height:32px; border-radius:10px; border:1px solid #343a66;
     background:linear-gradient(160deg,#2a2d50,#1a1c38); color:#fff; font-size:16px; padding:0; }
   .hotspot { position:absolute; transform:translate(-50%,-50%); width:15%; height:24%; min-width:70px; z-index:3;
     border-radius:16px; cursor:pointer; }
@@ -428,40 +428,39 @@
     #screen { max-width:none; }
     /* 가로에선 메뉴를 더 벌려서 캐릭터가 가운데 잘 보이게 */
     #homeLeft, #homeRight { top:64px; }
-    #vn { max-width:none; }
-    #vnPortrait { left:24%; }
   }
 
-  /* ===== 비주얼노벨 대화 (미연시 UI) ===== */
-  #vn { position:fixed; inset:0; max-width:480px; margin:0 auto; z-index:120; display:none; flex-direction:column;
+  /* ===== 비주얼노벨 대화 (미연시 UI · 가로 풀폭) ===== */
+  #vn { position:fixed; inset:0; z-index:120; display:none; flex-direction:column;
     justify-content:flex-end; cursor:pointer; overflow:hidden; }
   #vn.shake { animation:bshake .25s ease; }
   #vnBg { position:absolute; inset:0; z-index:0; background:
     radial-gradient(ellipse at 50% 30%, rgba(154,160,208,.22), transparent 60%),
-    linear-gradient(180deg,#1a1535,#0f1020); }
-  #vnPortrait { position:absolute; left:50%; bottom:150px; transform:translateX(-50%); z-index:1;
+    linear-gradient(180deg,#1a1535,#0f1020); background-size:cover; background-position:center; }
+  #vnPortrait { position:absolute; left:50%; bottom:175px; transform:translateX(-50%); z-index:1;
     font-size:120px; filter:drop-shadow(0 10px 16px #000a); transition:opacity .2s; }
-  /* 캐릭터 일러 모드 */
-  #vnPortrait.art { bottom:84px; font-size:0; height:74vh; display:flex; align-items:flex-end; }
-  #vnPortrait.art img { height:100%; max-width:92vw; object-fit:contain; filter:drop-shadow(0 12px 24px #000b); }
+  /* 캐릭터 일러 모드 — 상반신 클로즈업(버스트업): 일러를 크게 키워 하반신은 대사창 뒤/화면 밖으로 */
+  #vnPortrait.art { bottom:-46vh; font-size:0; height:132vh; display:flex; align-items:flex-end; }
+  #vnPortrait.art img { height:100%; width:auto; object-fit:contain; filter:drop-shadow(0 12px 24px #000b); }
   #vnPortrait.enter { animation:vnEnter .35s cubic-bezier(.2,1.2,.4,1); }
   @keyframes vnEnter { 0%{ opacity:0; transform:translateX(-50%) translateY(16px) scale(.97); } 100%{ opacity:1; transform:translateX(-50%) translateY(0) scale(1); } }
-  #vnBox { position:relative; z-index:2; margin:0 10px 4px; padding:20px 16px 12px; border-radius:14px; min-height:118px;
-    background:linear-gradient(180deg, rgba(26,17,48,.94), rgba(12,10,28,.96));
-    border:1px solid #6a5fc055; box-shadow:0 -4px 24px #0008, inset 0 1px 0 #ffffff12; transition:border-color .3s, box-shadow .3s; }
-  #vnBox.heartGlow { border-color:#ff8ab4aa; box-shadow:0 0 24px #ff5e7a55, inset 0 1px 0 #ffffff12; }
-  #vnNamePlate { position:absolute; top:-15px; left:10px; padding:5px 26px 5px 14px; font-weight:900; font-size:15px; color:#fff;
+  /* 대사창: 화면 하단 가로 풀폭 바 */
+  #vnBox { position:relative; z-index:2; margin:0; padding:20px 5vw 38px; border-radius:0; min-height:142px;
+    background:linear-gradient(180deg, rgba(26,17,48,.92), rgba(9,7,22,.97));
+    border-top:1px solid #8b6fd680; box-shadow:0 -10px 34px #000b, inset 0 1px 0 #ffffff10; transition:border-color .3s, box-shadow .3s; }
+  #vnBox.heartGlow { border-top-color:#ff8ab4cc; box-shadow:0 0 28px #ff5e7a55, inset 0 1px 0 #ffffff10; }
+  #vnNamePlate { position:absolute; top:-16px; left:5vw; padding:5px 34px 5px 16px; font-weight:900; font-size:16px; color:#fff;
     background:linear-gradient(90deg,#5b2a86,#8b4fd0 72%, transparent); border-left:3px solid #ffd866;
-    text-shadow:0 1px 3px #000; border-radius:4px 14px 0 4px; letter-spacing:3px; display:none; }
-  #vnText { font-size:15px; line-height:1.65; color:#f2efff; min-height:50px; text-shadow:0 1px 2px #0008; }
+    text-shadow:0 1px 3px #000; border-radius:4px 14px 0 4px; letter-spacing:4px; display:none; }
+  #vnText { font-size:16px; line-height:1.7; color:#f2efff; min-height:54px; text-shadow:0 1px 2px #0008; }
   #vnText .twCursor { display:inline-block; width:9px; color:#c7b9ff; animation:pulse .8s infinite; }
-  #vnNext { text-align:right; font-size:12px; color:#9aa0d0; margin-top:8px; animation:pulse 1.4s ease-in-out infinite; }
-  #vnChoices { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
-  .vnChoice { background:linear-gradient(160deg,#2a2458,#1b1740); color:#fff; border:1px solid #5a4fa0; padding:12px 14px; border-radius:12px;
+  #vnNext { position:absolute; right:5vw; bottom:38px; font-size:12px; color:#9aa0d0; animation:pulse 1.4s ease-in-out infinite; }
+  #vnChoices { display:flex; flex-direction:column; gap:8px; margin:10px auto 0; width:min(680px,94%); }
+  .vnChoice { background:linear-gradient(160deg,#2a2458,#1b1740); color:#fff; border:1px solid #5a4fa0; padding:12px 16px; border-radius:12px;
     font-size:14px; text-align:left; box-shadow:0 2px 8px #0006, inset 0 1px 0 #ffffff14; }
   .vnChoice:active { transform:scale(.98); border-color:#ff8ab4; }
-  /* 하단 메뉴바 (AUTO/SKIP/LOG) */
-  #vnBar { position:relative; z-index:3; display:flex; justify-content:flex-end; gap:5px; padding:0 12px 10px; }
+  /* 하단 메뉴바 (AUTO/SKIP/LOG) — 대사창 우하단 구석 */
+  #vnBar { position:absolute; right:12px; bottom:7px; z-index:4; display:flex; gap:5px; }
   .vnBtn { background:#1b1438cc; border:1px solid #4a4090; color:#b9aaff; font-size:11px; letter-spacing:2px; padding:5px 11px;
     border-radius:8px; font-weight:bold; }
   .vnBtn.on { color:#ffd866; border-color:#ffd866; box-shadow:0 0 8px #ffd86655; }
@@ -535,6 +534,8 @@
     <div class="hLvl">Lv.<span id="homeLv">1</span> <span id="homeName">영웅</span></div>
     <div class="hRes" style="margin-left:auto"><span class="goldIcon"></span><b id="homeGold">0</b></div>
     <div class="hRes">💎 <b id="homeGem">0</b></div>
+    <button id="storyBtn" onclick="openScreen('story')">📖<span class="navBadge" id="hStory"></span></button>
+    <button id="bondBtn" onclick="openScreen('bond')">💗<span class="navBadge" id="hBond"></span></button>
     <button id="menuBtn" onclick="openMenu()">☰<span class="navBadge" id="menuDot"></span></button>
   </div>
   <!-- 마을 건물 클릭 영역 -->
@@ -581,6 +582,7 @@
       <button onclick="closeMenu();openScreen('quest')">📜<span class="navBadge" id="mQuest"></span><i>퀘스트</i></button>
       <button onclick="closeMenu();openScreen('achieve')">🏆<span class="navBadge" id="mAch"></span><i>업적</i></button>
       <button onclick="closeMenu();openScreen('bond')">💗<span class="navBadge" id="mBond"></span><i>교감</i></button>
+      <button onclick="closeMenu();openScreen('story')">📖<span class="navBadge" id="mStory"></span><i>스토리</i></button>
       <button onclick="closeMenu();openChar()">🧍<i>캐릭터</i></button>
       <button onclick="closeMenu();openFromHome('costume')">👗<i>코스튬</i></button>
       <button onclick="closeMenu();openFromHome('hero')">🦸<i>영웅</i></button>
@@ -659,6 +661,7 @@ const G = {
     { id:'notice1', title:'📢 오픈 공지', body:'방치형 RPG 오픈! 매일 요일던전에서 상급 재료를 모으세요. 재료는 나중에 무기 초월에 쓰여요.', reward:{}, claimed:false },
   ],
   questClaimed: [],            // 수령한 챕터 보상 (스테이지 마일스톤)
+  storyDone: [],               // 시청한 메인 스토리 장 번호
   achClaimed: [],              // 수령한 업적
   lastSeen: 0,                 // 마지막 접속 시각(ms) — AFK 방치 보상 계산용
   attend: { last:'', day:0 },  // 일일 출석 (마지막 수령일, 누적일)
@@ -770,6 +773,8 @@ const WORLD = {
     {who:"린", text:"…눈을 떴군요, 소환사. 당신이 우리 '환령'을 부를 수 있는 마지막 사람이에요."},
     {who:"린", text:"빠르고 정확하게 움직이면 길은 열려요. 가요. 세계의 끝을 막으러."},
     {who:"", text:"— 환령들과 유대를 쌓고, 종말의 별 '노바'로부터 세계를 지켜라."},
+    {who:"", text:"(하늘의 균열 너머 — 거대한 무언가가 이쪽을 내려다보고 있다)"},
+    {who:"???", text:"……또, 부르는가. 부질없는 것을."},
   ],
 };
 // 캐릭터별 서사 (키 = 이름)
@@ -834,7 +839,7 @@ const CHARACTERS = {
 function charData(name){ return CHARACTERS[name] || {title:"환령", persona:"", profile:"", talk:["…"], episodes:[]}; }
 // ===== 린 개인 에피소드 (story/04 세로 슬라이스 — 다른 캐릭터의 기준 샘플) =====
 CHARACTERS["린"].episodes = [
-  { title:"1막 · 백발백중의 조건", need:20, reward:{gem:100}, script:[
+  { title:"1막 · 백발백중의 조건", need:20, reward:{gem:100}, bg:'assets/bg/hunt_field_20260610_inpaint.png', script:[
     {who:"", text:"(루멘 외곽 사격 훈련장. 늦은 오후 — 총성이 한 발, 울린다)"},
     {who:"린", text:"…7시 방향, 230. 바람은 좌측으로 2."},
     {who:"린", text:"심심하던 참이야. 너, 잘 왔어."},
@@ -855,7 +860,7 @@ CHARACTERS["린"].episodes = [
     {who:"린", text:"…사람보다 낫지."},
     {who:"린", text:"오늘은 여기까지. 단 거, 잊지 마. — 빠르고 정확하게."},
   ]},
-  { title:"2막 · 새벽 불침번", need:45, reward:{gem:150}, script:[
+  { title:"2막 · 새벽 불침번", need:45, reward:{gem:150}, bg:'assets/bg/hunt_field_20260610_inpaint.png', script:[
     {who:"", text:"(원정 야영지의 새벽. 불침번 교대를 하러 나오자 — 린이 이미 깨어 있다)"},
     {who:"린", text:"…잠이 안 와서. 교대까진 아직이야. 들어가."},
     {choice:[
@@ -899,6 +904,110 @@ CHARACTERS["린"].episodes = [
     {who:"린", text:"오늘 옆에 있어줘서… 그 말은, 두 번 해도 되겠다."},
   ]},
 ];
+
+// VN 배경 프리셋 (이미지 슬롯 — assets/bg에 파일 추가 시 여기 등록)
+const VN_BG = {
+  field:'assets/bg/hunt_field_20260610_inpaint.png',  // 들판/전장/훈련장
+  town:'assets/bg/home_town_20260609.png',            // 마을(루멘)
+  beach:'assets/bg/beach.png',                        // 해변
+};
+// ===== 메인 스토리 (story/02·05·06 문서 기반 — 스테이지 마일스톤 해금) =====
+const MAIN_STORY = [
+  { ch:0, title:"서장 · 떨어진 별", stage:1, focus:"", reward:{}, bg:VN_BG.field, get script(){ return WORLD.prologue; } },
+  { ch:1, title:"1장 · 푸른 탄환", stage:5, focus:"린", reward:{gem:150}, bg:VN_BG.field, script:[
+    {who:"", text:"(루멘 외곽 방어선. 경보가 울린다)"},
+    {who:"", text:"병사: \"균열 반응! 마수 떼 접근!\""},
+    {who:"린", text:"열둘. 전부 소형이야. …떨려?"},
+    {choice:[
+      {text:"조금", then:[{who:"린", text:"솔직하네. 그 정도가 딱 좋아. 떨림은 조준을 망치지만, 거짓말은 사람을 망치거든."}]},
+      {text:"네가 있잖아", then:[{who:"린", text:"…책임 막중하네. 좋아. 잘 봐둬, 내 방식."}]},
+    ]},
+    {who:"린", text:"명령해 봐. 듣고, 판단할게."},
+    {choice:[
+      {text:"돌격해서 선두를 끊어", then:[{who:"린", text:"판단 빠르네. 맘에 들어."}]},
+      {text:"내 옆에서 엄호해 줘", then:[{who:"린", text:"…신중하네. 그것도 정답이야."}]},
+    ]},
+    {who:"린", text:"퀵 드로우— 하나, 둘, 셋.", shake:true},
+    {who:"", text:"(전투 종료. 마수들이 재가 되어 흩어진다)"},
+    {who:"린", text:"끝. …나쁘지 않았어, 첫 지휘치고."},
+    {who:"", text:"(린의 손끝이 옅게 투명해진다. 린이 황급히 주먹을 쥔다)"},
+    {who:"나", text:"방금, 손이—"},
+    {who:"린", text:"…봤구나."},
+    {who:"린", text:"환령은 유대로 이 세계에 묶여 있어. 부른 사람이 잊으면, 우리는 흐려져. …그러다, 사라져."},
+    {who:"린", text:"부담 가지라는 건 아니고. …가끔은, 말 걸어줘. 그거면 돼. 💗", heart:true},
+    {who:"", text:"(밤하늘. 균열 너머에서 무언가가 내려다본다)"},
+    {who:"???", text:"…유대라. 그것이 어떻게 끝나는지도 모르고."},
+  ]},
+  { ch:2, title:"2장 · 홍련의 불씨", stage:10, focus:"루비아", reward:{gem:150}, bg:VN_BG.field, script:[
+    {who:"", text:"(외곽 협곡 — 균열 조사 의뢰)"},
+    {who:"루비아", text:"조사라니, 신난다! 수상한 건 일단 태워보면 알 수 있어!"},
+    {who:"린", text:"…말리는 건 네 몫이야, 소환사."},
+    {who:"", text:"(균열에 다가서자 — 루비아의 홍련서가 저절로 펼쳐져 빛난다)"},
+    {who:"루비아", text:"어, 어?! 얘 왜 이래? 나 아무것도 안 시켰는데?!"},
+    {who:"", text:"(균열에서 마수 출현 — 낡은 기사 갑주를 입고 있다)"},
+    {who:"루비아", text:"갑옷…? 마수가 왜 갑옷을 입고 있어…?"},
+    {who:"루비아", text:"크림슨 노바아아!! …아. 너무 셌나?", shake:true},
+    {who:"", text:"(전투 후 — 불탄 갑주의 문장을 살피는 일행)"},
+    {who:"린", text:"이 문장… 어디서 본 것 같은데. 기억이 안 나."},
+    {who:"루비아", text:"…있지. 이상한 얘기 하나 해도 돼?"},
+    {who:"루비아", text:"나, 이 책을 '어디서' 얻었는지 기억이 안 나. 눈 떠보니 손에 있었어. 처음부터 내 거였던 것처럼."},
+    {choice:[
+      {text:"언젠가 같이 알아보자", aff:2, then:[{who:"루비아", text:"…응! 약속이다? 새끼손가락! 💗", heart:true}]},
+      {text:"그 책, 너랑 잘 어울려", aff:2, then:[{who:"루비아", text:"뭐야 그게~! …헤헤. 고마워. 💗", heart:true}]},
+    ]},
+    {who:"루비아", text:"뭐 어때! 모르는 건 태우면서 알아가면 되지! 가자!"},
+    {who:"", text:"(떠나는 일행 뒤 — 불탄 갑주의 문장이 보인다: 무너진 왕관의 문양)"},
+  ]},
+  { ch:3, title:"3장 · 방패가 지키는 것", stage:20, focus:"실비아", reward:{gem:200}, bg:VN_BG.town, script:[
+    {who:"", text:"(루멘 — 대공방전 경보. 지축이 울린다)"},
+    {who:"", text:"병사: \"공성급 마수입니다! 성벽으로!\""},
+    {who:"실비아", text:"선봉은 나야. 뒤는 맡길게, 소환사."},
+    {who:"", text:"(실비아가 방패로 일격을 받아낸다. 한 번, 두 번—)", shake:true},
+    {who:"실비아", text:"크윽—! 아직… 버틸 수 있어…!"},
+    {who:"", text:"(방패에 금이 간다. 거대한 다음 일격이 떨어지는 순간—)"},
+    {choice:[
+      {text:"환령의 힘을 모아 실비아의 앞을 막는다", aff:2},
+      {text:"실비아의 손을 잡아 끌어낸다", aff:2},
+    ]},
+    {who:"실비아", text:"…방금, 나를…? 나는… 지키는 쪽인데."},
+    {who:"", text:"(반격 — 전원의 합동 공격. 보스가 무너진다. 성벽 위로 환호성)"},
+    {who:"", text:"(아이 하나가 실비아에게 들꽃을 내민다)"},
+    {who:"실비아", text:"…이상해. 이 성벽도, 이 환호도… 처음인데, 그리워."},
+    {who:"실비아", text:"예전에도 누군가를 위해 이렇게 서 있었던 것 같은… 아니. 아무것도 아냐."},
+    {who:"실비아", text:"지킬 게 있다는 건, 좋은 거네. 💗", heart:true},
+  ]},
+  { ch:4, title:"4장 · 검이 비추는 길", stage:30, focus:"사피라", reward:{gem:200}, script:null },
+  { ch:5, title:"5장 · 꺼지지 않는 것", stage:45, focus:"카엘", reward:{gem:300}, script:null },
+  { ch:6, title:"6장 · 세계수의 기억", stage:60, focus:"에메리아", reward:{gem:300}, script:null },
+  { ch:7, title:"7장 · 그림자의 칼끝", stage:80, focus:"카이라", reward:{gem:300}, script:null },
+  { ch:8, title:"8장 · 푸른 검의 맹세", stage:100, focus:"카이론", reward:{gem:500}, script:null },
+  { ch:9, title:"9장 · 잠식", stage:130, focus:"전원", reward:{gem:500}, script:null },
+  { ch:10, title:"10장 · 여명", stage:160, focus:"전원", reward:{gem:1000}, script:null },
+];
+function storyBadge(){ return MAIN_STORY.filter(s=>s.script && G.stage>=s.stage && !(G.storyDone||[]).includes(s.ch)).length; }
+function viewStory(){
+  let h=`<div class="card small">스테이지를 돌파하면 메인 스토리가 열려요. <b>환령과의 유대</b>가 세계를 구하는 힘이 됩니다.</div>`;
+  MAIN_STORY.forEach(s=>{
+    const unlocked=G.stage>=s.stage, done=(G.storyDone||[]).includes(s.ch), ready=!!s.script&&unlocked;
+    h+=`<div class="card" style="text-align:left;margin-bottom:8px;${unlocked?'':'opacity:.55'}">
+      <div style="font-weight:bold">${unlocked?'📖':'🔒'} ${s.title} ${s.focus?`<span class="small" style="color:#ff8ab4">— ${s.focus} 편</span>`:''}</div>
+      <div class="small">${unlocked? (s.script? (done?'✓ 시청 완료':(rewardText(s.reward)?'첫 시청 보상: '+rewardText(s.reward):'프롤로그')) : '🚧 다음 업데이트에서 공개') : '스테이지 '+s.stage+' 도달 시 해금'}</div>
+      ${ready?`<button class="btn ${done?'':'gem'}" style="width:100%;margin-top:6px" onclick="playMainStory(${s.ch})">${done?'다시 보기':'▶ 재생'}</button>`:''}
+    </div>`;
+  });
+  return h;
+}
+function playMainStory(ch){
+  const s=MAIN_STORY.find(x=>x.ch===ch);
+  if(!s || !s.script || G.stage<s.stage) return;
+  playVN(s.script, ()=>{
+    if(!G.storyDone) G.storyDone=[];
+    const first=!G.storyDone.includes(ch);
+    if(first){ G.storyDone.push(ch); grantReward(s.reward); saveGame(); }
+    if(currentScreen==='story') renderScreen();
+    if(first && rewardText(s.reward)) popReward('📖 '+s.title+' 완료', `<div style="font-weight:bold;font-size:18px">${rewardText(s.reward)}</div>`);
+  }, s.focus||null, s.bg||null);
+}
 const HERO_NAME_MIGRATION = {
   리네아:'린', 비올라:'루비아', 세레스:'사피라', 아멜리아:'실비아',
   녹시아:'카이라', 루미엘:'카이론', 포레:'에메리아', 드라카:'카엘'
@@ -1794,7 +1903,7 @@ function popReward(title, body){
 // ===== 풀스크린 서브 화면 (홈 메뉴에서 진입) =====
 let currentScreen = null;
 function openScreen(name){
-  const titles = {dungeon:'🗓️ 요일던전', mail:'📬 우편함', quest:'📜 퀘스트', achieve:'🏆 업적', attend:'📅 출석', bond:'💗 교감', mission:'📋 일일 미션', pet:'🐾 펫소환', guild:'🏛️ 길드소', summon:'✨ 소환상점', bag:'🎒 가방', shop:'🛒 상점'};
+  const titles = {dungeon:'🗓️ 요일던전', mail:'📬 우편함', quest:'📜 퀘스트', achieve:'🏆 업적', attend:'📅 출석', bond:'💗 교감', story:'📖 메인 스토리', mission:'📋 일일 미션', pet:'🐾 펫소환', guild:'🏛️ 길드소', summon:'✨ 소환상점', bag:'🎒 가방', shop:'🛒 상점'};
   if(name==='summon') summonView='hub';
   currentScreen = name;
   document.getElementById('screenTitle').textContent = titles[name]||'';
@@ -1812,6 +1921,7 @@ function renderScreen(){
   else if(currentScreen==='achieve') b.innerHTML = viewAchieve();
   else if(currentScreen==='attend') b.innerHTML = viewAttend();
   else if(currentScreen==='bond') b.innerHTML = viewBond();
+  else if(currentScreen==='story') b.innerHTML = viewStory();
   else if(currentScreen==='mission') b.innerHTML = viewMission();
   else if(currentScreen==='pet') b.innerHTML = viewPet();
   else if(currentScreen==='guild') b.innerHTML = viewGuild();
@@ -2003,12 +2113,19 @@ function claimAttend(){
 // ===== 비주얼노벨 대화 시스템 (미연시 UI: 타자기/AUTO/SKIP/LOG/두근두근) =====
 let vnScript=null, vnIdx=0, vnEnd=null, vnChar=null;
 let vnTypeTimer=null, vnTyping=false, vnFullText='', vnAuto=false, vnAutoTimer=null, vnLogArr=[];
-function playVN(script, onEnd, charName){
+function playVN(script, onEnd, charName, bg){
   vnScript=script.slice(); vnIdx=0; vnEnd=onEnd||null; vnChar=charName||null; vnLastWho=null; vnLogArr=[];
   vnAuto=false; updateAutoBtn();
+  setVNBg(bg||null);
   document.getElementById('vnLog').style.display='none';
   document.getElementById('vn').style.display='flex';
   vnStep();
+}
+// VN 배경 — 이미지가 있으면 어둡게 깔고, 없으면 기본 그라데이션
+function setVNBg(url){
+  const el=document.getElementById('vnBg');
+  if(url) el.style.backgroundImage=`linear-gradient(180deg, rgba(10,8,24,.35), rgba(10,8,24,.12) 45%, rgba(10,8,24,.55)), url('${url}${AV}')`;
+  else el.style.backgroundImage='';
 }
 function vnStep(){
   if(!vnScript || vnIdx>=vnScript.length){ closeVN(); const f=vnEnd; vnEnd=null; if(f) f(); return; }
@@ -2055,6 +2172,7 @@ function showVNLine(node){
   // 화자가 바뀌면 등장 애니메이션
   if(who && who!==vnLastWho){ portrait.classList.remove('enter'); void portrait.offsetWidth; portrait.classList.add('enter'); }
   vnLastWho=who;
+  if(node.bg) setVNBg(node.bg);   // 컷 단위 배경 전환
   vnLogArr.push({who, text:node.text});
   // 두근두근 연출: heart 플래그 또는 💗/두근 포함 대사 → 핑크 글로우 + 하트 파티클
   const box=document.getElementById('vnBox');
@@ -2131,7 +2249,7 @@ function renderVNChoice(choices){
 }
 function closeVN(){
   clearTimeout(vnTypeTimer); clearTimeout(vnAutoTimer); vnAuto=false; vnTyping=false;
-  document.getElementById('vn').style.display='none'; vnScript=null;
+  document.getElementById('vn').style.display='none'; vnScript=null; setVNBg(null);
 }
 
 // ===== 교감 / 호감도 =====
@@ -2181,7 +2299,7 @@ function talkChar(name){
   let gainNode;
   if(G.talkDate[name]!==todayStr()){ G.talkDate[name]=todayStr(); addAffinity(name,5); dailyInc('talk',1); gainNode={who:'',text:'(호감도 +5 💗)'}; }
   else gainNode={who:'',text:'(오늘은 이미 대화했어요. 내일 또 와요!)'};
-  playVN([{who:name,text:line}, gainNode], ()=>{ if(currentScreen==='bond') renderScreen(); }, name);
+  playVN([{who:name,text:line}, gainNode], ()=>{ if(currentScreen==='bond') renderScreen(); }, name, VN_BG.town);
 }
 function openEpisodes(name){
   const c=charData(name); const aff=G.affinity[name]||0;
@@ -2205,7 +2323,7 @@ function playEpisode(name,i){
     if(first){ G.epDone.push(key); grantReward(e.reward); }
     if(currentScreen==='bond') renderScreen();
     if(first) popReward('📖 에피소드 완료', rewardText(e.reward)?`<div style="font-weight:bold;font-size:18px">${rewardText(e.reward)}</div>`:'스토리를 확인했어요!');
-  }, name);
+  }, name, e.bg||null);
 }
 // ===== 선물 =====
 function openGift(name){
@@ -2229,7 +2347,7 @@ function giveGift(name,gid){
   addAffinity(name,amt);
   closePopup();
   const line=isFav? '이거… 내가 제일 좋아하는 거예요. 어떻게 알았어요…?' : '고마워요. 소중히 간직할게요.';
-  playVN([{who:name,text:line},{who:'',text:`🎁 ${g.emoji} ${g.name} → 호감도 +${amt} 💗${isFav?' (최애 선물!)':''}`}], ()=>{ if(currentScreen==='bond') renderScreen(); }, name);
+  playVN([{who:name,text:line},{who:'',text:`🎁 ${g.emoji} ${g.name} → 호감도 +${amt} 💗${isFav?' (최애 선물!)':''}`}], ()=>{ if(currentScreen==='bond') renderScreen(); }, name, VN_BG.town);
 }
 
 // ===== 일일 미션 =====
@@ -2364,12 +2482,13 @@ function updateHomeRes(){
   const sg=document.getElementById('scrGem'); if(sg) sg.textContent = G.gem.toLocaleString();
   dungeonReset();
   const a=attendClaimable()?1:0, mi=missionClaimable(), bo=bondBadge(),
-        ma=mailUnread(), qu=questClaimable(), ac=achClaimable();
+        ma=mailUnread(), qu=questClaimable(), ac=achClaimable(), st=storyBadge();
   // 메뉴 항목 뱃지
   setBadge('mAttend', a); setBadge('mMission', mi); setBadge('mBond', bo);
-  setBadge('mMail', ma); setBadge('mQuest', qu); setBadge('mAch', ac);
+  setBadge('mMail', ma); setBadge('mQuest', qu); setBadge('mAch', ac); setBadge('mStory', st);
+  setBadge('hStory', st); setBadge('hBond', bo);   // 홈 상단 바로가기 뱃지
   // 메뉴 버튼 알림점(합계) + 던전 핫스팟
-  setBadge('menuDot', a+mi+bo+ma+qu+ac);
+  setBadge('menuDot', a+mi+bo+ma+qu+ac+st);
   setBadge('hsDun', G.dungeon.left);
 }
 
@@ -2882,6 +3001,7 @@ function loadGame(){
       if(G.lastSeen==null) G.lastSeen = 0;
       if(!G.attend) G.attend = { last:'', day:0 };
       if(!G.affinity) G.affinity = {};
+      if(!G.storyDone) G.storyDone = [];
       if(!G.epDone) G.epDone = [];
       if(!G.talkDate) G.talkDate = {};
       if(G.seenPrologue==null) G.seenPrologue = false;
@@ -2912,7 +3032,7 @@ renderHeroRow();
 refreshTop();
 setTab('hunt');
 goHome(); // 시작은 홈(로비) 화면
-if(!G.seenPrologue){ playVN(WORLD.prologue, ()=>{ G.seenPrologue=true; saveGame(); if(pendingOffline) showOfflinePopup(); }); }
+if(!G.seenPrologue){ playVN(WORLD.prologue, ()=>{ G.seenPrologue=true; saveGame(); if(pendingOffline) showOfflinePopup(); }, null, VN_BG.field); }
 else if(pendingOffline) showOfflinePopup(); // 홈 위에 방치 보상 팝업
 restartAuto(); // 자동사냥 시작
 setInterval(useSkill, 6000); // 6초마다 직업 스킬 자동 발동
