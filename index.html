@@ -318,7 +318,7 @@
   .summonMode button b { display:block; font-size:22px; margin-bottom:3px; }
   .summonMode button.active { border-color:#ffd866; color:#ffd866; box-shadow:0 0 12px #ffd86633, inset 0 1px 0 #ffffff22; }
   .summonHeroBanner { position:relative; overflow:hidden; min-height:88px; border-color:#ffb74d; }
-  .summonHeroBanner::before { content:''; position:absolute; inset:0; background:url('assets/char/profile/lin_profile.png?v=1') 100% 8%/auto 170% no-repeat;
+  .summonHeroBanner::before { content:''; position:absolute; inset:0; background:url('assets/char/base/lin_base.png?v=1') 100% 8%/auto 170% no-repeat;
     opacity:.42; filter:drop-shadow(0 8px 16px #000); }
   .summonHeroBanner > * { position:relative; z-index:1; }
   #charBtn { position:absolute; bottom:14px; left:50%; transform:translateX(-50%); z-index:4;
@@ -327,9 +327,9 @@
 
   /* ===== 캐릭터 화면 ===== */
   #charView { position:fixed; inset:0; max-width:480px; margin:0 auto; z-index:62; display:none; overflow:hidden; }
-  #charView #homeArtFull { left:0; right:38%; top:42px; bottom:46px; justify-content:flex-start; padding-left:3%; }
+  #charView #homeArtFull { left:-7%; right:42%; top:42px; bottom:46px; justify-content:flex-start; padding-left:0; }
   #charView #homeArtFull img { transform:scale(1.25); transform-origin:left top; object-position:left top; }
-  #charView.fullArt #homeArtFull { left:0; right:38%; top:0; bottom:0; }
+  #charView.fullArt #homeArtFull { left:-7%; right:42%; top:0; bottom:0; }
   #charHeroList { position:absolute; top:56px; right:12px; bottom:62px; width:36%; min-width:230px; z-index:5;
     border:1px solid #343a66; border-radius:12px; background:linear-gradient(180deg,#181a30ee,#0f1020f2);
     box-shadow:0 8px 24px #0009, inset 0 1px 0 #ffffff12; padding:10px; overflow-y:auto; }
@@ -674,15 +674,15 @@ const ACHIEVEMENTS = [
 const HEROES = [
   { id:'lin', name:'린', emoji:'🔫', cls:'gun', attr:'바람/빙결', aura:'#7fd0ff', bonus:0.20, fx:'water', fxEmoji:'❄️',
     costumes:[
-      { id:'lin_default', name:'기본', img:'assets/char/profile/lin_profile.png', sd:'assets/char/sd_custom/sd_viola.png', price:0, desc:'총잡이 기본 복장' },
+      { id:'lin_default', name:'기본', img:'assets/char/base/lin_base.png', sd:'assets/char/sd_custom/sd_viola.png', price:0, desc:'총잡이 기본 복장' },
       { id:'lin_swim', name:'수영복', img:'assets/skins/swim.png', price:1500, aura:'#22d3ee', bonus:0.05, fxEmoji:'💧', scene:'assets/bg/beach.png', desc:'여름 수영복 · 해변 배경' },
     ]},
   { id:'rubia', name:'루비아', emoji:'🔥', cls:'magic', attr:'화염/물', aura:'#ff6b6b', bonus:0.20, fx:'flame', fxEmoji:'🔥',
-    costumes:[ { id:'rubia_default', name:'기본', img:'assets/char/profile/rubia_profile.png', sd:'assets/char/sd_custom/sd_ceres.png', price:0, desc:'마법사 기본 복장' } ]},
+    costumes:[ { id:'rubia_default', name:'기본', img:'assets/char/base/rubia_base.png', sd:'assets/char/sd_custom/sd_ceres.png', price:0, desc:'마법사 기본 복장' } ]},
   { id:'sapphira', name:'사피라', emoji:'⚔️', cls:'sword', attr:'물', aura:'#5b9bff', bonus:0.22, fx:'water', fxEmoji:'💧',
-    costumes:[ { id:'sapphira_default', name:'기본', img:'assets/char/profile/sapphira_profile.png', sd:'assets/char/sd_custom/sd_linea.png', price:0, desc:'전사 기본 복장' } ]},
+    costumes:[ { id:'sapphira_default', name:'기본', img:'assets/char/base/sapphira_base.png', sd:'assets/char/sd_custom/sd_linea.png', price:0, desc:'전사 기본 복장' } ]},
   { id:'silvia', name:'실비아', emoji:'🛡️', cls:'sword', attr:'물/빛', aura:'#ffe08a', bonus:0.25, fx:'feather', fxEmoji:'✨',
-    costumes:[ { id:'silvia_default', name:'기본', img:'assets/char/profile/silvia_profile.png', sd:'assets/char/sd_custom/sd_amelia.png', price:0, desc:'성기사 기본 복장' } ]},
+    costumes:[ { id:'silvia_default', name:'기본', img:'assets/char/base/silvia_base.png', sd:'assets/char/sd_custom/sd_amelia.png', price:0, desc:'성기사 기본 복장' } ]},
 ];
 const AV = '?v=10';   // 이미지 캐시 버전 (그림 교체 시 숫자 올리면 새로 로드됨)
 function heroObj(id){ return HEROES.find(h=>h.id===(id||G.hero)) || HEROES[0]; }
@@ -840,7 +840,7 @@ const GIFTS = [
 ];
 const CHAR_FAV = { 린:'jewel', 루비아:'book', 실비아:'cake', 사피라:'ring', 카엘:'ring', 에메리아:'flower', 카이라:'jewel', 카이론:'book' };
 // 캐릭터 일러 (VN 대화용). 명시 매핑 없으면 assets/char/<이름>.png 시도 → 없으면 이모지 폴백
-const CHAR_ART = { 린:'assets/char/profile/lin_profile.png', 루비아:'assets/char/profile/rubia_profile.png', 사피라:'assets/char/profile/sapphira_profile.png', 실비아:'assets/char/profile/silvia_profile.png' };
+const CHAR_ART = { 린:'assets/char/base/lin_base.png', 루비아:'assets/char/base/rubia_base.png', 사피라:'assets/char/base/sapphira_base.png', 실비아:'assets/char/base/silvia_base.png' };
 function charArt(name){ return CHAR_ART[name] || ('assets/char/'+encodeURIComponent(name)+'.png'); }
 // ===== 펫 =====
 const PET_POOL = [
@@ -1384,11 +1384,11 @@ function heroSdArt(h){
 }
 function heroProfileArt(h){
   const map = {
-    린:'lin_profile.png', 루비아:'rubia_profile.png', 실비아:'silvia_profile.png', 사피라:'sapphira_profile.png',
-    카엘:'kael_profile.png', 에메리아:'emeria_profile.png', 카이라:'kaira_profile.png', 카이론:'kairon_profile.png'
+    린:'lin_base.png', 루비아:'rubia_base.png', 실비아:'silvia_base.png', 사피라:'sapphira_base.png',
+    카엘:'kael_base.png', 에메리아:'emeria_base.png', 카이라:'kaira_base.png', 카이론:'kairon_base.png'
   };
   const file = map[h.name];
-  return file ? `assets/char/profile/${file}` : '';
+  return file ? `assets/char/base/${file}` : '';
 }
 function heroSdVisual(h, cls='heroListImg'){
   const art = heroSdArt(h);
@@ -1570,8 +1570,30 @@ function renderCharLeftArt(hero){
   document.getElementById('cvLv').textContent = selected ? heroLevel(selected) : G.plv;
 }
 function renderChar(){
+  if(selectedCharHeroIdx==null && G.heroes.length){
+    const first = orderedCharHeroes()[0];
+    if(first) selectedCharHeroIdx = first.i;
+  }
   renderCharLeftArt();
   renderCharHeroList();
+}
+function orderedCharHeroes(){
+  const slots = partySlots();
+  const partyRank = new Map(slots.filter(Boolean).map((hero, idx)=>[hero.uid, idx]));
+  return G.heroes
+    .map((hero,i)=>({hero,i}))
+    .sort((a,b)=>{
+      const ap = partyRank.has(a.hero.uid) ? partyRank.get(a.hero.uid) : 99;
+      const bp = partyRank.has(b.hero.uid) ? partyRank.get(b.hero.uid) : 99;
+      if(ap!==bp) return ap-bp;
+      const ag = GRADE_RANK[a.hero.grade] ?? 0;
+      const bg = GRADE_RANK[b.hero.grade] ?? 0;
+      if(ag!==bg) return bg-ag;
+      const al = heroLevel(a.hero);
+      const bl = heroLevel(b.hero);
+      if(al!==bl) return bl-al;
+      return heroEffAtk(b.hero)-heroEffAtk(a.hero);
+    });
 }
 function renderCharHeroList(){
   const box = document.getElementById('charHeroList');
@@ -1580,14 +1602,17 @@ function renderCharHeroList(){
   if(G.heroes.length===0){
     h += `<div class="card small">아직 영웅이 없어요. 소환상점에서 영웅을 소환해보세요.</div>`;
   } else {
-    const party = new Set(partyHeroes());
-    G.heroes.forEach((hero,i)=>{
+    const slots = partySlots();
+    const partyRank = new Map(slots.filter(Boolean).map((hero, idx)=>[hero.uid, idx]));
+    const ordered = orderedCharHeroes();
+    ordered.forEach(({hero,i})=>{
       const cls = heroCls(hero);
+      const slotNo = partyRank.has(hero.uid) ? partyRank.get(hero.uid)+1 : 0;
       h += `<div class="charHeroItem" onclick="openHeroFromChar(${i})">
         <div class="heroFace g-bg-${hero.grade}" style="border-color:${cls.color}">${heroSdVisual(hero,'heroListImg')}</div>
         <div class="heroMeta">
           <div class="heroName txt-${hero.grade}">[${hero.grade}] ${hero.name} Lv.${heroLevel(hero)}</div>
-          <div class="heroPower">${cls.hit} ${cls.name} · 전투력 ${heroEffAtk(hero)}${party.has(hero)?' · 출전':''}</div>
+          <div class="heroPower">${cls.hit} ${cls.name} · 전투력 ${heroEffAtk(hero)}${slotNo?` · ${slotNo}번 출전`:''}</div>
         </div>
       </div>`;
     });
