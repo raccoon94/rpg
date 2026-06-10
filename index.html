@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -306,7 +306,7 @@
   .hotspot.place .spotIcon,
   .hotspot.place .spotLabel,
   .hotspot.place .spotSub { display:none; }
-  .hotspot.heroHall { --spot-img:url('assets/char/rubia_sd.png?v=1'); }
+  .hotspot.heroHall { --spot-img:url('assets/char/sd_custom/sd_ceres.png?v=1'); }
   .hotspot.summonShop { --spot-img:url('assets/bg/home.png?v=5'); }
   .hotspot.dungeonGate { --spot-img:url('assets/bg/beach.png?v=5'); }
   .hotspot.huntField { --spot-img:url('background/main.webp?v=1'); }
@@ -318,7 +318,7 @@
   .summonMode button b { display:block; font-size:22px; margin-bottom:3px; }
   .summonMode button.active { border-color:#ffd866; color:#ffd866; box-shadow:0 0 12px #ffd86633, inset 0 1px 0 #ffffff22; }
   .summonHeroBanner { position:relative; overflow:hidden; min-height:88px; border-color:#ffb74d; }
-  .summonHeroBanner::before { content:''; position:absolute; inset:0; background:url('assets/skins/default.png?v=1') 100% 8%/auto 170% no-repeat;
+  .summonHeroBanner::before { content:''; position:absolute; inset:0; background:url('assets/char/profile/lin_profile.png?v=1') 100% 8%/auto 170% no-repeat;
     opacity:.42; filter:drop-shadow(0 8px 16px #000); }
   .summonHeroBanner > * { position:relative; z-index:1; }
   #charBtn { position:absolute; bottom:14px; left:50%; transform:translateX(-50%); z-index:4;
@@ -674,18 +674,21 @@ const ACHIEVEMENTS = [
 const HEROES = [
   { id:'lin', name:'린', emoji:'🔫', cls:'gun', attr:'바람/빙결', aura:'#7fd0ff', bonus:0.20, fx:'water', fxEmoji:'❄️',
     costumes:[
-      { id:'lin_default', name:'기본', img:'assets/skins/lin.png', sd:'assets/char/lin_sd.png', price:0, desc:'총잡이 기본 복장' },
+      { id:'lin_default', name:'기본', img:'assets/char/profile/lin_profile.png', sd:'assets/char/sd_custom/sd_viola.png', price:0, desc:'총잡이 기본 복장' },
       { id:'lin_swim', name:'수영복', img:'assets/skins/swim.png', price:1500, aura:'#22d3ee', bonus:0.05, fxEmoji:'💧', scene:'assets/bg/beach.png', desc:'여름 수영복 · 해변 배경' },
     ]},
   { id:'rubia', name:'루비아', emoji:'🔥', cls:'magic', attr:'화염/물', aura:'#ff6b6b', bonus:0.20, fx:'flame', fxEmoji:'🔥',
-    costumes:[ { id:'rubia_default', name:'기본', img:'assets/skins/rubia.png', sd:'assets/char/rubia_sd.png', price:0, desc:'마법사 기본 복장' } ]},
+    costumes:[ { id:'rubia_default', name:'기본', img:'assets/char/profile/rubia_profile.png', sd:'assets/char/sd_custom/sd_ceres.png', price:0, desc:'마법사 기본 복장' } ]},
   { id:'sapphira', name:'사피라', emoji:'⚔️', cls:'sword', attr:'물', aura:'#5b9bff', bonus:0.22, fx:'water', fxEmoji:'💧',
-    costumes:[ { id:'sapphira_default', name:'기본', img:'assets/skins/sapphira.png', sd:'assets/char/sapphira_sd.png', price:0, desc:'전사 기본 복장' } ]},
+    costumes:[ { id:'sapphira_default', name:'기본', img:'assets/char/profile/sapphira_profile.png', sd:'assets/char/sd_custom/sd_linea.png', price:0, desc:'전사 기본 복장' } ]},
   { id:'silvia', name:'실비아', emoji:'🛡️', cls:'sword', attr:'물/빛', aura:'#ffe08a', bonus:0.25, fx:'feather', fxEmoji:'✨',
-    costumes:[ { id:'silvia_default', name:'기본', img:'assets/skins/silvia.png', sd:'assets/char/silvia_sd.png', price:0, desc:'성기사 기본 복장' } ]},
+    costumes:[ { id:'silvia_default', name:'기본', img:'assets/char/profile/silvia_profile.png', sd:'assets/char/sd_custom/sd_amelia.png', price:0, desc:'성기사 기본 복장' } ]},
 ];
 const AV = '?v=10';   // 이미지 캐시 버전 (그림 교체 시 숫자 올리면 새로 로드됨)
 function heroObj(id){ return HEROES.find(h=>h.id===(id||G.hero)) || HEROES[0]; }
+const HERO_NAME_TO_COSTUME_ID = { 린:'lin', 루비아:'rubia', 사피라:'sapphira', 실비아:'silvia' };
+function costumeHeroIdByName(name){ return HERO_NAME_TO_COSTUME_ID[name] || null; }
+function selectedCharHero(){ return selectedCharHeroIdx!=null ? G.heroes[selectedCharHeroIdx] : null; }
 function curCostumeId(h){ h=h||heroObj(); return (G.heroCostume && G.heroCostume[h.id]) || h.costumes[0].id; }
 function costumeObj(h, cid){ h=h||heroObj(); return h.costumes.find(c=>c.id===(cid||curCostumeId(h))) || h.costumes[0]; }
 // 착용 중인 영웅+코스튬을 합쳐 skin 객체로 (기존 코드 호환)
@@ -717,6 +720,7 @@ let autoTimer = null;
 let heroDetailIdx = null;      // 영웅 상세(장비) 화면에서 보고있는 영웅
 let summonView = 'hero';
 let partyPickUid = null;       // 영웅 탭에서 배치 슬롯을 고르는 중인 영웅
+let selectedCharHeroIdx = null; // 영웅소에서 왼쪽 일러스트로 보고 있는 영웅
 
 // 영웅 풀
 // 환령(幻靈) 캐릭터 — 이름·직업·서사
@@ -836,7 +840,7 @@ const GIFTS = [
 ];
 const CHAR_FAV = { 린:'jewel', 루비아:'book', 실비아:'cake', 사피라:'ring', 카엘:'ring', 에메리아:'flower', 카이라:'jewel', 카이론:'book' };
 // 캐릭터 일러 (VN 대화용). 명시 매핑 없으면 assets/char/<이름>.png 시도 → 없으면 이모지 폴백
-const CHAR_ART = { 린:'assets/skins/lin.png', 루비아:'assets/skins/rubia.png', 사피라:'assets/skins/sapphira.png', 실비아:'assets/skins/silvia.png' };
+const CHAR_ART = { 린:'assets/char/profile/lin_profile.png', 루비아:'assets/char/profile/rubia_profile.png', 사피라:'assets/char/profile/sapphira_profile.png', 실비아:'assets/char/profile/silvia_profile.png' };
 function charArt(name){ return CHAR_ART[name] || ('assets/char/'+encodeURIComponent(name)+'.png'); }
 // ===== 펫 =====
 const PET_POOL = [
@@ -1471,7 +1475,11 @@ function viewCostume(){
 }
 function selectHero(id){
   if(!HEROES.find(h=>h.id===id)) return;
-  G.hero=id; refreshTop(); renderHeroRow(); renderPanel(); renderHome();
+  G.hero=id;
+  const hName = heroObj(id).name;
+  const idx = G.heroes.findIndex(h=>h.name===hName);
+  if(idx>=0) selectedCharHeroIdx = idx;
+  refreshTop(); renderHeroRow(); renderPanel(); renderHome();
   if(getComputedStyle(document.getElementById('charView')).display!=='none'){ renderChar(); showCharCostumes(); }
 }
 function setCostume(cid){
@@ -1535,30 +1543,34 @@ function renderHome(){
   updateHomeRes();
 }
 // 캐릭터 화면(코스튬 풀일러) 렌더
-function renderChar(){
+function renderCharLeftArt(hero){
+  const selected = hero || selectedCharHero();
   const skin = skinObj();
   const artEl = document.getElementById('homeArtFull');
-  const key = 'char:'+skin.id;
+  const art = selected ? heroProfileArt(selected) : '';
+  const key = selected ? 'hero:'+selected.uid+':'+(art||selected.name) : 'char:'+skin.id;
   if(artEl.dataset.key !== key){
     artEl.dataset.key = key;
     artEl.innerHTML = '';
     const img = document.createElement('img');
-    img.src = skin.img + AV;
-    if(skin.bg){ img.style.objectFit='cover'; img.style.objectPosition='center 14%'; }
+    img.src = (art || skin.img) + AV;
+    if(!selected && skin.bg){ img.style.objectFit='cover'; img.style.objectPosition='center 14%'; }
     else { img.style.objectFit='contain'; img.style.objectPosition='center top'; }
-    img.onerror = function(){ artEl.innerHTML = `<div class="homeEmoji">${skin.emoji}</div>`; };
+    img.onerror = function(){ artEl.innerHTML = `<div class="homeEmoji">${selected ? selected.emoji : skin.emoji}</div>`; };
     artEl.appendChild(img);
   }
-  document.getElementById('charView').classList.toggle('fullArt', !!skin.bg);
-  const scene = skin.scene || 'assets/bg/home.png';
+  document.getElementById('charView').classList.toggle('fullArt', !selected && !!skin.bg);
+  const scene = (!selected && skin.scene) || 'assets/bg/home.png';
   const sc = document.getElementById('homeScene');
   sc.style.backgroundImage = `url('${scene}${AV}')`;
   sc.style.backgroundSize='cover'; sc.style.backgroundPosition='center'; sc.style.backgroundRepeat='no-repeat';
-  const bh = bestHero();
-  const col = skin.aura;
+  const col = selected ? heroCls(selected).color : skin.aura;
   document.getElementById('charView').style.setProperty('--glow', col);
-  document.getElementById('cvName').textContent = skin.name;
-  document.getElementById('cvLv').textContent = G.plv;
+  document.getElementById('cvName').textContent = selected ? selected.name : skin.name;
+  document.getElementById('cvLv').textContent = selected ? heroLevel(selected) : G.plv;
+}
+function renderChar(){
+  renderCharLeftArt();
   renderCharHeroList();
 }
 function renderCharHeroList(){
@@ -1585,16 +1597,33 @@ function renderCharHeroList(){
 function showCharCostumes(){
   const box = document.getElementById('charHeroList');
   if(!box) return;
-  box.innerHTML = `<button class="btn" style="width:100%;margin-bottom:9px" onclick="renderCharHeroList()">◂ 영웅 목록</button>` + viewCostume();
+  const hero = selectedCharHero();
+  renderCharLeftArt(hero);
+  const costumeId = hero ? costumeHeroIdByName(hero.name) : G.hero;
+  if(costumeId) G.hero = costumeId;
+  if(!costumeId){
+    box.innerHTML = `<button class="btn" style="width:100%;margin-bottom:9px" onclick="renderCharHeroList()">◂ 영웅 목록</button>
+      <div class="card" style="border-color:${heroCls(hero).color};text-align:center">
+        ${heroSdVisual(hero,'heroListImg')}
+        <div class="txt-${hero.grade}" style="font-weight:bold;margin-top:5px">[${hero.grade}] ${hero.name}</div>
+        <div class="small" style="margin-top:5px">이 영웅의 코스튬은 준비 중이에요. 왼쪽에서 선택한 영웅 일러스트를 볼 수 있어요.</div>
+      </div>`;
+    return;
+  }
+  box.innerHTML = `<button class="btn" style="width:100%;margin-bottom:9px" onclick="renderCharHeroDetail(selectedCharHeroIdx)">◂ 영웅 정보</button>` + viewCostume();
 }
 function openHeroFromChar(i){
   heroDetailIdx = i;
+  selectedCharHeroIdx = i;
+  renderCharLeftArt(G.heroes[i]);
   renderCharHeroDetail(i);
 }
 function renderCharHeroDetail(i){
   const box = document.getElementById('charHeroList');
   const hero = G.heroes[i];
   if(!box || !hero){ renderCharHeroList(); return; }
+  selectedCharHeroIdx = i;
+  renderCharLeftArt(hero);
   const data = charData(hero.name);
   const art = heroProfileArt(hero);
   box.innerHTML = `<button class="btn" style="width:100%;margin-bottom:9px" onclick="renderCharHeroList()">◂ 영웅 목록</button>
@@ -2726,3 +2755,4 @@ battleEl.addEventListener('touchstart', manualTap, {passive:false});
 </script>
 </body>
 </html>
+
