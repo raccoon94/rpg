@@ -331,6 +331,19 @@
   .summonHeroBanner::before { content:''; position:absolute; inset:0; background:url('assets/char/base/lin_base.png?v=1') 100% 8%/auto 170% no-repeat;
     opacity:.42; filter:drop-shadow(0 8px 16px #000); }
   .summonHeroBanner > * { position:relative; z-index:1; }
+  #summonShopView { position:fixed; inset:0; z-index:82; display:none; overflow:hidden; background:#1b0f07; }
+  #summonShopBg { position:absolute; inset:0; background:url('assets/bg/summon_shop_20260611.png?v=1') center/cover no-repeat; }
+  .summonHit { position:absolute; z-index:2; border:0; background:transparent; border-radius:18px; cursor:pointer; padding:0; }
+  .summonHit:active { background:#ffffff22; box-shadow:0 0 20px #ffd86688 inset; }
+  .summonBackHit { left:1.2%; top:2.2%; width:12.5%; height:9%; }
+  .summonHero1 { left:14.4%; top:71.3%; width:10.2%; height:7%; }
+  .summonHero11 { left:25.3%; top:71.3%; width:11.3%; height:7%; }
+  .summonGear1 { left:39.3%; top:71.3%; width:10.2%; height:7%; }
+  .summonGear11 { left:50.3%; top:71.3%; width:11.3%; height:7%; }
+  .summonPet1 { left:64.2%; top:71.3%; width:10.2%; height:7%; }
+  .summonPet11 { left:75.2%; top:71.3%; width:11.3%; height:7%; }
+  .summonPackageHit { left:22.5%; top:91%; width:18.8%; height:7%; }
+  .summonGemHit { left:58.8%; top:91%; width:17.7%; height:7%; }
   #charBtn { position:absolute; bottom:14px; left:50%; transform:translateX(-50%); z-index:4;
     background:linear-gradient(160deg,#3b4fe0,#2a2d80); color:#fff; border:1px solid #5b6bd0; padding:10px 20px;
     border-radius:20px; font-weight:bold; font-size:13px; box-shadow:0 3px 12px #00000066; }
@@ -554,7 +567,7 @@
   <div class="hotspot place heroHall" style="left:31%;top:54%" onclick="openChar()" title="영웅소">
     <span class="spotSub">HERO</span><span class="spotIcon">🛡️</span><span class="spotLabel">영웅소</span>
   </div>
-  <div class="hotspot place summonShop" style="left:55%;top:63%" onclick="openFromHome('gacha')" title="소환상점">
+  <div class="hotspot place summonShop" style="left:55%;top:63%" onclick="openSummonShopView()" title="소환상점">
     <span class="spotSub">SUMMON</span><span class="spotIcon">✨</span><span class="spotLabel">소환상점</span>
   </div>
   <div class="hotspot place dungeonGate" style="left:79%;top:51%" onclick="openScreen('dungeon')" title="일일 던전">
@@ -566,6 +579,19 @@
   <div class="hotspot place guildHall" style="left:80%;top:78%" onclick="openScreen('guild')" title="길드소">
     <span class="spotSub">GUILD</span><span class="spotIcon">🏛️</span><span class="spotLabel">길드소</span>
   </div>
+</div>
+
+<div id="summonShopView">
+  <div id="summonShopBg"></div>
+  <button class="summonHit summonBackHit" onclick="closeSummonShopView()" title="돌아가기"></button>
+  <button class="summonHit summonHero1" onclick="summonHero(1)" title="영웅 1회 소환"></button>
+  <button class="summonHit summonHero11" onclick="summonHero(11)" title="영웅 11회 소환"></button>
+  <button class="summonHit summonGear1" onclick="summonGearShop(1)" title="장비 1회 소환"></button>
+  <button class="summonHit summonGear11" onclick="summonGearShop(11)" title="장비 11회 소환"></button>
+  <button class="summonHit summonPet1" onclick="summonPetShop(1)" title="펫 1회 소환"></button>
+  <button class="summonHit summonPet11" onclick="summonPetShop(11)" title="펫 11회 소환"></button>
+  <button class="summonHit summonPackageHit" onclick="firstPay()" title="패키지"></button>
+  <button class="summonHit summonGemHit" onclick="closeSummonShopView();openFromHome('shop')" title="재화"></button>
 </div>
 
 <div id="charView">
@@ -2031,6 +2057,19 @@ function enterHunt(){
   document.getElementById('tabs').style.display='flex';
 }
 function openFromHome(tab){ enterGame(); setTab(tab); }
+function openSummonShopView(){
+  renderHome();
+  closeMenu(); closeScreen();
+  document.getElementById('charView').style.display='none';
+  document.getElementById('summonShopView').style.display='block';
+  updateTabsVisibility();
+}
+function closeSummonShopView(){
+  document.getElementById('summonShopView').style.display='none';
+  renderHome();
+  document.getElementById('home').style.display='flex';
+  updateTabsVisibility();
+}
 function openChar(){ renderChar(); document.getElementById('charView').style.display='block'; updateTabsVisibility(); }
 function closeChar(){ document.getElementById('charView').style.display='none'; updateTabsVisibility(); }
 function openMenu(){ updateHomeRes(); document.getElementById('menuOverlay').style.display='flex'; }
@@ -2587,6 +2626,25 @@ function summonPet(){
     <div class="txt-${pet.grade}" style="font-weight:bold;font-size:18px">[${pet.grade}] ${pet.name}</div>
     <div class="small">${petBuffText(pet)}</div>`);
 }
+function summonPetShop(count=1){
+  const cost = count===11 ? 2000 : 200;
+  if(G.gem<cost){ alert('💎 보석이 부족해요!'); return; }
+  G.gem-=cost;
+  const got=[];
+  for(let i=0;i<count;i++){
+    const grade=rollGrade();
+    const base=PET_POOL[Math.floor(Math.random()*PET_POOL.length)];
+    const pet={name:base.name, emoji:base.emoji, buff:base.buff, grade:grade.g};
+    G.pets.push(pet); got.push(pet);
+  }
+  if(G.activePet<0) G.activePet=0;
+  refreshTop(); updatePet();
+  if(currentScreen) renderScreen(); else renderPanel();
+  const best = got.reduce((a,b)=> GRADE_RANK[b.grade]>GRADE_RANK[a.grade]?b:a);
+  popReward('🐾 펫 소환!', `<div style="font-size:54px">${best.emoji}</div>
+    <div class="txt-${best.grade}" style="font-weight:bold;font-size:18px">[${best.grade}] ${best.name}</div>
+    <div class="small">총 ${got.length}마리 소환 · 최고 등급 ${best.grade}</div>`);
+}
 function equipPet(i){ G.activePet=i; refreshTop(); currentScreen ? renderScreen() : renderPanel(); updatePet(); }
 function viewPet(){
   let h=`<div class="card" style="border-color:#ffb74d"><div class="row">
@@ -3000,6 +3058,22 @@ function upgradeGear(k, amount=1){
 }
 function summonGear(count=1){
   const cost = count===10 ? 1200 : 150;
+  if(G.gem<cost){ alert('💎 보석이 부족해요!'); return; }
+  G.gem-=cost;
+  const slots = ['무기','방어구','악세'];
+  const got = [];
+  for(let i=0;i<count;i++){
+    const slot = slots[Math.floor(Math.random()*slots.length)];
+    const up = Math.random()<0.08 ? 3 : (Math.random()<0.28 ? 2 : 1);
+    G.gear[slot] = (G.gear[slot]||0) + up;
+    got.push({slot, up});
+  }
+  refreshTop(); renderPanel();
+  const summary = slots.map(s=>`${s} +${got.filter(x=>x.slot===s).reduce((a,b)=>a+b.up,0)}`).filter(t=>!t.endsWith('+0')).join('<br>');
+  popReward('⚔️ 장비 소환!', `<div style="font-size:44px">🧰</div><div style="font-weight:bold;margin-top:6px">${summary}</div>`);
+}
+function summonGearShop(count=1){
+  const cost = count===11 ? 2000 : 200;
   if(G.gem<cost){ alert('💎 보석이 부족해요!'); return; }
   G.gem-=cost;
   const slots = ['무기','방어구','악세'];
