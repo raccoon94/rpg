@@ -1946,6 +1946,9 @@ function orderedCharHeroes(){
       return heroEffAtk(b.hero)-heroEffAtk(a.hero);
     });
 }
+function orderedBattleHeroList(){
+  return orderedCharHeroes();
+}
 function renderCharHeroList(){
   const box = document.getElementById('charHeroList');
   if(!box) return;
@@ -2893,7 +2896,7 @@ function viewHero(){
   const party = new Set(slots.filter(Boolean));
   let h = `<h3>보유 영웅 (${G.heroes.length}) · <span class="small">배치 버튼으로 1~5번 자리를 선택</span></h3>`;
   if(G.heroes.length===0) h += `<div class="card small">아직 영웅이 없어요. '소환' 탭에서 영웅을 뽑아보세요!</div>`;
-  G.heroes.forEach((hero,i)=>{
+  orderedBattleHeroList().forEach(({hero,i})=>{
     const inParty = party.has(hero);
     const slotNo = slots.findIndex(hh=>hh&&hh.uid===hero.uid) + 1;
     h += `<div class="card" onclick="openHero(${i})" style="cursor:pointer;${inParty?'border-color:'+heroCls(hero).color:''}"><div class="row">
