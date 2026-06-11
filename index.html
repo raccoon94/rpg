@@ -730,6 +730,7 @@ const G = {
   heroCostume: {},             // 영웅별 착용 코스튬 {heroId: costumeId}
   ownedCostumes: ['lin_default','rubia_default','sapphira_default','silvia_default'], // 보유 코스튬(기본은 기본보유)
   mats: {},                    // 요일던전 재료 (id: 개수) — 나중에 무기 초월에 사용
+  heroDust: 0,                 // 영웅 분해 재료
   dungeon: { date:'', left:3 },// 요일던전 일일 입장 횟수
   mail: [                      // 우편함 (패키지/공지)
     { id:'welcome', title:'🎁 환영 패키지', body:'게임 시작을 환영합니다! 보석과 골드를 받으세요.', reward:{gem:300, gold:1000}, claimed:false },
@@ -1283,6 +1284,8 @@ let monHpMax = 0, monHp = 0;
 const HERO_MAX_LEVEL = 50;
 const HERO_GRADE_ORDER = ['N','R','SR','SSR','UR'];
 const HERO_GRADE_MULT = {N:.45, R:.68, SR:1, SSR:3.5, UR:9};
+const HERO_DUST_ICON = '💠';
+const HERO_DUST_BY_GRADE = {N:1, R:3, SR:10, SSR:40, UR:120};
 const HERO_MAT = { 린:'wind', 루비아:'fire', 실비아:'water', 사피라:'water', 카엘:'fire', 에메리아:'wind', 카이라:'dark', 카이론:'water' };
 function heroEquipSum(h){ const e=h.equip||{무기:0,방어구:0,장신구:0}; return e.무기+e.방어구+e.장신구; }
 function heroAffinity(h){ return G.affinity[h.name]||0; }
@@ -1323,7 +1326,12 @@ function heroMatKey(h){ return HERO_MAT[h.name] || 'chaos'; }
 function heroTransCost(h){
   const gradeUp = heroLevel(h)>=HERO_MAX_LEVEL && h.grade!=='UR';
   const base = gradeUp ? (h.grade==='SR'?45:90) : (8 + heroCap(h)*2);
-  return { mat:base, gold:Math.floor(heroLevelCost(h) * (gradeUp?10:5)), gradeUp };
+  const dust = gradeUp ? (h.grade==='SR'?80:160) : (6 + heroCap(h));
+  return { mat:base, dust, gold:Math.floor(heroLevelCost(h) * (gradeUp?10:5)), gradeUp };
+}
+function heroDismantleReward(h){
+  const base = HERO_DUST_BY_GRADE[h.grade] || 1;
+  return Math.max(1, Math.floor(base + heroLevel(h)*0.4 + heroAscCount(h)*base*0.5));
 }
 function heroIsMaxed(h){ return h.grade==='UR' && heroLevel(h)>=HERO_MAX_LEVEL && heroCap(h)>=HERO_MAX_LEVEL; }
 function newHeroUid(){ return 'h'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
@@ -2235,6 +2243,7 @@ function renderCharHeroList(){
   const box = document.getElementById('charHeroList');
   if(!box) return;
   let h = `<h3>영웅 목록</h3>`;
+  h += `<div class="card small">${HERO_DUST_ICON} 영웅 결정 <b>${(G.heroDust||0).toLocaleString()}</b> · 영웅 분해로 획득, 초월에 사용</div>`;
   if(G.heroes.length===0){
     h += `<div class="card small">아직 영웅이 없어요. 소환상점에서 영웅을 소환해보세요.</div>`;
   } else {
@@ -2296,6 +2305,7 @@ function renderCharHeroDetail(i){
     ${heroStatDetailHtml(hero)}
     ${heroSkillDetailHtml(hero)}
     ${heroGrowthHtml(i,'char')}
+    ${heroDismantleHtml(i)}
     <div class="card">
       ${art?`<img src="${art}${AV}" alt="${hero.name}" style="width:100%;max-height:220px;object-fit:contain;border-radius:10px;background:#f4efe6;margin-bottom:7px">`:''}
       <div style="font-weight:bold;color:${heroCls(hero).color}">"${data.quote||''}"</div>
@@ -3232,6 +3242,7 @@ function heroGrowthHtml(i, mode='panel'){
   const canLevel = !maxed && lv < cap;
   const canTrans = !maxed && lv >= cap;
   const matHave = G.mats[matKey] || 0;
+  const dustHave = G.heroDust || 0;
   const nextGrade = hero.grade==='SR' ? 'SSR' : hero.grade==='SSR' ? 'UR' : 'UR';
   return `<div class="card" style="border-color:${heroCls(hero).color}">
     <div style="font-weight:bold">영웅 성장 <span class="txt-${hero.grade}">[${hero.grade}] Lv.${lv}/${cap}</span></div>
@@ -3243,13 +3254,44 @@ function heroGrowthHtml(i, mode='panel'){
     </div>
     <div class="row" style="margin-top:8px">
       <button class="btn gold" onclick="upHeroLevel(${i},'${mode}')" ${(!canLevel||G.gold<lvCost)?'disabled':''}>${canLevel?`<span class="goldIcon"></span>${lvCost.toLocaleString()} 레벨업`:'초월 필요'}</button>
-      <button class="btn gem" onclick="transcendHero(${i},'${mode}')" ${(!canTrans||G.gold<tr.gold||matHave<tr.mat)?'disabled':''}>${maxed?'최대치':tr.gradeUp?`${nextGrade} 등급업`:'초월'}</button>
+      <button class="btn gem" onclick="transcendHero(${i},'${mode}')" ${(!canTrans||G.gold<tr.gold||matHave<tr.mat||dustHave<tr.dust)?'disabled':''}>${maxed?'최대치':tr.gradeUp?`${nextGrade} 등급업`:'초월'}</button>
     </div>
     <div class="small" style="margin-top:6px">
-      레벨업: 골드 소비, 능력치 상승 · 초월: ${mat.emoji}${mat.name} ${matHave}/${tr.mat} + <span class="goldIcon"></span>${tr.gold.toLocaleString()}
+      레벨업: 골드 소비, 능력치 상승 · 초월: ${mat.emoji}${mat.name} ${matHave}/${tr.mat} + ${HERO_DUST_ICON}영웅 결정 ${dustHave}/${tr.dust} + <span class="goldIcon"></span>${tr.gold.toLocaleString()}
       ${tr.gradeUp&&!maxed?` · 성공 시 ${nextGrade} 1레벨로 승급`:''}
     </div>
   </div>`;
+}
+function heroDismantleHtml(i){
+  const hero = G.heroes[i]; if(!hero) return '';
+  const reward = heroDismantleReward(hero);
+  const disabled = G.heroes.length<=1 ? 'disabled' : '';
+  return `<div class="card" style="border-color:#ff5e7a">
+    <div class="row">
+      <div style="flex:1">
+        <div style="font-weight:bold;color:#ff9aad">영웅 분해</div>
+        <div class="small">분해 시 ${HERO_DUST_ICON}영웅 결정 <b>${reward}</b>개 획득 · 초월 필요 재료로 사용</div>
+      </div>
+      <button class="btn" style="background:linear-gradient(135deg,#ff5e7a,#8b1e3f)" onclick="dismantleHero(${i})" ${disabled}>분해</button>
+    </div>
+    ${G.heroes.length<=1?'<div class="small" style="margin-top:5px">마지막 영웅은 분해할 수 없어요.</div>':''}
+  </div>`;
+}
+function dismantleHero(i){
+  const hero = G.heroes[i]; if(!hero || G.heroes.length<=1) return;
+  const reward = heroDismantleReward(hero);
+  if(!confirm(`[${hero.grade}] ${hero.name} 영웅을 분해할까요?\n\n획득: ${HERO_DUST_ICON} 영웅 결정 ${reward}개\n분해한 영웅은 사라집니다.`)) return;
+  G.heroDust = (G.heroDust||0) + reward;
+  if(Array.isArray(G.party)) G.party = G.party.map(id=>id===hero.uid ? null : id);
+  if(G.heroHp) delete G.heroHp[hero.uid];
+  G.heroes.splice(i,1);
+  selectedCharHeroIdx = null;
+  heroDetailIdx = null;
+  partyPickUid = null;
+  renderHeroRow();
+  refreshTop();
+  renderChar();
+  popReward('💠 영웅 분해 완료', `<div style="font-size:42px">${HERO_DUST_ICON}</div><div style="font-weight:bold">영웅 결정 +${reward}</div>`);
 }
 function refreshHeroViews(mode){
   renderHeroRow();
@@ -3273,8 +3315,9 @@ function transcendHero(i, mode='panel'){
   const lv = heroLevel(hero), cap = heroCap(hero);
   if(lv < cap) return;
   const matKey = heroMatKey(hero), tr = heroTransCost(hero);
-  if((G.mats[matKey]||0) < tr.mat || G.gold < tr.gold) return;
+  if((G.mats[matKey]||0) < tr.mat || (G.heroDust||0) < tr.dust || G.gold < tr.gold) return;
   G.mats[matKey] -= tr.mat;
+  G.heroDust -= tr.dust;
   G.gold -= tr.gold;
   if(cap >= HERO_MAX_LEVEL && hero.grade !== 'UR'){
     hero.grade = hero.grade === 'SR' ? 'SSR' : 'UR';
@@ -3644,6 +3687,7 @@ function loadGame(){
       if(!G.heroCostume) G.heroCostume = {};
       if(!G.ownedCostumes) G.ownedCostumes = ['lin_default','rubia_default','sapphira_default','silvia_default'];
       if(!G.mats) G.mats = {};
+      if(G.heroDust==null) G.heroDust = 0;
       if(!G.dungeon) G.dungeon = { date:'', left:3 };
       if(!G.mail) G.mail = [];
       if(!G.questClaimed) G.questClaimed = [];
