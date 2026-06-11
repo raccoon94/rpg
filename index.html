@@ -2218,7 +2218,7 @@ function spawnSkinFx(){
 // 마을 로비(홈) 렌더
 function renderHome(){
   const skin = skinObj(); const bh = bestHero();
-  document.getElementById('homeName').textContent = skin.name;
+  document.getElementById('homeName').textContent = pName();   // 모험가(플레이어) 이름
   document.getElementById('homeLv').textContent = G.plv;
   updateHomeRes();
 }
@@ -2482,6 +2482,7 @@ function confirmPlayerName(){
   const v=(i&&i.value||'').trim().slice(0,8);
   if(!v){ if(i){ i.style.borderColor='#ff5e7a'; i.placeholder='이름을 입력해주세요!'; } return; }
   G.playerName=v; saveGame(); closePopup();
+  if(typeof renderHome==='function') renderHome();   // 홈 좌상단 이름 즉시 갱신
   const cb=_pNameCb; _pNameCb=null; if(cb) cb();
 }
 
