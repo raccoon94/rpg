@@ -675,14 +675,10 @@
       <button onclick="closeMenu();openScreen('mail')">📬<span class="navBadge" id="mMail"></span><i>우편</i></button>
       <button onclick="closeMenu();openScreen('quest')">📜<span class="navBadge" id="mQuest"></span><i>퀘스트</i></button>
       <button onclick="closeMenu();openScreen('achieve')">🏆<span class="navBadge" id="mAch"></span><i>업적</i></button>
-      <button onclick="closeMenu();openScreen('bond')">💗<span class="navBadge" id="mBond"></span><i>교감</i></button>
-      <button onclick="closeMenu();openScreen('story')">📖<span class="navBadge" id="mStory"></span><i>스토리</i></button>
-      <button onclick="closeMenu();openChar()">🧍<i>캐릭터</i></button>
+      <button onclick="closeMenu();openScreen('bag')">🎒<i>가방</i></button>
       <button onclick="closeMenu();openFromHome('costume')">👗<i>코스튬</i></button>
-      <button onclick="closeMenu();openFromHome('hero')">🦸<i>영웅</i></button>
       <button onclick="closeMenu();openFromHome('gear')">⚔️<i>장비</i></button>
       <button onclick="closeMenu();openFromHome('shop')">🛒<i>상점</i></button>
-      <button onclick="closeMenu();enterHunt()">🔥<i>사냥터</i></button>
     </div>
   </div>
 </div>
@@ -2538,6 +2534,35 @@ function viewDungeon(){
   h += `<div class="card small">💡 재료는 영웅 속성별 <b>10레벨 초월</b>과 <b>SR → SSR → UR 등급업</b>에 사용돼요.</div>`;
   return h;
 }
+// ===== 가방 — 보유 재료/소환권 한눈에 =====
+function viewBag(){
+  const dayOf={}; WEEKDAY_DUNGEON.forEach(w=>dayOf[w.mat]=w.day);
+  let h=`<h3>🧪 초월 재료</h3>
+  <div class="card"><div class="row"><div style="font-size:24px">${HERO_DUST_ICON}</div>
+    <div style="flex:1;text-align:left"><b>영웅 결정</b><div class="small">영웅 분해로 획득 · 영웅 초월/등급업에 사용</div></div>
+    <b style="font-size:16px">${(G.heroDust||0).toLocaleString()}</b></div></div>`;
+  for(const k in MATERIALS){
+    const m=MATERIALS[k], n=G.mats[k]||0;
+    h+=`<div class="card" style="${n>0?'':'opacity:.55'}"><div class="row">
+      <div style="font-size:24px">${m.emoji}</div>
+      <div style="flex:1;text-align:left"><b>${m.name}</b><div class="small">${dayOf[k]||''} 던전에서 획득 · 해당 속성 영웅 초월에 사용</div></div>
+      <b style="font-size:16px">${n}</b></div></div>`;
+  }
+  h+=`<h3 style="margin-top:12px">🎟 소환권</h3>`;
+  const tk=G.selectTickets||{};
+  [['hero','🦸','영웅 UR 선택소환권'],['gear','⚔️','장비 UR 선택소환권'],['pet','🐾','펫 UR 선택소환권']].forEach(([k,ic,nm])=>{
+    const n=tk[k]||0;
+    h+=`<div class="card" style="${n>0?'':'opacity:.55'}"><div class="row"><div style="font-size:24px">${ic}</div>
+      <div style="flex:1;text-align:left"><b>${nm}</b><div class="small">소환 1000회마다 1장 · 원하는 UR을 골라서 획득</div></div>
+      <b style="font-size:16px">${n}</b></div></div>`;
+  });
+  h+=`<h3 style="margin-top:12px">🪙 기타</h3>
+  <div class="card"><div class="row"><div style="font-size:24px">🪙</div>
+    <div style="flex:1;text-align:left"><b>길드 코인</b><div class="small">길드 출석으로 획득</div></div>
+    <b style="font-size:16px">${(G.guild&&G.guild.coin)||0}</b></div></div>
+  <div class="card small">💡 부족할 때: 재료=🗓️요일던전 · 영웅 결정=영웅 분해 · 소환권=소환 누적</div>`;
+  return h;
+}
 function enterDungeon(){
   dungeonReset();
   if(G.dungeon.left<=0) return;
@@ -3122,11 +3147,11 @@ function updateHomeRes(){
   const a=attendClaimable()?1:0, mi=missionClaimable(), bo=bondBadge(),
         ma=mailUnread(), qu=questClaimable(), ac=achClaimable(), st=storyBadge();
   // 메뉴 항목 뱃지
-  setBadge('mAttend', a); setBadge('mMission', mi); setBadge('mBond', bo);
-  setBadge('mMail', ma); setBadge('mQuest', qu); setBadge('mAch', ac); setBadge('mStory', st);
-  setBadge('hStory', st); setBadge('hBond', bo);   // 홈 상단 바로가기 뱃지
-  // 메뉴 버튼 알림점(합계) + 던전 핫스팟
-  setBadge('menuDot', a+mi+bo+ma+qu+ac+st);
+  setBadge('mAttend', a); setBadge('mMission', mi);
+  setBadge('mMail', ma); setBadge('mQuest', qu); setBadge('mAch', ac);
+  setBadge('hStory', st); setBadge('hBond', bo);   // 교감/스토리 알림은 홈 상단 버튼에 표시
+  // 메뉴 버튼 알림점(메뉴 항목 합계만) + 던전 핫스팟
+  setBadge('menuDot', a+mi+ma+qu+ac);
   setBadge('hsDun', G.dungeon.left);
 }
 
