@@ -117,6 +117,17 @@
     text-shadow:0 2px 4px #000; animation:dmgFloat .7s ease-out forwards; }
   .dmg.crit { color:#ff7a95; font-size:30px; }
   @keyframes dmgFloat { 0%{opacity:1; transform:translateY(0) scale(1);} 30%{transform:translateY(-18px) scale(1.2);} 100%{opacity:0; transform:translateY(-66px) scale(1);} }
+  .tapHitFx { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:54px; height:54px; pointer-events:none; z-index:9; color:#ffe08a; animation:tapHitPop .42s ease-out forwards; }
+  .tapHitFx::before { content:'✦'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:38px; text-shadow:0 0 8px #fff1a8, 0 0 16px #ff8a00; }
+  .tapHitFx::after { content:''; position:absolute; left:50%; top:50%; width:42px; height:42px;
+    border:3px solid #ffe08a; border-radius:50%; transform:translate(-50%,-50%); box-shadow:0 0 12px #ffb74dcc; }
+  @keyframes tapHitPop {
+    0%{opacity:0; transform:translate(-50%,-50%) scale(.35) rotate(-18deg);}
+    35%{opacity:1; transform:translate(-50%,-50%) scale(1.12) rotate(8deg);}
+    100%{opacity:0; transform:translate(-50%,-50%) scale(1.75) rotate(24deg);}
+  }
 
   /* 하단 영웅 파티 */
   #heroRow { position:absolute; left:5%; top:47%; width:29%; height:46%; z-index:5; pointer-events:none; }
@@ -719,6 +730,7 @@ const G = {
   party: [],             // 전투 배치 영웅 uid 5칸
   gear: { 무기:0, 방어구:0, 악세:0 },  // 강화 단계
   tapPower: 1, autoPower: 1, autoSpeed: 1,  // 사냥 업그레이드 단계
+  critChance: 1, critDmgPower: 1, bossPower: 1, attrPower: 1,
   firstPayDone: false,
   adPass: false,               // 광고 스킵 패스(월 구독) 활성 여부
   adCd: { gold:0, gem:0, pull:0 }, // 보상형 광고 쿨다운(다시 가능 시각 ms)
@@ -1359,8 +1371,9 @@ function synergyInfo(){
 function synergyMult(){ return 1 + synergyInfo().bonus; }
 function guildMult(){ return (G.guild && G.guild.joined) ? 1.10 : 1; }  // 길드 가입 시 공격력 +10%
 function totalAtk(){ return Math.round((G.atk + heroAtkTotal() + gearAtkTotal()) * skinMult() * synergyMult() * petAtkMult() * guildMult()); }
-const HUNT_MAX_LEVEL = 500;
+const HUNT_MAX_LEVEL = 1000;
 const SPEED_MAX_LEVEL = 100;
+const SPECIAL_MAX_LEVEL = 50;
 function huntCost(base, level){ return Math.floor(base + Math.pow(level, 2) * base * 0.08); }
 function huntCostMany(base, level, maxLevel, amount){
   let total = 0, n = 0;
@@ -1370,10 +1383,24 @@ function huntCostMany(base, level, maxLevel, amount){
   }
   return {total, n};
 }
+function specialCost(level){ return Math.floor(25 + Math.pow(level, 1.7) * 8); }
+function specialCostMany(level, maxLevel, amount){
+  let total = 0, n = 0;
+  while(n < amount && level + n < maxLevel){
+    total += specialCost(level + n);
+    n++;
+  }
+  return {total, n};
+}
 function passMult(){ return G.adPass ? 1.5 : 1; }            // 광고 패스 자동사냥 1.5배
 function tapMult(){ return 1.5 * (1 + (G.tapPower-1)*0.10); } // 터치 공격력 배수
 function autoMult(){ return (1 + (G.autoPower-1)*0.08) * passMult(); }  // 자동 공격력 배수
 function autoInterval(){ return Math.max(100, 600 - (G.autoSpeed-1)*5); } // 공격속도 (ms)
+function huntCritBonus(){ return ((G.critChance||1)-1) * (0.50/(SPECIAL_MAX_LEVEL-1)); }
+function critDmgUpgradeMult(){ return 1 + ((G.critDmgPower||1)-1) * (1.00/(SPECIAL_MAX_LEVEL-1)); }
+function bossDmgMult(){ return isBoss ? 1 + ((G.bossPower||1)-1) * (1.00/(SPECIAL_MAX_LEVEL-1)) : 1; }
+function attrDmgMult(){ return 1 + ((G.attrPower||1)-1) * (0.75/(SPECIAL_MAX_LEVEL-1)); }
+function huntDamageMult(){ return bossDmgMult() * attrDmgMult(); }
 
 // ===== 몬스터 =====
 let isBoss = false;
@@ -1476,9 +1503,9 @@ function activeCls(){ const b=bestHero(); return b?heroCls(b):CLASSES.sword; }
 
 // isManual=true → 클릭 타격 (풀 데미지), false → 자동사냥 (자동 배수 적용)
 function attack(isManual){
-  let dmg = totalAtk() * (isManual ? tapMult() : autoMult());
-  const crit = Math.random() < (G.critRate + petCritBonus());
-  if(crit) dmg *= G.critDmg;
+  let dmg = totalAtk() * (isManual ? tapMult() : autoMult()) * huntDamageMult();
+  const crit = Math.random() < (G.critRate + petCritBonus() + huntCritBonus());
+  if(crit) dmg *= G.critDmg * critDmgUpgradeMult();
   dealDamage(dmg, crit);
   // 플레이어 돌진 모션
   const pl = document.getElementById('player');
@@ -1742,7 +1769,7 @@ function castSkill(name, color, fx, mult, multiHit, basePower){
     f.textContent=fx; f.style.left=(56+Math.random()*26)+'%'; f.style.top=(20+Math.random()*22)+'%';
     b.appendChild(f); setTimeout(()=>f.remove(),360);
   }, k*70);
-  const total = (basePower || totalAtk()) * mult;
+  const total = (basePower || totalAtk()) * mult * huntDamageMult();
   if(multiHit){ for(let i=0;i<6;i++) setTimeout(()=>dealDamage(total/6, true), i*60); }
   else { dealDamage(total*0.5, true); setTimeout(()=>dealDamage(total*0.5, true), 140); }
   setTimeout(()=>{ vignette(false); pl.classList.remove('cast'); }, 650);
@@ -3066,7 +3093,7 @@ function petAttack(){
   const proj=document.createElement('div'); proj.className='petProj'; proj.innerHTML=p.img ? `<img src="${p.img}${AV}" alt="${p.name}">` : p.emoji;
   proj.style.left='24%'; proj.style.top='54%'; b.appendChild(proj);
   proj.animate([{left:'24%',top:'54%',opacity:1},{left:'68%',top:'38%',opacity:1},{opacity:0}],{duration:320,easing:'ease-in'});
-  setTimeout(()=>{ proj.remove(); dealDamage(totalAtk()*0.4, false); }, 320);
+  setTimeout(()=>{ proj.remove(); dealDamage(totalAtk()*0.4*huntDamageMult(), false); }, 320);
 }
 
 // 홈/화면 상단 재화 표시 + 알림 뱃지
@@ -3132,13 +3159,37 @@ function viewHunt(){
   const tapMaxed = G.tapPower >= HUNT_MAX_LEVEL;
   const autoMaxed = G.autoPower >= HUNT_MAX_LEVEL;
   const speedMaxed = G.autoSpeed >= SPEED_MAX_LEVEL;
+  const critMaxed = G.critChance >= SPECIAL_MAX_LEVEL;
+  const critDmgMaxed = G.critDmgPower >= SPECIAL_MAX_LEVEL;
+  const bossMaxed = G.bossPower >= SPECIAL_MAX_LEVEL;
+  const attrMaxed = G.attrPower >= SPECIAL_MAX_LEVEL;
   const tapOne = huntCostMany(45, G.tapPower, HUNT_MAX_LEVEL, 1);
   const tapTen = huntCostMany(45, G.tapPower, HUNT_MAX_LEVEL, 10);
   const powOne = huntCostMany(55, G.autoPower, HUNT_MAX_LEVEL, 1);
   const powTen = huntCostMany(55, G.autoPower, HUNT_MAX_LEVEL, 10);
   const spdOne = huntCostMany(70, G.autoSpeed, SPEED_MAX_LEVEL, 1);
   const spdTen = huntCostMany(70, G.autoSpeed, SPEED_MAX_LEVEL, 10);
+  const critOne = specialCostMany(G.critChance, SPECIAL_MAX_LEVEL, 1);
+  const critTen = specialCostMany(G.critChance, SPECIAL_MAX_LEVEL, 10);
+  const critDmgOne = specialCostMany(G.critDmgPower, SPECIAL_MAX_LEVEL, 1);
+  const critDmgTen = specialCostMany(G.critDmgPower, SPECIAL_MAX_LEVEL, 10);
+  const bossOne = specialCostMany(G.bossPower, SPECIAL_MAX_LEVEL, 1);
+  const bossTen = specialCostMany(G.bossPower, SPECIAL_MAX_LEVEL, 10);
+  const attrOne = specialCostMany(G.attrPower, SPECIAL_MAX_LEVEL, 1);
+  const attrTen = specialCostMany(G.attrPower, SPECIAL_MAX_LEVEL, 10);
   const coin = '<span class="goldIcon"></span>';
+  const gem = '💎';
+  const pct = v => Math.round(v*100);
+  const specialCard = (type, icon, title, lv, maxed, one, ten, nowText, nextText) => `
+    <div class="card"><div class="row">
+      <div style="font-size:26px">${icon}</div>
+      <div style="flex:1">
+        <div style="font-weight:bold">${title} Lv.${lv} / ${SPECIAL_MAX_LEVEL}</div>
+        <div class="small">${nowText}${maxed?' · 최대 레벨':` → ${nextText}`}</div>
+      </div>
+      <button class="btn gem" onclick="upHunt('${type}',1)" ${(maxed||G.gem<one.total)?'disabled':''}>${maxed?'MAX':gem+one.total.toLocaleString()+' +1'}</button>
+      <button class="btn gem" onclick="upHunt('${type}',10)" ${(maxed||ten.n<=0||G.gem<ten.total)?'disabled':''}>${gem}${ten.total.toLocaleString()} +10</button>
+    </div></div>`;
   const wallTip = G.wallStage ? `<div class="card" style="border-color:#ff8aa0;background:linear-gradient(160deg,#3a1d34,#1b1427)">
       <div style="font-weight:900;color:#ffd866">스테이지 ${G.wallStage}에서 전멸했어요</div>
       <div class="small" style="margin-top:4px">현재는 이전 스테이지를 반복 클리어합니다. 공격력/자동공격을 강화하거나 소환상점에서 영웅을 늘려 다시 도전하세요.</div>
@@ -3172,7 +3223,21 @@ function viewHunt(){
       </div>
       <button class="btn gold" onclick="upHunt('speed',1)" ${(speedMaxed||G.gold<spdOne.total)?'disabled':''}>${speedMaxed?'MAX':coin+spdOne.total.toLocaleString()+' +1'}</button>
       <button class="btn gold" onclick="upHunt('speed',10)" ${(speedMaxed||spdTen.n<=0||G.gold<spdTen.total)?'disabled':''}>${coin}${spdTen.total.toLocaleString()} +10</button>
-    </div></div>`;
+    </div></div>
+    <h3>✨ 특수 강화</h3>
+    <div class="card small">특수 강화는 보석으로 올릴 수 있고 Lv.${SPECIAL_MAX_LEVEL}까지 성장합니다.</div>
+    ${specialCard('crit', '🎯', '치명타확률', G.critChance, critMaxed, critOne, critTen,
+      `추가 치명타확률 +${pct(huntCritBonus())}%`,
+      `+${pct(G.critChance * (0.50/(SPECIAL_MAX_LEVEL-1)))}%`)}
+    ${specialCard('critDmg', '💥', '치명타공격력', G.critDmgPower, critDmgMaxed, critDmgOne, critDmgTen,
+      `치명타 피해 x${critDmgUpgradeMult().toFixed(2)}`,
+      `x${(1 + G.critDmgPower * (1.00/(SPECIAL_MAX_LEVEL-1))).toFixed(2)}`)}
+    ${specialCard('boss', '👑', '보스공격력', G.bossPower, bossMaxed, bossOne, bossTen,
+      `보스에게 피해 +${pct(bossDmgMult()-1)}%`,
+      `+${pct(G.bossPower * (1.00/(SPECIAL_MAX_LEVEL-1)))}%`)}
+    ${specialCard('attr', '🌈', '속성공격력', G.attrPower, attrMaxed, attrOne, attrTen,
+      `전체 피해 +${pct(attrDmgMult()-1)}%`,
+      `+${pct(G.attrPower * (0.75/(SPECIAL_MAX_LEVEL-1)))}%`)}`;
 }
 function upHunt(type, amount=1){
   if(type==='tap'){
@@ -3191,6 +3256,13 @@ function upHunt(type, amount=1){
     if(pack.n<=0 || G.gold<pack.total) return;
     G.gold-=pack.total; G.autoSpeed += pack.n;
     restartAuto();  // 속도 바뀌면 타이머 재시작
+  } else if(['crit','critDmg','boss','attr'].includes(type)){
+    const keyMap = {crit:'critChance', critDmg:'critDmgPower', boss:'bossPower', attr:'attrPower'};
+    const key = keyMap[type];
+    if(G[key]>=SPECIAL_MAX_LEVEL) return;
+    const pack = specialCostMany(G[key], SPECIAL_MAX_LEVEL, amount);
+    if(pack.n<=0 || G.gem<pack.total) return;
+    G.gem-=pack.total; G[key] += pack.n;
   }
   refreshTop(); renderPanel();
 }
