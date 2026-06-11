@@ -182,7 +182,9 @@
   #panel .huntPowerCard .powerDesc { margin-top:4px; line-height:1.45; overflow-wrap:anywhere; }
   #panel .huntPowerCard .upgradeBtns { flex:0 0 98px; display:flex; flex-direction:column; gap:5px; margin-left:auto; }
   #panel .huntPowerCard .upgradeBtns .btn { flex:0 0 auto; width:98px; min-width:0; padding:6px 7px; font-size:10.5px; white-space:nowrap; line-height:1.2; }
-  #panel .upgradeCard.specialUpgradeCard .row .btn { flex:0 0 104px; min-width:104px; max-width:104px; padding:7px 8px; font-size:11px; }
+  #panel .specialUpgradeCard .row { align-items:flex-start; flex-wrap:nowrap; gap:8px; }
+  #panel .specialUpgradeCard .specialBtns { flex:0 0 104px; display:flex; flex-direction:column; gap:5px; margin-left:auto; }
+  #panel .specialUpgradeCard .specialBtns .btn { flex:0 0 auto; width:104px; min-width:0; padding:7px 8px; font-size:11px; white-space:nowrap; }
   .huntHeroList { max-height:190px; overflow-y:auto; padding-right:3px; }
   .huntHeroList::-webkit-scrollbar { width:6px; }
   .huntHeroList::-webkit-scrollbar-thumb { background:#3a3f70; border-radius:4px; }
@@ -3225,8 +3227,10 @@ function viewHunt(){
         <div style="font-weight:bold">${title} Lv.${lv} / ${SPECIAL_MAX_LEVEL}</div>
         <div class="small">${nowText}${maxed?' · 최대 레벨':` → ${nextText}`}</div>
       </div>
-      <button class="btn gem" onclick="upHunt('${type}',1)" ${(maxed||G.gem<one.total)?'disabled':''}>${maxed?'MAX':gem+one.total.toLocaleString()+' +1'}</button>
-      <button class="btn gem" onclick="upHunt('${type}',10)" ${(maxed||ten.n<=0||G.gem<ten.total)?'disabled':''}>${gem}${ten.total.toLocaleString()} +10</button>
+      <div class="specialBtns">
+        <button class="btn gem" onclick="upHunt('${type}',1)" ${(maxed||G.gem<one.total)?'disabled':''}>${maxed?'MAX':gem+one.total.toLocaleString()+' +1'}</button>
+        <button class="btn gem" onclick="upHunt('${type}',10)" ${(maxed||ten.n<=0||G.gem<ten.total)?'disabled':''}>${gem}${ten.total.toLocaleString()} +10</button>
+      </div>
     </div></div>`;
   const wallTip = G.wallStage ? `<div class="card" style="border-color:#ff8aa0;background:linear-gradient(160deg,#3a1d34,#1b1427)">
       <div style="font-weight:900;color:#ffd866">스테이지 ${G.wallStage}에서 전멸했어요</div>
