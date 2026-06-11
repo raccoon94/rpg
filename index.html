@@ -3241,6 +3241,17 @@ function gearRewardSummary(got){
   const summary = slots.map(s=>`${s} +${got.filter(x=>x.slot===s).reduce((a,b)=>a+b.up,0)}`).filter(t=>!t.endsWith('+0')).join('<br>');
   return {best, summary};
 }
+function gearIcon(slot){ return slot==='무기'?'⚔️':slot==='방어구'?'🛡️':'💍'; }
+function gearRewardGrid(got){
+  return `<div class="rewardGrid">${got.map(g=>`<div class="rewardItem" style="border-color:${gradeColorOf(g.grade)}">
+    <div class="hp-card g-bg-${g.grade}" style="width:58px;height:58px;border-color:${gradeColorOf(g.grade)}">
+      <div class="hp-shine"></div><div class="hp-grade txt-${g.grade}" style="font-size:9px">${g.grade}</div>
+      <div class="hp-emoji" style="font-size:28px">${gearIcon(g.slot)}</div>
+    </div>
+    <div class="name txt-${g.grade}">[${g.grade}] ${g.slot}</div>
+    <div class="sub">+${g.up}</div>
+  </div>`).join('')}</div>`;
+}
 function summonGear(count=1){
   const cost = count===11 ? 2000 : 200;
   if(G.gem<cost){ alert('💎 보석이 부족해요!'); return; }
@@ -3257,7 +3268,7 @@ function summonGear(count=1){
   addSummonPity('gear', count);
   refreshTop(); renderPanel();
   const {best, summary} = gearRewardSummary(got);
-  popReward('⚔️ 장비 소환!', `<div style="font-size:44px">🧰</div><div class="txt-${best.grade}" style="font-weight:bold">최고 등급 ${best.grade}</div><div style="font-weight:bold;margin-top:6px">${summary}</div>`);
+  popReward('⚔️ 장비 소환!', `${gearRewardGrid(got)}<div class="small" style="margin-top:8px">최고 등급 ${best.grade}</div><div style="font-weight:bold;margin-top:6px">${summary}</div>`);
   showPityToast('gear');
 }
 function summonGearShop(count=1){
@@ -3276,7 +3287,7 @@ function summonGearShop(count=1){
   addSummonPity('gear', count);
   refreshTop(); renderPanel();
   const {best, summary} = gearRewardSummary(got);
-  popReward('⚔️ 장비 소환!', `<div style="font-size:44px">🧰</div><div class="txt-${best.grade}" style="font-weight:bold">최고 등급 ${best.grade}</div><div style="font-weight:bold;margin-top:6px">${summary}</div>`);
+  popReward('⚔️ 장비 소환!', `${gearRewardGrid(got)}<div class="small" style="margin-top:8px">최고 등급 ${best.grade}</div><div style="font-weight:bold;margin-top:6px">${summary}</div>`);
   showPityToast('gear');
 }
 function viewGacha(){
