@@ -78,7 +78,9 @@
   .lvtag { margin-top:6px; font-size:11px; color:#ffd866; font-weight:bold; text-shadow:0 1px 2px #000; }
   #petCompanion { position:absolute; left:258px; bottom:145px; font-size:34px; z-index:7;
     animation:bob 2s ease-in-out infinite; filter:drop-shadow(0 3px 4px #0008); }
+  #petCompanion img { width:54px; height:54px; object-fit:contain; display:block; }
   .petProj { position:absolute; font-size:22px; z-index:6; pointer-events:none; filter:drop-shadow(0 0 6px #ffd86688); }
+  .petProj img { width:30px; height:30px; object-fit:contain; display:block; }
 
   /* 몬스터 */
   #enemy { position:relative; display:flex; flex-direction:column; align-items:center; }
@@ -215,6 +217,7 @@
     box-shadow:0 3px 10px #0006, inset 0 0 18px #0004; }
   .hp-card .hp-emoji { filter:drop-shadow(0 3px 4px #0008); z-index:2; }
   .hp-card .heroListImg { width:108%; height:108%; object-fit:contain; z-index:2; filter:drop-shadow(0 3px 4px #0008); }
+  .hp-card .petListImg { width:112%; height:112%; object-fit:contain; z-index:2; filter:drop-shadow(0 3px 4px #0008); }
   .hp-card .hp-grade { position:absolute; top:2px; left:4px; font-weight:900; font-size:11px; text-shadow:0 1px 2px #000; z-index:3; }
   .hp-card .hp-cls { position:absolute; top:2px; right:4px; font-size:12px; z-index:3; text-shadow:0 1px 2px #000; }
   .hp-card .hp-stars { position:absolute; bottom:1px; left:0; right:0; text-align:center; font-size:10px; color:#fff; text-shadow:0 1px 2px #000; z-index:3; letter-spacing:-1px; }
@@ -688,8 +691,10 @@ const G = {
   firstPayDone: false,
   adPass: false,               // 광고 스킵 패스(월 구독) 활성 여부
   adCd: { gold:0, gem:0, pull:0 }, // 보상형 광고 쿨다운(다시 가능 시각 ms)
-  pity: 0,                     // 천장 카운터 (200 도달 시 SSR 확정)
+  pity: 0,                     // 영웅 소환 선택권 진행도(구버전 호환)
   totalPulls: 0,              // 누적 소환 횟수
+  summonPity: { hero:0, gear:0, pet:0 }, // 1000회마다 UR 선택소환권
+  selectTickets: { hero:0, gear:0, pet:0 },
   hero: 'lin',                 // 착용 영웅
   heroCostume: {},             // 영웅별 착용 코스튬 {heroId: costumeId}
   ownedCostumes: ['lin_default','rubia_default','sapphira_default','silvia_default'], // 보유 코스튬(기본은 기본보유)
