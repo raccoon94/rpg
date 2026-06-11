@@ -2769,6 +2769,14 @@ function petRewardHtml(pet){
       <div class="hp-shine"></div><div class="hp-grade txt-${pet.grade}">${pet.grade}</div>${petVisual(pet)}
     </div><div class="txt-${pet.grade}" style="font-weight:bold;font-size:18px">[${pet.grade}] ${pet.name}</div>`;
 }
+function petRewardGrid(got){
+  return `<div class="rewardGrid">${got.map(p=>`<div class="rewardItem" style="border-color:${gradeColorOf(p.grade)}">
+    <div class="hp-card g-bg-${p.grade}" style="width:58px;height:58px;border-color:${gradeColorOf(p.grade)}">
+      <div class="hp-shine"></div><div class="hp-grade txt-${p.grade}" style="font-size:9px">${p.grade}</div>${petVisual(p)}
+    </div>
+    <div class="name txt-${p.grade}">[${p.grade}] ${p.name}</div>
+  </div>`).join('')}</div>`;
+}
 function summonPet(){
   const cost=200;
   if(G.gem<cost){ alert('💎 보석이 부족해요!'); return; }
@@ -2779,7 +2787,7 @@ function summonPet(){
   G.pets.push(pet);
   if(G.activePet<0) G.activePet=G.pets.length-1; // 첫 펫 자동 장착
   refreshTop(); currentScreen ? renderScreen() : renderPanel(); updatePet();
-  popReward('🐾 펫 획득!', `${petRewardHtml(pet)}<div class="small">${petBuffText(pet)}</div>`);
+  popReward('🐾 펫 획득!', `${petRewardHtml(pet)}`);
   showPityToast('pet');
 }
 function summonPetShop(count=1){
@@ -2802,8 +2810,8 @@ function summonPetShop(count=1){
   refreshTop(); updatePet();
   if(currentScreen) renderScreen(); else renderPanel();
   const best = got.reduce((a,b)=> GRADE_RANK[b.grade]>GRADE_RANK[a.grade]?b:a);
-  popReward('🐾 펫 소환!', `${petRewardHtml(best)}
-    <div class="small">총 ${got.length}마리 소환 · 최고 등급 ${best.grade}</div>`);
+  popReward('🐾 펫 소환!', `${petRewardGrid(got)}
+    <div class="small" style="margin-top:8px">총 ${got.length}마리 소환 · 최고 등급 ${best.grade}</div>`);
   showPityToast('pet');
 }
 function equipPet(i){ G.activePet=i; refreshTop(); currentScreen ? renderScreen() : renderPanel(); updatePet(); }
