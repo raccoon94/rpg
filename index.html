@@ -2582,9 +2582,8 @@ function offlineRewardCheck(){
   const elapsed = Math.min(43200, Math.floor((Date.now()-G.lastSeen)/1000)); // 최대 12시간
   if(elapsed < 60) return;                         // 1분 미만이면 스킵
   const kills = Math.floor(elapsed/3);             // 약 3초당 1처치 가정
-  const gold = Math.floor(5*Math.pow(1.2,G.stage-1)) * kills;
-  const exp = G.stage * kills;
-  pendingOffline = { elapsed, gold, exp };
+  const gold = Math.floor((Math.floor(5*Math.pow(1.2,G.stage-1)) * kills) / 50);
+  pendingOffline = { elapsed, gold };
 }
 function fmtDur(sec){ const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60); return (h?h+'시간 ':'')+m+'분'; }
 function showOfflinePopup(){
@@ -2592,10 +2591,9 @@ function showOfflinePopup(){
   document.querySelector('#popup>button').style.display='none';
   document.getElementById('popTitle').textContent = '💤 방치 보상';
   document.getElementById('popContent').innerHTML =
-    `<div class="small">${fmtDur(o.elapsed)} 동안 자리를 비웠어요</div>
+     `<div class="small">${fmtDur(o.elapsed)} 동안 자리를 비웠어요</div>
      <div style="font-size:30px;margin:8px 0">💤</div>
      <div style="font-weight:bold"><span class="goldIcon"></span>${o.gold.toLocaleString()}</div>
-     <div class="small">경험치 ${o.exp.toLocaleString()}</div>
      <div style="display:flex;gap:8px;margin-top:14px">
        <button class="btn" style="flex:1" onclick="claimOffline(1)">받기</button>
        <button class="btn gem" style="flex:1" onclick="claimOfflineAd()">📺 2배 받기</button>
@@ -2605,8 +2603,7 @@ function showOfflinePopup(){
 function claimOffline(mult){
   const o = pendingOffline; if(!o) return;
   pendingOffline = null;
-  G.gold += o.gold*mult; G.exp += o.exp*mult;
-  while(G.exp >= G.plv*20){ G.exp -= G.plv*20; G.plv++; G.atk += 5; }
+  G.gold += o.gold*mult;
   document.getElementById('overlay').style.display='none';
   document.querySelector('#popup>button').style.display='';
   refreshTop();
