@@ -343,6 +343,18 @@
   #summonShopBg { position:absolute; inset:0; background:url('assets/bg/summon_shop_20260611.png?v=1') center/cover no-repeat; }
   .summonHit { position:absolute; z-index:2; border:0; background:transparent; border-radius:18px; cursor:pointer; padding:0; }
   .summonHit:active { background:#ffffff22; box-shadow:0 0 20px #ffd86688 inset; }
+  #summonShopView[data-mode="cash"] .summonHero1,
+  #summonShopView[data-mode="cash"] .summonHero11,
+  #summonShopView[data-mode="cash"] .summonGear1,
+  #summonShopView[data-mode="cash"] .summonGear11,
+  #summonShopView[data-mode="cash"] .summonPet1,
+  #summonShopView[data-mode="cash"] .summonPet11,
+  #summonShopView[data-mode="package"] .summonHero1,
+  #summonShopView[data-mode="package"] .summonHero11,
+  #summonShopView[data-mode="package"] .summonGear1,
+  #summonShopView[data-mode="package"] .summonGear11,
+  #summonShopView[data-mode="package"] .summonPet1,
+  #summonShopView[data-mode="package"] .summonPet11 { display:none; }
   .summonBackHit { left:1.2%; top:2.2%; width:12.5%; height:9%; }
   .summonHero1 { left:14.4%; top:64.8%; width:10.2%; height:6.2%; }
   .summonHero11 { left:25.3%; top:64.8%; width:11.3%; height:6.2%; }
@@ -350,8 +362,13 @@
   .summonGear11 { left:50.3%; top:64.8%; width:11.3%; height:6.2%; }
   .summonPet1 { left:64.2%; top:64.8%; width:10.2%; height:6.2%; }
   .summonPet11 { left:75.2%; top:64.8%; width:11.3%; height:6.2%; }
-  .summonPackageHit { left:22.5%; top:91%; width:18.8%; height:7%; }
-  .summonGemHit { left:58.8%; top:91%; width:17.7%; height:7%; }
+  .summonPackageHit { left:22.5%; top:91%; width:18.8%; height:7%; z-index:5; }
+  .summonMainHit { left:41.6%; top:91%; width:17%; height:7%; z-index:5; }
+  .summonGemHit { left:58.8%; top:91%; width:17.7%; height:7%; z-index:5; }
+  #summonShopPanel { position:absolute; left:8%; right:8%; top:15%; bottom:12%; z-index:3; display:none;
+    overflow-y:auto; padding:12px; border-radius:18px; background:linear-gradient(180deg,#261506ee,#140b03ee);
+    border:2px solid #9c642a; box-shadow:0 12px 28px #0009, inset 0 1px 0 #ffffff26; }
+  #summonShopPanel .card { background:linear-gradient(160deg,#3a210d,#221006); border-color:#a86c2f; }
   #charBtn { position:absolute; bottom:14px; left:50%; transform:translateX(-50%); z-index:4;
     background:linear-gradient(160deg,#3b4fe0,#2a2d80); color:#fff; border:1px solid #5b6bd0; padding:10px 20px;
     border-radius:20px; font-weight:bold; font-size:13px; box-shadow:0 3px 12px #00000066; }
@@ -591,6 +608,7 @@
 
 <div id="summonShopView">
   <div id="summonShopBg"></div>
+  <div id="summonShopPanel"></div>
   <button class="summonHit summonBackHit" onclick="closeSummonShopView()" title="돌아가기"></button>
   <button class="summonHit summonHero1" onclick="summonHero(1)" title="영웅 1회 소환"></button>
   <button class="summonHit summonHero11" onclick="summonHero(11)" title="영웅 11회 소환"></button>
@@ -598,8 +616,9 @@
   <button class="summonHit summonGear11" onclick="summonGearShop(11)" title="장비 11회 소환"></button>
   <button class="summonHit summonPet1" onclick="summonPetShop(1)" title="펫 1회 소환"></button>
   <button class="summonHit summonPet11" onclick="summonPetShop(11)" title="펫 11회 소환"></button>
-  <button class="summonHit summonPackageHit" onclick="firstPay()" title="패키지"></button>
-  <button class="summonHit summonGemHit" onclick="closeSummonShopView();openFromHome('shop')" title="재화"></button>
+  <button class="summonHit summonPackageHit" onclick="setSummonShopMode('package')" title="패키지"></button>
+  <button class="summonHit summonMainHit" onclick="setSummonShopMode('summon')" title="소환"></button>
+  <button class="summonHit summonGemHit" onclick="setSummonShopMode('cash')" title="재화"></button>
 </div>
 
 <div id="charView">
@@ -1820,13 +1839,15 @@ function claimSelectSummon(kind, index){
 
 // ===== 화려한 소환 연출 =====
 const GRADE_RANK = {N:0,R:1,SR:2,SSR:3,UR:4};
-function showSummonAnim(results){
+function showSummonAnim(results, type='hero'){
   const best = results.reduce((a,b)=> GRADE_RANK[b.grade]>GRADE_RANK[a.grade]?b:a);
   const ov = document.getElementById('summonOverlay');
   const rays = document.getElementById('summonRays');
   const flash = document.getElementById('summonFlash');
+  const title = document.getElementById('summonTitle');
   const cardWrap = document.getElementById('summonCards');
   const accent = {N:'#9ca3af',R:'#60a5fa',SR:'#c084fc',SSR:'#ffc23a',UR:'#ff8df0'}[best.grade];
+  title.textContent = type==='gear' ? '⚔️ 장비 소환 ⚔️' : type==='pet' ? '🐾 펫 소환 🐾' : '✨ 영웅 소환 ✨';
   rays.style.color = accent;
   flash.style.background = `radial-gradient(circle, ${accent}, transparent 60%)`;
   cardWrap.innerHTML = '';
@@ -1843,12 +1864,31 @@ function showSummonAnim(results){
       const c = document.createElement('div');
       c.className = 'summonCard';
       c.style.animationDelay = (i*0.07)+'s';
-      c.innerHTML = heroPortrait(h, results.length>1?'sm':'lg');
+      c.innerHTML = summonResultPortrait(h, type, results.length>1?'sm':'lg');
       cardWrap.appendChild(c);
     });
   }, 420);
 }
 function closeSummon(){ document.getElementById('summonOverlay').style.display='none'; }
+function summonResultPortrait(item, type, size){
+  if(type==='gear'){
+    const dim = size==='lg' ? 120 : 64;
+    const big = size==='lg';
+    return `<div class="hp-card g-bg-${item.grade}" style="width:${dim}px;height:${dim}px;border-color:${gradeColorOf(item.grade)}">
+        <div class="hp-shine"></div><div class="hp-grade txt-${item.grade}">${item.grade}</div>
+        <div class="hp-emoji" style="font-size:${big?58:30}px">${gearIcon(item.slot)}</div>
+      </div>${big?`<div style="margin-top:10px;font-weight:bold;font-size:18px" class="txt-${item.grade}">[${item.grade}] ${item.slot}</div>
+      <div class="small">강화 +${item.up}</div>`:''}`;
+  }
+  if(type==='pet'){
+    const dim = size==='lg' ? 120 : 64;
+    const big = size==='lg';
+    return `<div class="hp-card g-bg-${item.grade}" style="width:${dim}px;height:${dim}px;border-color:${gradeColorOf(item.grade)}">
+        <div class="hp-shine"></div><div class="hp-grade txt-${item.grade}">${item.grade}</div>${petVisual(item)}
+      </div>${big?`<div style="margin-top:10px;font-weight:bold;font-size:18px" class="txt-${item.grade}">[${item.grade}] ${item.name}</div>`:''}`;
+  }
+  return heroPortrait(item, size);
+}
 
 // ===== 영웅 카드(디자인) =====
 // size: 'lg' 대형 / 'sm' 그리드 / 'mini' 전투 슬롯
@@ -2206,6 +2246,7 @@ function openSummonShopView(){
   closeMenu(); closeScreen();
   document.getElementById('charView').style.display='none';
   document.getElementById('summonShopView').style.display='block';
+  setSummonShopMode('summon');
   updateTabsVisibility();
 }
 function closeSummonShopView(){
@@ -2213,6 +2254,64 @@ function closeSummonShopView(){
   renderHome();
   document.getElementById('home').style.display='flex';
   updateTabsVisibility();
+}
+function setSummonShopMode(mode){
+  const view = document.getElementById('summonShopView');
+  const panel = document.getElementById('summonShopPanel');
+  if(!view || !panel) return;
+  view.dataset.mode = mode;
+  if(mode==='summon'){
+    panel.style.display='none';
+    panel.innerHTML='';
+    return;
+  }
+  panel.style.display='block';
+  panel.innerHTML = mode==='package' ? viewSummonPackageShop() : viewSummonCashShop();
+}
+function viewSummonPackageShop(){
+  const first = G.firstPayDone
+    ? `<div class="card" style="border-color:#3be38b"><b>첫 결제 패키지 수령 완료</b><div class="small">SR 카엘과 보석 보상을 이미 받았어요.</div></div>`
+    : `<div class="card" style="border-color:#ffb74d"><div class="row">
+        <div style="font-size:34px">🎁</div>
+        <div style="flex:1"><b>첫 결제 패키지</b><div class="small">SR 카엘 + 💎2,000</div></div>
+        <button class="btn gem" onclick="firstPay();setSummonShopMode('package')">₩1,100</button>
+      </div></div>`;
+  const pass = G.adPass
+    ? `<div class="card" style="border-color:#7c3bff"><b class="txt-SR">광고 스킵 패스 이용 중</b><div class="small">광고 보상 즉시 수령 · 자동사냥 1.5배</div></div>`
+    : `<div class="card"><div class="row">
+        <div style="font-size:34px">✨</div>
+        <div style="flex:1"><b>광고 스킵 패스</b><div class="small">광고 없이 즉시 보상 + 자동사냥 1.5배</div></div>
+        <button class="btn" onclick="buyAdPass();setSummonShopMode('package')">월 ₩4,900</button>
+      </div></div>`;
+  return `<h3>🎁 패키지 상점</h3>${first}${pass}
+    <div class="card"><div class="row">
+      <div style="font-size:34px">💎</div>
+      <div style="flex:1"><b>성장 패키지</b><div class="small">💎3,000 + <span class="goldIcon"></span>100,000</div></div>
+      <button class="btn gem" onclick="G.gem+=3000;G.gold+=100000;refreshTop();setSummonShopMode('package')">₩19,900</button>
+    </div></div>`;
+}
+function viewSummonCashShop(){
+  return `<h3>💎 재화 상점</h3>
+    <div class="card"><div class="row">
+      <div style="font-size:34px"><span class="goldIcon"></span></div>
+      <div style="flex:1"><b>골드 보급</b><div class="small">게임 재화 골드 +100,000</div></div>
+      <button class="btn gold" onclick="G.gold+=100000;refreshTop();setSummonShopMode('cash')">무료</button>
+    </div></div>
+    <div class="card"><div class="row">
+      <div style="font-size:34px">💎</div>
+      <div style="flex:1"><b>보석 1,000</b><div class="small">소환과 강화에 사용하는 보석</div></div>
+      <button class="btn gem" onclick="G.gem+=1000;refreshTop();setSummonShopMode('cash')">₩9,900</button>
+    </div></div>
+    <div class="card"><div class="row">
+      <div style="font-size:34px">💎</div>
+      <div style="flex:1"><b>보석 3,000</b><div class="small">11연 소환용 보석 묶음</div></div>
+      <button class="btn gem" onclick="G.gem+=3000;refreshTop();setSummonShopMode('cash')">₩27,000</button>
+    </div></div>
+    <div class="card"><div class="row">
+      <div style="font-size:34px">📺</div>
+      <div style="flex:1"><b>광고 보석</b><div class="small">광고 보상으로 💎30 획득</div></div>
+      <button class="btn gem" onclick="watchAd('gem');setTimeout(()=>setSummonShopMode('cash'),50)" ${adReady('gem')?'':'disabled'}>${G.adPass?'즉시 받기':(adReady('gem')?'광고 보기':adRemain('gem')+'초')}</button>
+    </div></div>`;
 }
 function openChar(){ renderChar(); document.getElementById('charView').style.display='block'; updateTabsVisibility(); }
 function closeChar(){ document.getElementById('charView').style.display='none'; updateTabsVisibility(); }
@@ -2787,7 +2886,7 @@ function summonPet(){
   G.pets.push(pet);
   if(G.activePet<0) G.activePet=G.pets.length-1; // 첫 펫 자동 장착
   refreshTop(); currentScreen ? renderScreen() : renderPanel(); updatePet();
-  popReward('🐾 펫 획득!', `${petRewardHtml(pet)}`);
+  showSummonAnim([pet], 'pet');
   showPityToast('pet');
 }
 function summonPetShop(count=1){
@@ -2809,9 +2908,7 @@ function summonPetShop(count=1){
   if(G.activePet<0) G.activePet=0;
   refreshTop(); updatePet();
   if(currentScreen) renderScreen(); else renderPanel();
-  const best = got.reduce((a,b)=> GRADE_RANK[b.grade]>GRADE_RANK[a.grade]?b:a);
-  popReward('🐾 펫 소환!', `${petRewardGrid(got)}
-    <div class="small" style="margin-top:8px">총 ${got.length}마리 소환 · 최고 등급 ${best.grade}</div>`);
+  showSummonAnim(got, 'pet');
   showPityToast('pet');
 }
 function equipPet(i){ G.activePet=i; refreshTop(); currentScreen ? renderScreen() : renderPanel(); updatePet(); }
@@ -3267,8 +3364,7 @@ function summonGear(count=1){
   }
   addSummonPity('gear', count);
   refreshTop(); renderPanel();
-  const {best, summary} = gearRewardSummary(got);
-  popReward('⚔️ 장비 소환!', `${gearRewardGrid(got)}<div class="small" style="margin-top:8px">최고 등급 ${best.grade}</div><div style="font-weight:bold;margin-top:6px">${summary}</div>`);
+  showSummonAnim(got, 'gear');
   showPityToast('gear');
 }
 function summonGearShop(count=1){
@@ -3286,8 +3382,7 @@ function summonGearShop(count=1){
   }
   addSummonPity('gear', count);
   refreshTop(); renderPanel();
-  const {best, summary} = gearRewardSummary(got);
-  popReward('⚔️ 장비 소환!', `${gearRewardGrid(got)}<div class="small" style="margin-top:8px">최고 등급 ${best.grade}</div><div style="font-weight:bold;margin-top:6px">${summary}</div>`);
+  showSummonAnim(got, 'gear');
   showPityToast('gear');
 }
 function viewGacha(){
