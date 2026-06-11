@@ -787,7 +787,7 @@ function skinVisual(skin, px){
   return `<img src="${skin.img}${AV}" alt="" style="width:${px}px;height:${px}px;object-fit:contain;vertical-align:middle"
     onerror="this.onerror=null;this.outerHTML='<span style=&quot;font-size:${Math.round(px*0.8)}px&quot;>${safe}</span>'">`;
 }
-const PITY_MAX = 200;          // 천장
+const PITY_MAX = 1000;         // 1000회마다 UR 선택소환권
 const GRADE_STARS = {N:1, R:2, SR:3, SSR:5, UR:6};
 const GRADE_GRAD = {           // 등급별 배경 그라데이션
   N:  'linear-gradient(160deg,#7b8494,#3f4654)',
@@ -1142,19 +1142,66 @@ const CHAR_ART = { 린:'assets/char/base/lin_base.png', 루비아:'assets/char/b
 function charArt(name){ return CHAR_ART[name] || ('assets/char/'+encodeURIComponent(name)+'.png'); }
 // ===== 펫 =====
 const PET_POOL = [
-  {name:'불꽃 정령', emoji:'🔥', buff:'atk'},  {name:'바람 까마귀', emoji:'🐦‍⬛', buff:'atk'},
-  {name:'서리 늑대', emoji:'🐺', buff:'crit'}, {name:'황금 두꺼비', emoji:'🐸', buff:'gold'},
-  {name:'빛 나비', emoji:'🦋', buff:'atk'},    {name:'그림자 고양이', emoji:'🐈', buff:'crit'},
-  {name:'아기 용', emoji:'🐲', buff:'atk'},     {name:'유니콘', emoji:'🦄', buff:'gold'},
+  {name:'아기 고양이', emoji:'🐱', buff:'gold', grade:'N', img:'assets/pet/pet_n_cat.png'},
+  {name:'아기 토끼', emoji:'🐰', buff:'hp', grade:'N', img:'assets/pet/pet_n_rabbit.png'},
+  {name:'아기 부엉이', emoji:'🦉', buff:'magic', grade:'N', img:'assets/pet/pet_n_owl.png'},
+  {name:'아기 다람쥐', emoji:'🐿️', buff:'def', grade:'N', img:'assets/pet/pet_n_squirrel.png'},
+  {name:'아기 슬라임', emoji:'💧', buff:'heal', grade:'N', img:'assets/pet/pet_n_slime.png'},
+
+  {name:'청동 고양이', emoji:'🐱', buff:'gold', grade:'R', img:'assets/pet/pet_n_cat.png'},
+  {name:'초록 토끼', emoji:'🐰', buff:'hp', grade:'R', img:'assets/pet/pet_n_rabbit.png'},
+  {name:'별모자 부엉이', emoji:'🦉', buff:'magic', grade:'R', img:'assets/pet/pet_n_owl.png'},
+  {name:'방패 다람쥐', emoji:'🐿️', buff:'def', grade:'R', img:'assets/pet/pet_n_squirrel.png'},
+  {name:'물방울 슬라임', emoji:'💧', buff:'heal', grade:'R', img:'assets/pet/pet_n_slime.png'},
+
+  {name:'기계 골렘', emoji:'🤖', buff:'def', grade:'SR', img:'assets/pet/pet_sr_golem.png'},
+  {name:'그림자 박쥐', emoji:'🦇', buff:'crit', grade:'SR', img:'assets/pet/pet_sr_bat.png'},
+  {name:'아쿠아 해달', emoji:'🦦', buff:'heal', grade:'SR', img:'assets/pet/pet_sr_otter.png'},
+  {name:'암석 사마귀', emoji:'🦂', buff:'atk', grade:'SR', img:'assets/pet/pet_sr_scorpion.png'},
+  {name:'요정 나비', emoji:'🦋', buff:'speed', grade:'SR', img:'assets/pet/pet_sr_butterfly.png'},
+  {name:'번개 모요', emoji:'🦊', buff:'atk', grade:'SR', img:'assets/pet/pet_sr_fox.png'},
+  {name:'숲의 고슴도치', emoji:'🦔', buff:'hp', grade:'SR', img:'assets/pet/pet_sr_hedgehog.png'},
+  {name:'유령 고양이', emoji:'🐈', buff:'magic', grade:'SR', img:'assets/pet/pet_sr_ghostcat.png'},
+  {name:'태양 사자', emoji:'🦁', buff:'crit', grade:'SR', img:'assets/pet/pet_sr_lion.png'},
+  {name:'빙결 펭귄', emoji:'🐧', buff:'def', grade:'SR', img:'assets/pet/pet_sr_penguin.png'},
+
+  {name:'별빛 고래', emoji:'🐳', buff:'skill', grade:'SSR', img:'assets/pet/pet_ssr_whale.png'},
+  {name:'시간의 수호자', emoji:'⏳', buff:'speed', grade:'SSR', img:'assets/pet/pet_ssr_clock.png'},
+  {name:'화산 도마뱀', emoji:'🦎', buff:'atk', grade:'SSR', img:'assets/pet/pet_ssr_lizard.png'},
+  {name:'유령 사신', emoji:'💀', buff:'magic', grade:'SSR', img:'assets/pet/pet_ssr_reaper.png'},
+  {name:'금빛 여우', emoji:'🦊', buff:'gold', grade:'SSR', img:'assets/pet/pet_ssr_fox.png'},
+  {name:'천둥 군주 볼테온', emoji:'🐺', buff:'atk', grade:'SSR', img:'assets/pet/pet_ssr_wolf.png'},
+  {name:'대지 수호 골렘', emoji:'🪨', buff:'def', grade:'SSR', img:'assets/pet/pet_ssr_stonegolem.png'},
+  {name:'바람 정령 실피드', emoji:'🧚', buff:'speed', grade:'SSR', img:'assets/pet/pet_ssr_fairy.png'},
+  {name:'빛의 성기사 아우렐', emoji:'🛡️', buff:'hp', grade:'SSR', img:'assets/pet/pet_ssr_paladin.png'},
+  {name:'심연 마도사 겔루스', emoji:'🧙', buff:'magic', grade:'SSR', img:'assets/pet/pet_ssr_mage.png'},
+
+  {name:'불사신 수호자', emoji:'🦁', buff:'atk', grade:'UR', img:'assets/pet/pet_ur_lion.png'},
+  {name:'아이스 드래곤', emoji:'🐉', buff:'atk', grade:'UR', img:'assets/pet/pet_ur_dragon.png'},
+  {name:'신성한 루미엘', emoji:'🧚', buff:'hp', grade:'UR', img:'assets/pet/pet_ur_angel.png'},
+  {name:'파멸의 이그니스', emoji:'😈', buff:'magic', grade:'UR', img:'assets/pet/pet_ur_demon.png'},
+  {name:'생명의 가디언', emoji:'🌿', buff:'heal', grade:'UR', img:'assets/pet/pet_ur_gaia.png'},
+  {name:'번개의 제왕 라이멘스', emoji:'🐺', buff:'speed', grade:'UR', img:'assets/pet/pet_ur_wolf.png'},
+  {name:'대지의 거신 가이아', emoji:'🪨', buff:'def', grade:'UR', img:'assets/pet/pet_ur_golem.png'},
 ];
 const PET_BUFF = {
-  atk:  {label:'공격력',   icon:'⚔️', val:{N:0.03,R:0.08,SR:0.15,SSR:0.30}},
-  crit: {label:'치명타율', icon:'🎯', val:{N:0.02,R:0.04,SR:0.07,SSR:0.12}},
-  gold: {label:'골드 획득', icon:'<span class="goldIcon"></span>', val:{N:0.10,R:0.25,SR:0.50,SSR:1.00}},
+  atk:   {label:'공격력',   icon:'⚔️', val:{N:0.03,R:0.06,SR:0.10,SSR:0.18,UR:0.35}},
+  crit:  {label:'치명타율', icon:'🎯', val:{N:0.02,R:0.03,SR:0.06,SSR:0.10,UR:0.18}},
+  gold:  {label:'골드 획득', icon:'<span class="goldIcon"></span>', val:{N:0.08,R:0.14,SR:0.22,SSR:0.35,UR:0.60}},
+  hp:    {label:'체력',     icon:'❤️', val:{N:0.05,R:0.08,SR:0.12,SSR:0.20,UR:0.35}},
+  def:   {label:'방어력',   icon:'🛡️', val:{N:0.04,R:0.07,SR:0.12,SSR:0.22,UR:0.38}},
+  heal:  {label:'HP 회복',  icon:'✚', val:{N:0.05,R:0.08,SR:0.12,SSR:0.20,UR:0.35}},
+  speed: {label:'공격속도', icon:'⚡', val:{N:0.03,R:0.05,SR:0.09,SSR:0.16,UR:0.28}},
+  magic: {label:'마법 공격력', icon:'🔮', val:{N:0.04,R:0.07,SR:0.12,SSR:0.22,UR:0.38}},
+  skill: {label:'스킬 피해량', icon:'✦', val:{N:0.04,R:0.07,SR:0.12,SSR:0.22,UR:0.40}},
 };
-function petBuffText(p){ const b=PET_BUFF[p.buff]; return `${b.icon} ${b.label} +${Math.round(b.val[p.grade]*100)}%`; }
+function petBuffText(p){ const b=PET_BUFF[p.buff]||PET_BUFF.atk; return `${b.icon} ${b.label} +${Math.round((b.val[p.grade]||0)*100)}%`; }
+function petVisual(p, cls='petListImg'){
+  const safe = (p.emoji||'🐾').replace(/'/g,'');
+  return p.img ? `<img class="${cls}" src="${p.img}${AV}" alt="${p.name}" onerror="this.onerror=null;this.outerHTML='<span class=&quot;hp-emoji&quot; style=&quot;font-size:26px&quot;>${safe}</span>'">` : `<span class="hp-emoji" style="font-size:26px">${safe}</span>`;
+}
 function activePet(){ return (G.activePet>=0 && G.pets[G.activePet]) ? G.pets[G.activePet] : null; }
-function petVal(p){ return p ? PET_BUFF[p.buff].val[p.grade] : 0; }
+function petVal(p){ const b=p ? PET_BUFF[p.buff] : null; return b ? (b.val[p.grade]||0) : 0; }
 function petAtkMult(){ const p=activePet(); return (p&&p.buff==='atk') ? 1+petVal(p) : 1; }
 function petCritBonus(){ const p=activePet(); return (p&&p.buff==='crit') ? petVal(p) : 0; }
 function petGoldMult(){ const p=activePet(); return (p&&p.buff==='gold') ? 1+petVal(p) : 1; }
@@ -1190,10 +1237,11 @@ const CLASSES = {
 };
 function heroCls(h){ return CLASSES[h.cls] || CLASSES.sword; }
 const GRADES = [
-  {g:"N",  rate:0.55, atk:5},
-  {g:"R",  rate:0.30, atk:15},
-  {g:"SR", rate:0.12, atk:50},
-  {g:"SSR",rate:0.03, atk:180},
+  {g:"N",  rate:0.549, atk:18},
+  {g:"R",  rate:0.300, atk:30},
+  {g:"SR", rate:0.120, atk:50},
+  {g:"SSR",rate:0.030, atk:180},
+  {g:"UR", rate:0.001, atk:520},
 ];
 const MONSTERS = ["🟢","👹","🦂","🕷️","🐗","🦇","🐍","👻","🧟","🐲"];
 const MON_NAMES = ["슬라임","고블린","전갈","독거미","멧돼지","박쥐","독사","유령","좀비","드래곤"];
@@ -1202,8 +1250,8 @@ let monHpMax = 0, monHp = 0;
 
 // ===== 능력치 계산 =====
 const HERO_MAX_LEVEL = 50;
-const HERO_GRADE_ORDER = ['SR','SSR','UR'];
-const HERO_GRADE_MULT = {SR:1, SSR:3.5, UR:9};
+const HERO_GRADE_ORDER = ['N','R','SR','SSR','UR'];
+const HERO_GRADE_MULT = {N:.45, R:.68, SR:1, SSR:3.5, UR:9};
 const HERO_MAT = { 린:'wind', 루비아:'fire', 실비아:'water', 사피라:'water', 카엘:'fire', 에메리아:'wind', 카이라:'dark', 카이론:'water' };
 function heroEquipSum(h){ const e=h.equip||{무기:0,방어구:0,장신구:0}; return e.무기+e.방어구+e.장신구; }
 function heroAffinity(h){ return G.affinity[h.name]||0; }
@@ -1631,18 +1679,42 @@ function rollGrade(){
   for(const g of GRADES){ acc+=g.rate; if(r<=acc) return g; }
   return GRADES[0];
 }
-const SSR_GRADE = GRADES.find(g=>g.g==='SSR');
+const SR_GRADE = GRADES.find(g=>g.g==='SR');
+const UR_GRADE = GRADES.find(g=>g.g==='UR');
 // 천장 적용 등급 뽑기
 function rollHeroGrade(){
-  G.pity++; G.totalPulls++;
-  if(G.pity >= PITY_MAX){ G.pity = 0; return SSR_GRADE; } // 천장 → SSR 확정
-  const grade = rollGrade();
-  if(grade.g === 'SSR') G.pity = 0;  // SSR 나오면 천장 초기화
-  return grade;
+  G.totalPulls++;
+  return rollGrade();
+}
+function ensureSummonState(){
+  if(!G.summonPity) G.summonPity = {hero:G.pity||0, gear:0, pet:0};
+  if(!G.selectTickets) G.selectTickets = {hero:0, gear:0, pet:0};
+  ['hero','gear','pet'].forEach(k=>{
+    if(G.summonPity[k]==null) G.summonPity[k]=0;
+    if(G.selectTickets[k]==null) G.selectTickets[k]=0;
+  });
+  G.pity = G.summonPity.hero;
+}
+function addSummonPity(kind, count){
+  ensureSummonState();
+  G.summonPity[kind] += count;
+  let gained = 0;
+  while(G.summonPity[kind] >= PITY_MAX){
+    G.summonPity[kind] -= PITY_MAX;
+    G.selectTickets[kind]++;
+    gained++;
+  }
+  G.pity = G.summonPity.hero;
+  return gained;
+}
+function pityLabel(kind){
+  ensureSummonState();
+  const name = {hero:'영웅', gear:'장비', pet:'펫'}[kind];
+  return `${name} 선택소환 ${G.summonPity[kind]}/${PITY_MAX} · 선택권 ${G.selectTickets[kind]}장`;
 }
 function makeHeroFromGrade(grade){
   const base = HERO_POOL[Math.floor(Math.random()*HERO_POOL.length)];
-  return { uid:newHeroUid(), name:base.name, emoji:base.emoji, cls:base.cls, grade:base.grade||'SR', atk:base.atk||50, level:1, cap:10, equip:{무기:0,방어구:0,장신구:0} };
+  return { uid:newHeroUid(), name:base.name, emoji:base.emoji, cls:base.cls, grade:grade.g, atk:grade.atk||base.atk||50, level:1, cap:10, equip:{무기:0,방어구:0,장신구:0} };
 }
 function addHero(hero){
   if(!hero.uid) hero.uid = newHeroUid();
@@ -1663,21 +1735,83 @@ function summonHero(count){
   dailyInc('summon', count);
   for(let i=0;i<count;i++) results.push(makeHeroFromGrade(rollHeroGrade()));
   // 11연 최소 SR 1개 보장
-  if(count===11 && !results.some(h=>h.grade==='SR'||h.grade==='SSR')){
-    results[Math.floor(Math.random()*11)] = makeHeroFromGrade(GRADES.find(g=>g.g==='SR'));
+  if(count===11 && !results.some(h=>GRADE_RANK[h.grade]>=GRADE_RANK.SR)){
+    results[Math.floor(Math.random()*11)] = makeHeroFromGrade(SR_GRADE);
   }
+  addSummonPity('hero', count);
   results.forEach(addHero);
   refreshTop(); renderHeroRow(); renderPanel();
   showSummonAnim(results);
+  showPityToast('hero');
 }
 // 광고 무료 1회 소환
 function freePullHero(){
   const hero = makeHeroFromGrade(rollHeroGrade());
+  addSummonPity('hero', 1);
   addHero(hero);
   refreshTop(); renderHeroRow(); renderPanel();
   showSummonAnim([hero]);
+  showPityToast('hero');
 }
 function closePopup(){ document.getElementById('overlay').style.display='none'; }
+function showPityToast(kind){
+  ensureSummonState();
+  if(G.selectTickets[kind]>0){
+    const name = {hero:'영웅', gear:'장비', pet:'펫'}[kind];
+    showToast(`${name} UR 선택소환권 보유!`, '#ff8df0', true);
+  }
+}
+function openSelectSummon(kind){
+  ensureSummonState();
+  if((G.selectTickets[kind]||0)<=0){ alert('아직 선택소환권이 없어요. 1000회 소환하면 1장 획득합니다.'); return; }
+  const title = {hero:'🛡️ 영웅 UR 선택소환', gear:'⚔️ 장비 UR 선택소환', pet:'🐾 펫 UR 선택소환'}[kind];
+  let body = `<div class="small" style="margin-bottom:10px">원하는 UR 보상을 선택하세요. 남은 선택권 ${G.selectTickets[kind]}장</div>`;
+  if(kind==='hero'){
+    body += `<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:7px">`;
+    HERO_POOL.forEach((h,i)=>{
+      const hero = {name:h.name, emoji:h.emoji, cls:h.cls, grade:'UR', atk:UR_GRADE.atk, level:1, cap:10};
+      body += `<button class="btn" onclick="claimSelectSummon('hero',${i})">${heroPortrait(hero,'sm')}<div>${h.name}</div></button>`;
+    });
+    body += `</div>`;
+  } else if(kind==='gear'){
+    body += `<div style="display:grid;gap:7px">
+      ${['무기','방어구','악세'].map((s,i)=>`<button class="btn gem" onclick="claimSelectSummon('gear',${i})">UR ${s} 강화 +40 선택</button>`).join('')}
+    </div>`;
+  } else {
+    const pets = PET_POOL.filter(p=>p.grade==='UR');
+    body += `<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:7px">`;
+    pets.forEach((p,i)=>{
+      body += `<button class="btn" onclick="claimSelectSummon('pet',${i})">
+        <div class="hp-card g-bg-UR" style="width:58px;height:58px;margin:0 auto 5px;border-color:${gradeColorOf('UR')}">
+          <div class="hp-grade txt-UR">UR</div>${petVisual(p)}
+        </div><div>${p.name}</div></button>`;
+    });
+    body += `</div>`;
+  }
+  popReward(title, body);
+}
+function claimSelectSummon(kind, index){
+  ensureSummonState();
+  if((G.selectTickets[kind]||0)<=0) return;
+  G.selectTickets[kind]--;
+  if(kind==='hero'){
+    const base = HERO_POOL[index] || HERO_POOL[0];
+    const hero = {uid:newHeroUid(), name:base.name, emoji:base.emoji, cls:base.cls, grade:'UR', atk:UR_GRADE.atk, level:1, cap:10, equip:{무기:0,방어구:0,장신구:0}};
+    addHero(hero); closePopup(); refreshTop(); renderHeroRow(); renderPanel(); showSummonAnim([hero]);
+  } else if(kind==='gear'){
+    const slot = ['무기','방어구','악세'][index] || '무기';
+    G.gear[slot] = (G.gear[slot]||0) + 40;
+    closePopup(); refreshTop(); renderPanel();
+    popReward('⚔️ UR 장비 선택 완료', `<div style="font-size:42px">🏆</div><b>${slot} +40</b>`);
+  } else {
+    const base = PET_POOL.filter(p=>p.grade==='UR')[index] || PET_POOL.find(p=>p.grade==='UR');
+    const pet = makePetFromBase(base, 'UR');
+    G.pets.push(pet);
+    if(G.activePet<0) G.activePet=G.pets.length-1;
+    closePopup(); refreshTop(); updatePet(); if(currentScreen) renderScreen(); else renderPanel();
+    popReward('🐾 UR 펫 선택 완료', `${petRewardHtml(pet)}<div class="small">${petBuffText(pet)}</div>`);
+  }
+}
 
 // ===== 화려한 소환 연출 =====
 const GRADE_RANK = {N:0,R:1,SR:2,SSR:3,UR:4};
@@ -1696,8 +1830,8 @@ function showSummonAnim(results){
   // 연출 시작: 빛 → 플래시 → 카드 등장
   rays.classList.remove('spin'); void rays.offsetWidth; rays.classList.add('spin');
   flash.classList.remove('burst'); void flash.offsetWidth; flash.classList.add('burst');
-  // SSR이면 화면 전체 골드 플래시 한 번 더
-  if(best.grade==='SSR') ov.classList.add('ssr');
+  // SSR/UR이면 화면 전체 골드 플래시 한 번 더
+  if(best.grade==='SSR' || best.grade==='UR') ov.classList.add('ssr');
   else ov.classList.remove('ssr');
   setTimeout(()=>{
     results.forEach((h,i)=>{
@@ -2617,19 +2751,31 @@ function claimMission(id){
 
 // ===== 펫 =====
 function gradeColorOf(g){ return {N:'#9ca3af',R:'#60a5fa',SR:'#c084fc',SSR:'#fbbf24',UR:'#ff8df0'}[g]; }
+function randomPetByGrade(grade){
+  const pool = PET_POOL.filter(p=>p.grade===grade) || [];
+  const use = pool.length ? pool : PET_POOL;
+  return use[Math.floor(Math.random()*use.length)];
+}
+function makePetFromBase(base, grade){
+  return {name:base.name, emoji:base.emoji, buff:base.buff, grade:grade||base.grade||'N', img:base.img||''};
+}
+function petRewardHtml(pet){
+  return `<div class="hp-card g-bg-${pet.grade}" style="width:86px;height:86px;margin:0 auto 8px;border-color:${gradeColorOf(pet.grade)}">
+      <div class="hp-shine"></div><div class="hp-grade txt-${pet.grade}">${pet.grade}</div>${petVisual(pet)}
+    </div><div class="txt-${pet.grade}" style="font-weight:bold;font-size:18px">[${pet.grade}] ${pet.name}</div>`;
+}
 function summonPet(){
-  const cost=150;
+  const cost=200;
   if(G.gem<cost){ alert('💎 보석이 부족해요!'); return; }
   G.gem-=cost;
   const grade=rollGrade();
-  const base=PET_POOL[Math.floor(Math.random()*PET_POOL.length)];
-  const pet={name:base.name, emoji:base.emoji, buff:base.buff, grade:grade.g};
+  const pet=makePetFromBase(randomPetByGrade(grade.g), grade.g);
+  addSummonPity('pet', 1);
   G.pets.push(pet);
   if(G.activePet<0) G.activePet=G.pets.length-1; // 첫 펫 자동 장착
   refreshTop(); currentScreen ? renderScreen() : renderPanel(); updatePet();
-  popReward('🐾 펫 획득!', `<div style="font-size:56px">${pet.emoji}</div>
-    <div class="txt-${pet.grade}" style="font-weight:bold;font-size:18px">[${pet.grade}] ${pet.name}</div>
-    <div class="small">${petBuffText(pet)}</div>`);
+  popReward('🐾 펫 획득!', `${petRewardHtml(pet)}<div class="small">${petBuffText(pet)}</div>`);
+  showPityToast('pet');
 }
 function summonPetShop(count=1){
   const cost = count===11 ? 2000 : 200;
@@ -2638,23 +2784,29 @@ function summonPetShop(count=1){
   const got=[];
   for(let i=0;i<count;i++){
     const grade=rollGrade();
-    const base=PET_POOL[Math.floor(Math.random()*PET_POOL.length)];
-    const pet={name:base.name, emoji:base.emoji, buff:base.buff, grade:grade.g};
+    const pet=makePetFromBase(randomPetByGrade(grade.g), grade.g);
     G.pets.push(pet); got.push(pet);
   }
+  if(count===11 && !got.some(p=>GRADE_RANK[p.grade]>=GRADE_RANK.SR)){
+    const idx = Math.floor(Math.random()*got.length);
+    const pet = makePetFromBase(randomPetByGrade('SR'), 'SR');
+    G.pets[G.pets.length-got.length+idx] = pet; got[idx] = pet;
+  }
+  addSummonPity('pet', count);
   if(G.activePet<0) G.activePet=0;
   refreshTop(); updatePet();
   if(currentScreen) renderScreen(); else renderPanel();
   const best = got.reduce((a,b)=> GRADE_RANK[b.grade]>GRADE_RANK[a.grade]?b:a);
-  popReward('🐾 펫 소환!', `<div style="font-size:54px">${best.emoji}</div>
-    <div class="txt-${best.grade}" style="font-weight:bold;font-size:18px">[${best.grade}] ${best.name}</div>
+  popReward('🐾 펫 소환!', `${petRewardHtml(best)}
     <div class="small">총 ${got.length}마리 소환 · 최고 등급 ${best.grade}</div>`);
+  showPityToast('pet');
 }
 function equipPet(i){ G.activePet=i; refreshTop(); currentScreen ? renderScreen() : renderPanel(); updatePet(); }
 function viewPet(){
   let h=`<div class="card" style="border-color:#ffb74d"><div class="row">
-      <div style="flex:1"><b>🐾 펫 소환</b><div class="small">펫은 버프를 주고 전투에서 같이 공격해요 (확률: N55/R30/SR12/SSR3%)</div></div>
-      <button class="btn gem" onclick="summonPet()" ${G.gem<150?'disabled':''}>💎 150</button>
+      <div style="flex:1"><b>🐾 펫 소환</b><div class="small">N 54.9% · R 30% · SR 12% · SSR 3% · UR 0.1%<br>${pityLabel('pet')}</div></div>
+      <button class="btn gem" onclick="summonPet()" ${G.gem<200?'disabled':''}>💎 200</button>
+      <button class="btn" onclick="openSelectSummon('pet')" ${G.selectTickets?.pet>0?'':'disabled'}>UR 선택</button>
     </div></div>
     <h3>보유 펫 (${G.pets.length})</h3>`;
   if(G.pets.length===0) h+=`<div class="card small">아직 펫이 없어요. 소환해보세요!</div>`;
@@ -2663,7 +2815,7 @@ function viewPet(){
     h+=`<div class="card" style="${active?'border-color:'+gradeColorOf(p.grade):''}"><div class="row">
       <div class="hp-card g-bg-${p.grade}" style="width:50px;height:50px;border-color:${gradeColorOf(p.grade)}">
         <div class="hp-grade txt-${p.grade}" style="font-size:9px">${p.grade}</div>
-        <div class="hp-emoji" style="font-size:26px">${p.emoji}</div></div>
+        ${petVisual(p)}</div>
       <div style="flex:1"><div style="font-weight:bold">[${p.grade}] ${p.name} ${active?'<span style="font-size:10px;color:#3be38b">●장착</span>':''}</div>
         <div class="small">${petBuffText(p)}</div></div>
       <button class="btn ${active?'':'gem'}" onclick="equipPet(${i})" ${active?'disabled':''}>${active?'장착중':'장착'}</button>
@@ -2675,7 +2827,7 @@ function viewPet(){
 function updatePet(){
   const el=document.getElementById('petCompanion'); if(!el) return;
   const p=activePet();
-  el.textContent = p ? p.emoji : '';
+  el.innerHTML = p ? (p.img ? `<img src="${p.img}${AV}" alt="${p.name}">` : p.emoji) : '';
   el.style.display = p ? 'block' : 'none';
 }
 // ===== 길드소 =====
@@ -2720,7 +2872,7 @@ function petAttack(){
   const p=activePet(); if(!p) return;
   if(document.getElementById('home').style.display==='flex') return; // 홈에선 패스
   const b=document.getElementById('battle');
-  const proj=document.createElement('div'); proj.className='petProj'; proj.textContent=p.emoji;
+  const proj=document.createElement('div'); proj.className='petProj'; proj.innerHTML=p.img ? `<img src="${p.img}${AV}" alt="${p.name}">` : p.emoji;
   proj.style.left='24%'; proj.style.top='54%'; b.appendChild(proj);
   proj.animate([{left:'24%',top:'54%',opacity:1},{left:'68%',top:'38%',opacity:1},{opacity:0}],{duration:320,easing:'ease-in'});
   setTimeout(()=>{ proj.remove(); dealDamage(totalAtk()*0.4, false); }, 320);
@@ -3061,37 +3213,58 @@ function upgradeGear(k, amount=1){
   G.gold-=pack.total; G.gear[k]=(G.gear[k]||0)+pack.n;
   refreshTop(); renderPanel();
 }
+const GEAR_SUMMON_UP = {N:1, R:2, SR:4, SSR:10, UR:25};
+function rollSummonGear(){
+  const slots = ['무기','방어구','악세'];
+  const grade = rollGrade();
+  const slot = slots[Math.floor(Math.random()*slots.length)];
+  const up = GEAR_SUMMON_UP[grade.g] || 1;
+  G.gear[slot] = (G.gear[slot]||0) + up;
+  return {slot, up, grade:grade.g};
+}
+function gearRewardSummary(got){
+  const slots = ['무기','방어구','악세'];
+  const best = got.reduce((a,b)=> GRADE_RANK[b.grade]>GRADE_RANK[a.grade]?b:a);
+  const summary = slots.map(s=>`${s} +${got.filter(x=>x.slot===s).reduce((a,b)=>a+b.up,0)}`).filter(t=>!t.endsWith('+0')).join('<br>');
+  return {best, summary};
+}
 function summonGear(count=1){
-  const cost = count===10 ? 1200 : 150;
+  const cost = count===11 ? 2000 : 200;
   if(G.gem<cost){ alert('💎 보석이 부족해요!'); return; }
   G.gem-=cost;
-  const slots = ['무기','방어구','악세'];
   const got = [];
-  for(let i=0;i<count;i++){
-    const slot = slots[Math.floor(Math.random()*slots.length)];
-    const up = Math.random()<0.08 ? 3 : (Math.random()<0.28 ? 2 : 1);
-    G.gear[slot] = (G.gear[slot]||0) + up;
-    got.push({slot, up});
+  for(let i=0;i<count;i++) got.push(rollSummonGear());
+  if(count===11 && !got.some(x=>GRADE_RANK[x.grade]>=GRADE_RANK.SR)){
+    const idx = Math.floor(Math.random()*got.length);
+    const slot = got[idx].slot;
+    const add = GEAR_SUMMON_UP.SR - got[idx].up;
+    G.gear[slot] = (G.gear[slot]||0) + add;
+    got[idx] = {slot, up:GEAR_SUMMON_UP.SR, grade:'SR'};
   }
+  addSummonPity('gear', count);
   refreshTop(); renderPanel();
-  const summary = slots.map(s=>`${s} +${got.filter(x=>x.slot===s).reduce((a,b)=>a+b.up,0)}`).filter(t=>!t.endsWith('+0')).join('<br>');
-  popReward('⚔️ 장비 소환!', `<div style="font-size:44px">🧰</div><div style="font-weight:bold;margin-top:6px">${summary}</div>`);
+  const {best, summary} = gearRewardSummary(got);
+  popReward('⚔️ 장비 소환!', `<div style="font-size:44px">🧰</div><div class="txt-${best.grade}" style="font-weight:bold">최고 등급 ${best.grade}</div><div style="font-weight:bold;margin-top:6px">${summary}</div>`);
+  showPityToast('gear');
 }
 function summonGearShop(count=1){
   const cost = count===11 ? 2000 : 200;
   if(G.gem<cost){ alert('💎 보석이 부족해요!'); return; }
   G.gem-=cost;
-  const slots = ['무기','방어구','악세'];
   const got = [];
-  for(let i=0;i<count;i++){
-    const slot = slots[Math.floor(Math.random()*slots.length)];
-    const up = Math.random()<0.08 ? 3 : (Math.random()<0.28 ? 2 : 1);
-    G.gear[slot] = (G.gear[slot]||0) + up;
-    got.push({slot, up});
+  for(let i=0;i<count;i++) got.push(rollSummonGear());
+  if(count===11 && !got.some(x=>GRADE_RANK[x.grade]>=GRADE_RANK.SR)){
+    const idx = Math.floor(Math.random()*got.length);
+    const slot = got[idx].slot;
+    const add = GEAR_SUMMON_UP.SR - got[idx].up;
+    G.gear[slot] = (G.gear[slot]||0) + add;
+    got[idx] = {slot, up:GEAR_SUMMON_UP.SR, grade:'SR'};
   }
+  addSummonPity('gear', count);
   refreshTop(); renderPanel();
-  const summary = slots.map(s=>`${s} +${got.filter(x=>x.slot===s).reduce((a,b)=>a+b.up,0)}`).filter(t=>!t.endsWith('+0')).join('<br>');
-  popReward('⚔️ 장비 소환!', `<div style="font-size:44px">🧰</div><div style="font-weight:bold;margin-top:6px">${summary}</div>`);
+  const {best, summary} = gearRewardSummary(got);
+  popReward('⚔️ 장비 소환!', `<div style="font-size:44px">🧰</div><div class="txt-${best.grade}" style="font-weight:bold">최고 등급 ${best.grade}</div><div style="font-weight:bold;margin-top:6px">${summary}</div>`);
+  showPityToast('gear');
 }
 function viewGacha(){
   let h=`<h3>✨ 소환상점</h3>
@@ -3103,17 +3276,18 @@ function viewGacha(){
   if(summonView==='gear'){
     h += `<div class="card summonHeroBanner">
       <h3>⚔️ 장비소환</h3>
-      <div class="small">소환한 장비는 무기/방어구/악세 강화 단계에 바로 더해져요.</div>
+      <div class="small">N 54.9% · R 30% · SR 12% · SSR 3% · UR 0.1%<br>${pityLabel('gear')}</div>
     </div>
     <div class="card"><div class="row">
       <div style="font-size:28px">🧰</div>
-      <div style="flex:1"><b>1회 장비소환</b><div class="small">무작위 장비 +1~3</div></div>
-      <button class="btn gem" onclick="summonGear(1)" ${G.gem<150?'disabled':''}>💎 150</button>
+      <div style="flex:1"><b>1회 장비소환</b><div class="small">등급별 강화량 획득</div></div>
+      <button class="btn gem" onclick="summonGear(1)" ${G.gem<200?'disabled':''}>💎 200</button>
     </div></div>
     <div class="card" style="border-color:#ffb74d"><div class="row">
       <div style="font-size:28px">⚒️</div>
-      <div style="flex:1"><b>10회 장비소환</b><div class="small">강화 재료 대량 획득</div></div>
-      <button class="btn" style="background:linear-gradient(135deg,#ff8a00,#ff5e7a)" onclick="summonGear(10)" ${G.gem<1200?'disabled':''}>💎 1200</button>
+      <div style="flex:1"><b>11연 장비소환</b><div class="small">최소 SR 이상 1개 보장</div></div>
+      <button class="btn" style="background:linear-gradient(135deg,#ff8a00,#ff5e7a)" onclick="summonGear(11)" ${G.gem<2000?'disabled':''}>💎 2,000</button>
+      <button class="btn" onclick="openSelectSummon('gear')" ${G.selectTickets?.gear>0?'':'disabled'}>UR 선택</button>
     </div></div>
     <div class="card">
       <div class="row"><div style="flex:1" class="small">현재 장비 합계</div><b>+${gearAtkTotal()}</b></div>
@@ -3131,25 +3305,26 @@ function viewGacha(){
       <button class="btn gem" style="width:100%;margin-top:8px" onclick="firstPay()">단돈 ₩1,100 (테스트:무료)</button>
     </div>`;
   }
-  const toCeil = PITY_MAX - (G.pity%PITY_MAX);
-  const pct = (G.pity/PITY_MAX*100).toFixed(0);
+  ensureSummonState();
+  const pct = (G.summonPity.hero/PITY_MAX*100).toFixed(0);
   h += `<div class="card summonHeroBanner">
       <h3>🛡️ 영웅소환</h3>
-      <div class="small">새로운 동료를 영입해 전투 파티를 강화하세요.</div>
+      <div class="small">N 54.9% · R 30% · SR 12% · SSR 3% · UR 0.1%</div>
     </div>
     <div class="card">
-      <div class="row" style="justify-content:space-between"><b><span class="txt-SR">SR 영웅 확정 소환</span></b><span class="small">누적 ${G.totalPulls}회</span></div>
+      <div class="row" style="justify-content:space-between"><b><span class="txt-UR">1000회 UR 선택소환</span></b><span class="small">누적 ${G.totalPulls}회</span></div>
       <div style="height:10px;background:#2a2d50;border-radius:6px;overflow:hidden;margin-top:6px">
-        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#ffd24a,#ff8a00)"></div>
+        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#8b5cf6,#ff4fd8,#ffd24a)"></div>
       </div>
-      <div class="small" style="margin-top:6px">현재 등록된 8명의 영웅은 모두 <b class="txt-SR">SR 캐릭터</b>로 소환됩니다.</div>
+      <div class="small" style="margin-top:6px">${pityLabel('hero')}</div>
+      <button class="btn gem" style="width:100%;margin-top:8px" onclick="openSelectSummon('hero')" ${G.selectTickets?.hero>0?'':'disabled'}>UR 영웅 선택소환</button>
     </div>
     <div class="card"><div class="row">
       <div style="flex:1"><b>1회 소환</b><div class="small">영웅 1명</div></div>
       <button class="btn gem" onclick="summonHero(1)" ${G.gem<300?'disabled':''}>💎 300</button>
     </div></div>
     <div class="card" style="border-color:#ffb74d"><div class="row">
-      <div style="flex:1"><b>11회 소환 🔥</b><div class="small">11명 · <span class="txt-SR">전원 SR 영웅</span></div></div>
+      <div style="flex:1"><b>11회 소환 🔥</b><div class="small">11명 · 최소 SR 이상 1명 보장</div></div>
       <button class="btn" style="background:linear-gradient(135deg,#ff8a00,#ff5e7a)" onclick="summonHero(11)" ${G.gem<3000?'disabled':''}>💎 3,000</button>
     </div></div>
     <div class="card small">보석은 상점에서 광고/충전으로 모을 수 있어요.</div>`;
@@ -3271,6 +3446,10 @@ function loadGame(){
       if(!G.adCd) G.adCd = { gold:0, gem:0, pull:0 };
       if(G.pity==null) G.pity = 0;
       if(G.totalPulls==null) G.totalPulls = 0;
+      if(!G.summonPity) G.summonPity = { hero:G.pity||0, gear:0, pet:0 };
+      if(!G.selectTickets) G.selectTickets = { hero:0, gear:0, pet:0 };
+      ['hero','gear','pet'].forEach(k=>{ if(G.summonPity[k]==null) G.summonPity[k]=0; if(G.selectTickets[k]==null) G.selectTickets[k]=0; });
+      G.pity = G.summonPity.hero;
       if(!G.hero) G.hero = 'lin';
       if(!G.heroCostume) G.heroCostume = {};
       if(!G.ownedCostumes) G.ownedCostumes = ['lin_default','rubia_default','sapphira_default','silvia_default'];
@@ -3289,6 +3468,14 @@ function loadGame(){
       if(G.seenPrologue==null) G.seenPrologue = false;
       if(!G.daily) G.daily = { date:'', counts:{}, claimed:[] };
       if(!G.pets) G.pets = [];
+      G.pets.forEach(p=>{
+        if(!p.grade) p.grade = 'N';
+        if(!PET_BUFF[p.buff]) p.buff = 'atk';
+        if(!p.img){
+          const match = PET_POOL.find(x=>x.name===p.name && x.grade===p.grade) || PET_POOL.find(x=>x.buff===p.buff && x.grade===p.grade);
+          if(match) p.img = match.img;
+        }
+      });
       if(G.activePet==null) G.activePet = -1;
       if(!G.guild) G.guild = { joined:false, coin:0, lastCheck:'' };
       if(!G.heroHp) G.heroHp = {};
