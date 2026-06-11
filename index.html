@@ -172,6 +172,11 @@
   .card .row { display:flex; align-items:center; gap:9px; }
   #panel .card .row { flex-wrap:wrap; }
   #panel .card .row .btn { white-space:nowrap; }
+  #panel .upgradeCard { overflow-x:auto; overflow-y:hidden; padding-bottom:8px; }
+  #panel .upgradeCard .row { flex-wrap:nowrap; min-width:430px; }
+  #panel .upgradeCard .row > div:nth-child(2) { min-width:150px; }
+  #panel .upgradeCard::-webkit-scrollbar { height:6px; }
+  #panel .upgradeCard::-webkit-scrollbar-thumb { background:#3a3f70; border-radius:4px; }
   .huntHeroList { max-height:190px; overflow-y:auto; padding-right:3px; }
   .huntHeroList::-webkit-scrollbar { width:6px; }
   .huntHeroList::-webkit-scrollbar-thumb { background:#3a3f70; border-radius:4px; }
@@ -2131,7 +2136,7 @@ function viewCostume(){
     if(equipped) btn = `<button class="btn" disabled>착용 중</button>`;
     else if(owned) btn = `<button class="btn" onclick="setCostume('${c.id}')">착용</button>`;
     else btn = `<button class="btn gem" onclick="buyCostume('${c.id}')" ${G.gem<c.price?'disabled':''}>💎${c.price}</button>`;
-    h += `<div class="card"><div class="row">
+    h += `<div class="card upgradeCard"><div class="row">
       <div class="hp-card" style="width:54px;height:54px;border-color:${c.aura||h0.aura}"><div class="hp-emoji" style="font-size:28px">${skinVisual({img:c.img,emoji:h0.emoji},46)}</div></div>
       <div style="flex:1"><div style="font-weight:bold">${c.name} ${equipped?'<span style="font-size:10px;color:#3be38b">●착용</span>':''}</div>
         <div class="small">${c.desc||''}${c.bonus?` · 공격력 +${Math.round(c.bonus*100)}%`:''}</div></div>
@@ -3182,7 +3187,7 @@ function viewHunt(){
   const gem = '💎';
   const pct = v => Math.round(v*100);
   const specialCard = (type, icon, title, lv, maxed, one, ten, nowText, nextText) => `
-    <div class="card"><div class="row">
+    <div class="card upgradeCard"><div class="row">
       <div style="font-size:26px">${icon}</div>
       <div style="flex:1">
         <div style="font-weight:bold">${title} Lv.${lv} / ${SPECIAL_MAX_LEVEL}</div>
@@ -3198,7 +3203,7 @@ function viewHunt(){
   return `<h3>⚔️ 일반 사냥터 강화</h3>
     <div class="card small">전투 화면 아무 곳이나 <b>터치</b>하면 몬스터를 공격해요. 터치공격과 자동공격은 Lv.${HUNT_MAX_LEVEL}, 자동 공격속도는 Lv.${SPEED_MAX_LEVEL}까지 강화할 수 있어요.</div>
     ${wallTip}
-    <div class="card" style="border-color:#ffb74d"><div class="row">
+    <div class="card upgradeCard" style="border-color:#ffb74d"><div class="row">
       <div style="font-size:26px">👆</div>
       <div style="flex:1">
         <div style="font-weight:bold">터치공격력 Lv.${G.tapPower} / ${HUNT_MAX_LEVEL}</div>
@@ -3585,7 +3590,7 @@ function viewGacha(){
       <h3>⚔️ 장비소환</h3>
       <div class="small">N 54.9% · R 30% · SR 12% · SSR 3% · UR 0.1%<br>${pityLabel('gear')}</div>
     </div>
-    <div class="card"><div class="row">
+    <div class="card upgradeCard"><div class="row">
       <div style="font-size:28px">🧰</div>
       <div style="flex:1"><b>1회 장비소환</b><div class="small">등급별 강화량 획득</div></div>
       <button class="btn gem" onclick="summonGear(1)" ${G.gem<200?'disabled':''}>💎 200</button>
@@ -3626,7 +3631,7 @@ function viewGacha(){
       <div class="small" style="margin-top:6px">${pityLabel('hero')}</div>
       <button class="btn gem" style="width:100%;margin-top:8px" onclick="openSelectSummon('hero')" ${G.selectTickets?.hero>0?'':'disabled'}>UR 영웅 선택소환</button>
     </div>
-    <div class="card"><div class="row">
+    <div class="card upgradeCard"><div class="row">
       <div style="flex:1"><b>1회 소환</b><div class="small">영웅 1명</div></div>
       <button class="btn gem" onclick="summonHero(1)" ${G.gem<300?'disabled':''}>💎 300</button>
     </div></div>
