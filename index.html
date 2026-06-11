@@ -185,6 +185,10 @@
   #panel .specialUpgradeCard .row { align-items:flex-start; flex-wrap:nowrap; gap:8px; }
   #panel .specialUpgradeCard .specialBtns { flex:0 0 104px; display:flex; flex-direction:column; gap:5px; margin-left:auto; }
   #panel .specialUpgradeCard .specialBtns .btn { flex:0 0 auto; width:104px; min-width:0; padding:7px 8px; font-size:11px; white-space:nowrap; }
+  #panel .gearUpgradeCard .row { align-items:flex-start; flex-wrap:nowrap; gap:8px; }
+  #panel .gearUpgradeCard .gearInfo { flex:1 1 auto; min-width:0; padding-top:2px; }
+  #panel .gearUpgradeCard .gearBtns { flex:0 0 104px; display:flex; flex-direction:column; gap:5px; margin-left:auto; }
+  #panel .gearUpgradeCard .gearBtns .btn { flex:0 0 auto; width:104px; min-width:0; padding:7px 8px; font-size:11px; white-space:nowrap; }
   .huntHeroList { max-height:190px; overflow-y:auto; padding-right:3px; }
   .huntHeroList::-webkit-scrollbar { width:6px; }
   .huntHeroList::-webkit-scrollbar-thumb { background:#3a3f70; border-radius:4px; }
@@ -1324,10 +1328,12 @@ function heroMaxHp(h){
   const role = h.cls==='tank' ? 1.45 : h.cls==='healer' ? 1.12 : h.cls==='assassin' ? .88 : 1;
   return Math.round((520 + heroLevel(h)*72 + heroAscCount(h)*680 + (h.atk||50)*5) * mult * role * (1 + (h.equip?.방어구||0)*0.16));
 }
+function gearDefTotal(){ return (G.gear.방어구||0) * 6; }
+function gearCritDmgMult(){ return 1 + (G.gear.악세||0) * 0.02; }
 function heroDef(h){
   const mult = heroGradeMult(h);
   const role = h.cls==='tank' ? 1.55 : h.cls==='healer' ? 1.15 : h.cls==='assassin' ? .82 : 1;
-  return Math.round((28 + heroLevel(h)*5 + heroAscCount(h)*55 + (h.equip?.방어구||0)*38 + (h.equip?.장신구||0)*14) * mult * role);
+  return Math.round((28 + heroLevel(h)*5 + heroAscCount(h)*55 + (h.equip?.방어구||0)*38 + (h.equip?.장신구||0)*14 + gearDefTotal()) * mult * role);
 }
 function ensureHeroHp(h){
   if(!h || !h.uid) return 0;
@@ -1367,7 +1373,7 @@ function partySlots(){
   return Array.from({length:5}, (_,i)=> G.heroes.find(h=>h.uid===G.party[i]) || null);
 }
 function heroAtkTotal(){ return partyHeroes().reduce((s,h)=>s+heroEffAtk(h),0); }
-function gearAtkTotal(){ return (G.gear.무기*8) + (G.gear.방어구*3) + (G.gear.악세*3); }
+function gearAtkTotal(){ return (G.gear.무기||0) * 8; }
 // 직업 시너지: 파티(상위5명)에 같은 직업이 많을수록 공격력 보너스
 function synergyInfo(){
   const cnt = {};
@@ -1515,7 +1521,7 @@ function activeCls(){ const b=bestHero(); return b?heroCls(b):CLASSES.sword; }
 function attack(isManual){
   let dmg = totalAtk() * (isManual ? tapMult() : autoMult()) * huntDamageMult();
   const crit = Math.random() < (G.critRate + petCritBonus() + huntCritBonus());
-  if(crit) dmg *= G.critDmg * critDmgUpgradeMult();
+  if(crit) dmg *= G.critDmg * critDmgUpgradeMult() * gearCritDmgMult();
   dealDamage(dmg, crit);
   // 플레이어 돌진 모션
   const pl = document.getElementById('player');
@@ -3526,20 +3532,26 @@ function upHeroEquip(i,k){
   refreshTop(); renderPanel();
 }
 function viewGear(){
-  const list = [["무기","🗡️",8],["방어구","🛡️",3],["악세","💍",3]];
+  const list = [
+    {k:"무기", emo:"🗡️", label:"공격력", unit:"", value:lv=>lv*8, next:lv=>(lv+1)*8},
+    {k:"방어구", emo:"🛡️", label:"방어력", unit:"", value:lv=>lv*6, next:lv=>(lv+1)*6},
+    {k:"악세", emo:"💍", label:"치명타공격력", unit:"%", value:lv=>lv*2, next:lv=>(lv+1)*2},
+  ];
   let h = `<h3>장비 강화</h3>`;
-  list.forEach(([k,emo,inc])=>{
+  list.forEach(({k,emo,label,unit,value,next})=>{
     const lv = G.gear[k];
     const one = gearCostMany(k, 1);
     const ten = gearCostMany(k, 10);
-    h += `<div class="card"><div class="row">
+    h += `<div class="card upgradeCard gearUpgradeCard"><div class="row">
       <div style="font-size:28px">${emo}</div>
-      <div style="flex:1">
+      <div class="gearInfo">
         <div style="font-weight:bold">${k} +${lv}</div>
-        <div class="small">공격력 +${lv*inc} → +${(lv+1)*inc}</div>
+        <div class="small">${label} +${value(lv).toLocaleString()}${unit} → +${next(lv).toLocaleString()}${unit}</div>
       </div>
-      <button class="btn gold" onclick="upgradeGear('${k}',1)" ${G.gold<one.total?'disabled':''}><span class="goldIcon"></span>${one.total.toLocaleString()} +1</button>
-      <button class="btn gold" onclick="upgradeGear('${k}',10)" ${G.gold<ten.total?'disabled':''}><span class="goldIcon"></span>${ten.total.toLocaleString()} +10</button>
+      <div class="gearBtns">
+        <button class="btn gold" onclick="upgradeGear('${k}',1)" ${G.gold<one.total?'disabled':''}><span class="goldIcon"></span>${one.total.toLocaleString()} +1</button>
+        <button class="btn gold" onclick="upgradeGear('${k}',10)" ${G.gold<ten.total?'disabled':''}><span class="goldIcon"></span>${ten.total.toLocaleString()} +10</button>
+      </div>
     </div></div>`;
   });
   return h;
