@@ -173,6 +173,13 @@
   .huntHeroItem .name { font-size:12px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .partyPick { display:flex; gap:5px; flex-wrap:wrap; margin-top:7px; }
   .partyPick button { min-width:34px; padding:6px 8px; border-radius:8px; font-size:11px; }
+  .heroStatGrid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; margin-top:8px; }
+  .heroStatCell { background:#10132699; border:1px solid #343a66; border-radius:9px; padding:7px; min-width:0; }
+  .heroStatCell .label { font-size:10px; color:#9aa0d0; }
+  .heroStatCell .value { margin-top:3px; font-size:13px; font-weight:900; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .skillDetail { margin-top:7px; padding:8px; border:1px solid #343a66; border-radius:10px; background:#10132699; }
+  .skillDetail .name { font-size:12px; font-weight:900; }
+  .skillDetail .desc { margin-top:4px; font-size:10px; color:#c9cdf0; line-height:1.45; }
 
   /* 버튼 */
   .btn { background:linear-gradient(160deg,#5b73ff,#3b4fe0); color:#fff; border:none; padding:9px 13px; border-radius:10px;
@@ -1653,6 +1660,48 @@ function heroSkillPower(h){
   const partySize = Math.max(1, partyHeroes().length);
   return (heroEffAtk(h) + G.atk/partySize) * skinMult() * (1 + synergyInfo().bonus);
 }
+function heroAttackType(h){
+  const magic = ['mage','healer'];
+  return magic.includes(h.cls) ? '마법' : '물리';
+}
+function heroCritRate(h){
+  const role = h.cls==='assassin' ? .10 : h.cls==='gunner' ? .08 : h.cls==='warrior' ? .04 : h.cls==='mage' ? .03 : .02;
+  const grade = (GRADE_RANK[h.grade]||0) * .015;
+  return Math.min(.75, G.critRate + role + grade + petCritBonus());
+}
+function heroAttackSpeed(h){
+  const base = {assassin:1.32, gunner:1.20, warrior:1.02, mage:.94, tanker:.86, healer:.90, knight:.96, sword:1.00, magic:.94, gun:1.16}[h.cls] || 1;
+  const grade = 1 + (GRADE_RANK[h.grade]||0) * .035;
+  const pet = activePet()?.buff==='speed' ? 1 + petVal(activePet()) : 1;
+  return base * grade * pet;
+}
+function heroStatDetailHtml(hero){
+  const data = charData(hero.name);
+  const rows = [
+    ['공격력', heroEffAtk(hero).toLocaleString()],
+    ['체력', heroMaxHp(hero).toLocaleString()],
+    ['방어력', heroDef(hero).toLocaleString()],
+    ['치명타 확률', Math.round(heroCritRate(hero)*100)+'%'],
+    ['공격속도', heroAttackSpeed(hero).toFixed(2)+'회/초'],
+    ['속성', data.attr || '기본'],
+    ['공격 타입', heroAttackType(hero)],
+    ['전투력', heroEffAtk(hero).toLocaleString()],
+  ];
+  return `<div class="card" style="border-color:${heroCls(hero).color}">
+    <div style="font-weight:bold;margin-bottom:3px">능력치</div>
+    <div class="heroStatGrid">${rows.map(([label,value])=>`<div class="heroStatCell"><div class="label">${label}</div><div class="value">${value}</div></div>`).join('')}</div>
+  </div>`;
+}
+function heroSkillDetailHtml(hero){
+  const pack = heroSkillPack(hero);
+  return `<div class="card" style="border-color:${pack.color}">
+    <div style="font-weight:bold;margin-bottom:5px">스킬</div>
+    ${pack.skills.map((sk,idx)=>`<div class="skillDetail">
+      <div class="name" style="color:${pack.color}">${idx+1}. ${sk.fx||heroCls(hero).hit} ${sk.name}</div>
+      <div class="desc">계수 x${sk.mult} · 쿨타임 ${(heroSkillCooldown(hero, sk)/1000).toFixed(1)}초<br>${sk.desc||'전용 전투 기술을 자동으로 발동합니다.'}</div>
+    </div>`).join('')}
+  </div>`;
+}
 function useSkill(){
   if(document.getElementById('home').style.display==='flex') return;
   if(document.getElementById('charView').style.display==='block') return;
@@ -2244,6 +2293,8 @@ function renderCharHeroDetail(i){
       <div class="txt-${hero.grade}" style="font-weight:bold;margin-top:4px">[${hero.grade}] ${hero.name} Lv.${heroLevel(hero)}/${heroCap(hero)}</div>
       <div class="small">${heroCls(hero).hit} ${heroCls(hero).name} · ${data.attr||''}</div>
     </div>
+    ${heroStatDetailHtml(hero)}
+    ${heroSkillDetailHtml(hero)}
     ${heroGrowthHtml(i,'char')}
     <div class="card">
       ${art?`<img src="${art}${AV}" alt="${hero.name}" style="width:100%;max-height:220px;object-fit:contain;border-radius:10px;background:#f4efe6;margin-bottom:7px">`:''}
