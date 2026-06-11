@@ -1638,20 +1638,43 @@ const CHAR_SKILLS = {
     {name:'천공의 심판', fx:'⚔️', mult:10, desc:'거대한 검성 강림'},
   ]},
 };
-let charSkillIdx = 0;
-function useSkill(){
-  const skin = skinObj();
-  const cs = CHAR_SKILLS[skin.name];   // 코스튬이 캐릭터면 그 캐릭터의 스킬을 순환 발동
-  if(cs){
-    const sk = cs.skills[charSkillIdx % cs.skills.length]; charSkillIdx++;
-    castSkill(sk.name, cs.color, sk.fx, sk.mult, false);
-  } else {
-    const bh = bestHero(); if(!bh) return;   // 아니면 기존 직업 스킬
-    const cls = heroCls(bh);
-    castSkill(cls.skill, cls.color, cls.skillFx, cls.skillMult, cls.name==='총기류');
-  }
+const heroSkillState = {};
+function heroSkillPack(h){
+  const cs = CHAR_SKILLS[h.name];
+  if(cs) return cs;
+  const cls = heroCls(h);
+  return { color:cls.color, skills:[{name:cls.skill, fx:cls.skillFx, mult:cls.skillMult, desc:cls.name}] };
 }
-function castSkill(name, color, fx, mult, multiHit){
+function heroSkillCooldown(h, sk){
+  const rank = GRADE_RANK[h.grade] ?? 0;
+  return Math.max(4500, 8800 + (sk.mult||5)*180 - rank*650);
+}
+function heroSkillPower(h){
+  const partySize = Math.max(1, partyHeroes().length);
+  return (heroEffAtk(h) + G.atk/partySize) * skinMult() * (1 + synergyInfo().bonus);
+}
+function useSkill(){
+  if(document.getElementById('home').style.display==='flex') return;
+  if(document.getElementById('charView').style.display==='block') return;
+  if(document.getElementById('screen').style.display==='flex') return;
+  if(monHp<=0) return;
+  const now = Date.now();
+  const ready = livingPartyHeroes().filter(h=>{
+    const st = heroSkillState[h.uid] || (heroSkillState[h.uid] = {idx:0, readyAt:now + Math.random()*1400});
+    return now >= st.readyAt;
+  });
+  ready.forEach((h, order)=>setTimeout(()=>castHeroSkill(h), order*360));
+}
+function castHeroSkill(h){
+  if(!h || ensureHeroHp(h)<=0 || monHp<=0) return;
+  const pack = heroSkillPack(h);
+  const st = heroSkillState[h.uid] || (heroSkillState[h.uid] = {idx:0, readyAt:0});
+  const sk = pack.skills[st.idx % pack.skills.length];
+  st.idx++;
+  st.readyAt = Date.now() + heroSkillCooldown(h, sk);
+  castSkill(`${h.name} · ${sk.name}`, pack.color, sk.fx, sk.mult, false, heroSkillPower(h));
+}
+function castSkill(name, color, fx, mult, multiHit, basePower){
   const b = document.getElementById('battle');
   const pl = document.getElementById('player');
   // 컷씬: 암전 + 캐릭터 줌 + 섬광 + 스킬명
@@ -1662,7 +1685,7 @@ function castSkill(name, color, fx, mult, multiHit){
     f.textContent=fx; f.style.left=(56+Math.random()*26)+'%'; f.style.top=(20+Math.random()*22)+'%';
     b.appendChild(f); setTimeout(()=>f.remove(),360);
   }, k*70);
-  const total = totalAtk() * mult;
+  const total = (basePower || totalAtk()) * mult;
   if(multiHit){ for(let i=0;i<6;i++) setTimeout(()=>dealDamage(total/6, true), i*60); }
   else { dealDamage(total*0.5, true); setTimeout(()=>dealDamage(total*0.5, true), 140); }
   setTimeout(()=>{ vignette(false); pl.classList.remove('cast'); }, 650);
@@ -3629,7 +3652,7 @@ else if(!G.seenPrologue){ startPrologue(); }
 else if(pendingOffline) showOfflinePopup(); // 홈 위에 방치 보상 팝업
 restartAuto(); // 자동사냥 시작
 restartMonsterAttack(); // 몬스터도 배치 영웅을 공격
-setInterval(useSkill, 6000); // 6초마다 직업 스킬 자동 발동
+setInterval(useSkill, 1000); // 배치 영웅별 스킬 쿨타임 확인
 setInterval(spawnSkinFx, 700); // 코스튬 분위기 이펙트
 setInterval(petAttack, 1400); // 펫 동료 공격
 
