@@ -336,12 +336,12 @@
   .summonHit { position:absolute; z-index:2; border:0; background:transparent; border-radius:18px; cursor:pointer; padding:0; }
   .summonHit:active { background:#ffffff22; box-shadow:0 0 20px #ffd86688 inset; }
   .summonBackHit { left:1.2%; top:2.2%; width:12.5%; height:9%; }
-  .summonHero1 { left:14.4%; top:71.3%; width:10.2%; height:7%; }
-  .summonHero11 { left:25.3%; top:71.3%; width:11.3%; height:7%; }
-  .summonGear1 { left:39.3%; top:71.3%; width:10.2%; height:7%; }
-  .summonGear11 { left:50.3%; top:71.3%; width:11.3%; height:7%; }
-  .summonPet1 { left:64.2%; top:71.3%; width:10.2%; height:7%; }
-  .summonPet11 { left:75.2%; top:71.3%; width:11.3%; height:7%; }
+  .summonHero1 { left:14.4%; top:64.8%; width:10.2%; height:6.2%; }
+  .summonHero11 { left:25.3%; top:64.8%; width:11.3%; height:6.2%; }
+  .summonGear1 { left:39.3%; top:64.8%; width:10.2%; height:6.2%; }
+  .summonGear11 { left:50.3%; top:64.8%; width:11.3%; height:6.2%; }
+  .summonPet1 { left:64.2%; top:64.8%; width:10.2%; height:6.2%; }
+  .summonPet11 { left:75.2%; top:64.8%; width:11.3%; height:6.2%; }
   .summonPackageHit { left:22.5%; top:91%; width:18.8%; height:7%; }
   .summonGemHit { left:58.8%; top:91%; width:17.7%; height:7%; }
   #charBtn { position:absolute; bottom:14px; left:50%; transform:translateX(-50%); z-index:4;
@@ -1651,7 +1651,7 @@ function addHero(hero){
 }
 // 소환 실행 (count=1 또는 11)
 function summonHero(count){
-  const cost = count===11 ? 2000 : 200;
+  const cost = count===11 ? 3000 : 300;
   if(G.gem < cost){ alert('💎 보석이 부족해요!\n상점에서 광고/충전으로 보석을 모아보세요.'); return; }
   G.gem -= cost;
   const results = [];
@@ -3141,11 +3141,11 @@ function viewGacha(){
     </div>
     <div class="card"><div class="row">
       <div style="flex:1"><b>1회 소환</b><div class="small">영웅 1명</div></div>
-      <button class="btn gem" onclick="summonHero(1)" ${G.gem<200?'disabled':''}>💎 200</button>
+      <button class="btn gem" onclick="summonHero(1)" ${G.gem<300?'disabled':''}>💎 300</button>
     </div></div>
     <div class="card" style="border-color:#ffb74d"><div class="row">
       <div style="flex:1"><b>11회 소환 🔥</b><div class="small">11명 · <span class="txt-SR">전원 SR 영웅</span></div></div>
-      <button class="btn" style="background:linear-gradient(135deg,#ff8a00,#ff5e7a)" onclick="summonHero(11)" ${G.gem<2000?'disabled':''}>💎 2000</button>
+      <button class="btn" style="background:linear-gradient(135deg,#ff8a00,#ff5e7a)" onclick="summonHero(11)" ${G.gem<3000?'disabled':''}>💎 3,000</button>
     </div></div>
     <div class="card small">보석은 상점에서 광고/충전으로 모을 수 있어요.</div>`;
   return h;
