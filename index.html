@@ -176,6 +176,12 @@
   #panel .upgradeCard .row { flex-wrap:wrap; min-width:0; }
   #panel .upgradeCard .row > div:nth-child(2) { flex:1 1 150px; min-width:0; }
   #panel .upgradeCard .row .btn { flex:1 1 118px; min-width:118px; }
+  #panel .huntPowerCard .row { align-items:flex-start; }
+  #panel .huntPowerCard .powerInfo { flex:1 1 0; min-width:0; padding-top:2px; }
+  #panel .huntPowerCard .powerTitle { font-size:13px; font-weight:900; line-height:1.3; color:#fff; }
+  #panel .huntPowerCard .powerDesc { margin-top:4px; line-height:1.45; overflow-wrap:anywhere; }
+  #panel .huntPowerCard .upgradeBtns { flex:1 1 100%; display:flex; flex-direction:column; gap:6px; margin-top:3px; }
+  #panel .huntPowerCard .upgradeBtns .btn { width:100%; min-width:0; padding:8px 10px; }
   .huntHeroList { max-height:190px; overflow-y:auto; padding-right:3px; }
   .huntHeroList::-webkit-scrollbar { width:6px; }
   .huntHeroList::-webkit-scrollbar-thumb { background:#3a3f70; border-radius:4px; }
@@ -3202,23 +3208,27 @@ function viewHunt(){
   return `<h3>⚔️ 일반 사냥터 강화</h3>
     <div class="card small">전투 화면 아무 곳이나 <b>터치</b>하면 몬스터를 공격해요. 터치공격과 자동공격은 Lv.${HUNT_MAX_LEVEL}, 자동 공격속도는 Lv.${SPEED_MAX_LEVEL}까지 강화할 수 있어요.</div>
     ${wallTip}
-    <div class="card upgradeCard" style="border-color:#ffb74d"><div class="row">
+    <div class="card upgradeCard huntPowerCard" style="border-color:#ffb74d"><div class="row">
       <div style="font-size:26px">👆</div>
-      <div style="flex:1">
-        <div style="font-weight:bold">터치공격력 Lv.${G.tapPower} / ${HUNT_MAX_LEVEL}</div>
-        <div class="small">터치 데미지 x${tapMult().toFixed(2)}${tapMaxed?' · 최대 레벨':` → x${(1.5 * (1 + G.tapPower*0.10)).toFixed(2)}`}</div>
+      <div class="powerInfo">
+        <div class="powerTitle">터치공격력 Lv.${G.tapPower} / ${HUNT_MAX_LEVEL}</div>
+        <div class="small powerDesc">터치 데미지 x${tapMult().toFixed(2)}${tapMaxed?' · 최대 레벨':` → x${(1.5 * (1 + G.tapPower*0.10)).toFixed(2)}`}</div>
       </div>
-      <button class="btn gold" onclick="upHunt('tap',1)" ${(tapMaxed||G.gold<tapOne.total)?'disabled':''}>${tapMaxed?'MAX':coin+tapOne.total.toLocaleString()+' +1'}</button>
-      <button class="btn gold" onclick="upHunt('tap',10)" ${(tapMaxed||tapTen.n<=0||G.gold<tapTen.total)?'disabled':''}>${coin}${tapTen.total.toLocaleString()} +10</button>
+      <div class="upgradeBtns">
+        <button class="btn gold" onclick="upHunt('tap',1)" ${(tapMaxed||G.gold<tapOne.total)?'disabled':''}>${tapMaxed?'MAX':coin+tapOne.total.toLocaleString()+' 1회 강화'}</button>
+        <button class="btn gold" onclick="upHunt('tap',10)" ${(tapMaxed||tapTen.n<=0||G.gold<tapTen.total)?'disabled':''}>${coin}${tapTen.total.toLocaleString()} 10회 강화</button>
+      </div>
     </div></div>
-    <div class="card"><div class="row">
+    <div class="card upgradeCard huntPowerCard"><div class="row">
       <div style="font-size:26px">💪</div>
-      <div style="flex:1">
-        <div style="font-weight:bold">자동 공격력 Lv.${G.autoPower} / ${HUNT_MAX_LEVEL}</div>
-        <div class="small">자동 데미지 x${autoMult().toFixed(2)}${autoMaxed?' · 최대 레벨':` → x${((1 + G.autoPower*0.08) * passMult()).toFixed(2)}`}</div>
+      <div class="powerInfo">
+        <div class="powerTitle">자동공격력 Lv.${G.autoPower} / ${HUNT_MAX_LEVEL}</div>
+        <div class="small powerDesc">자동 데미지 x${autoMult().toFixed(2)}${autoMaxed?' · 최대 레벨':` → x${((1 + G.autoPower*0.08) * passMult()).toFixed(2)}`}</div>
       </div>
-      <button class="btn gold" onclick="upHunt('power',1)" ${(autoMaxed||G.gold<powOne.total)?'disabled':''}>${autoMaxed?'MAX':coin+powOne.total.toLocaleString()+' +1'}</button>
-      <button class="btn gold" onclick="upHunt('power',10)" ${(autoMaxed||powTen.n<=0||G.gold<powTen.total)?'disabled':''}>${coin}${powTen.total.toLocaleString()} +10</button>
+      <div class="upgradeBtns">
+        <button class="btn gold" onclick="upHunt('power',1)" ${(autoMaxed||G.gold<powOne.total)?'disabled':''}>${autoMaxed?'MAX':coin+powOne.total.toLocaleString()+' 1회 강화'}</button>
+        <button class="btn gold" onclick="upHunt('power',10)" ${(autoMaxed||powTen.n<=0||G.gold<powTen.total)?'disabled':''}>${coin}${powTen.total.toLocaleString()} 10회 강화</button>
+      </div>
     </div></div>
     <div class="card"><div class="row">
       <div style="font-size:26px">⚡</div>
