@@ -199,6 +199,11 @@
   #overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); display:none; align-items:center; justify-content:center; z-index:150; }
   #popup { background:#181a30; border:2px solid #3b5bff; border-radius:16px; padding:24px; width:300px; text-align:center; }
   #popContent { margin:14px 0; }
+  .rewardGrid { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; max-height:360px; overflow-y:auto; padding-right:2px; }
+  .rewardItem { background:linear-gradient(160deg,#23264a,#181a32); border:1px solid #343a66; border-radius:10px; padding:7px 4px; text-align:center; min-width:0; }
+  .rewardItem .name { font-size:10px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .rewardItem .sub { font-size:10px; color:#c9cdf0; margin-top:2px; }
+  .rewardItem .hp-card { margin:0 auto 5px; }
   .pulledHero { font-size:60px; margin:8px 0; }
 
   /* 첫결제 배너 */
