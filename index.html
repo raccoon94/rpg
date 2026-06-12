@@ -2350,7 +2350,7 @@ function renderCharHeroDetail(i){
     ${heroGrowthHtml(i,'char')}
     ${heroDismantleHtml(i)}
     <div class="card">
-      ${art?`<img src="${art}${AV}" alt="${hero.name}" style="width:100%;max-height:220px;object-fit:contain;border-radius:10px;background:#f4efe6;margin-bottom:7px">`:''}
+      ${art?`<img src="${art}${AV}" alt="${hero.name}" style="width:100%;max-height:220px;object-fit:contain;border-radius:10px;background:transparent;margin-bottom:7px">`:''}
       <div style="font-weight:bold;color:${heroCls(hero).color}">"${data.quote||''}"</div>
       <div class="small" style="margin-top:6px;line-height:1.5">${data.profile||''}</div>
     </div>`;
@@ -3500,7 +3500,7 @@ function viewHeroDetail(i){
     </div>
     ${heroGrowthHtml(i,'panel')}
     <div class="card">
-      ${art?`<img src="${art}${AV}" alt="${hero.name}" style="width:100%;max-height:260px;object-fit:contain;border-radius:10px;margin-bottom:8px;background:#f4efe6">`:''}
+      ${art?`<img src="${art}${AV}" alt="${hero.name}" style="width:100%;max-height:260px;object-fit:contain;border-radius:10px;margin-bottom:8px;background:transparent">`:''}
       <div style="font-weight:bold;color:${heroCls(hero).color}">"${data.quote||''}"</div>
       <div class="small" style="margin-top:7px;line-height:1.55">${data.profile||''}</div>
       <div class="small" style="margin-top:7px;line-height:1.55">스토리: ${data.story||''}</div>
