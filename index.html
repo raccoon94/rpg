@@ -812,8 +812,7 @@ const HEROES = [
   { id:'lin', name:'린', emoji:'🔫', cls:'gun', attr:'바람', aura:'#7fd0ff', bonus:0.20, fx:'water', fxEmoji:'🌀',
     costumes:[
       { id:'lin_default', name:'기본', img:'assets/char/base/lin_base.png', sd:'assets/char/sd_custom/sd_viola.png', price:0, desc:'총잡이 기본 복장' },
-      { id:'lin_swim', name:'수영복', img:'assets/skins/swim.png', price:1500, aura:'#22d3ee', bonus:0.05, fxEmoji:'💧', scene:'assets/bg/beach.png', desc:'여름 수영복 · 해변 배경' },
-      { id:'lin_summer_event', name:'물총 축제', img:'assets/char/event/lin_summer_cutout.png', sd:'assets/char/sd_custom/sd_viola.png', price:1800, aura:'#38d5ff', bonus:0.08, fxEmoji:'💦', scene:'assets/bg/beach.png', desc:'여름 이벤트 복장 · 바람과 물총 축제' },
+      { id:'lin_summer_event', name:'물총 축제', img:'assets/char/event/lin_summer_cutout.png', sd:'assets/char/sd_custom/sd_viola.png', price:1800, aura:'#38d5ff', bonus:0.08, fxEmoji:'💦', scene:'assets/bg/beach.png', artScale:1.46, desc:'여름 이벤트 복장 · 바람과 물총 축제' },
     ]},
   { id:'rubia', name:'루비아', emoji:'🔥', cls:'magic', attr:'화염', aura:'#ff6b6b', bonus:0.20, fx:'flame', fxEmoji:'🔥',
     costumes:[
@@ -2213,6 +2212,10 @@ function heroDisplayScene(h){
   const c = heroEquippedCostume(h);
   return (c && c.scene) ? c.scene : 'assets/bg/home.png';
 }
+function heroDisplayScale(h){
+  const c = heroEquippedCostume(h);
+  return (c && c.artScale) ? c.artScale : 1.25;
+}
 function heroSdVisual(h, cls='heroListImg'){
   const art = heroSdArt(h);
   return art.img ? `<img class="${cls}" src="${art.img}${AV}" alt="${h.name}">` : `<span class="hp-emoji" style="font-size:26px">${h.emoji}</span>`;
@@ -2379,6 +2382,10 @@ function renderCharLeftArt(hero){
     img.src = (art || skin.img) + AV;
     if(!selected && skin.bg){ img.style.objectFit='cover'; img.style.objectPosition='center 14%'; }
     else { img.style.objectFit='contain'; img.style.objectPosition='center top'; }
+    if(selected){
+      img.style.transform = `scale(${heroDisplayScale(selected)})`;
+      img.style.transformOrigin = 'left top';
+    }
     img.onerror = function(){ artEl.innerHTML = `<div class="homeEmoji">${selected ? selected.emoji : skin.emoji}</div>`; };
     artEl.appendChild(img);
   }
