@@ -447,6 +447,19 @@
   .charHeroItem .heroFace img { width:120%; height:120%; object-fit:contain; filter:drop-shadow(0 3px 4px #0008); }
   #charHeroList .heroListImg { width:100%; max-height:96px; object-fit:contain; filter:drop-shadow(0 4px 5px #0008); }
   #charHeroList .charHeroItem .heroFace .heroListImg { width:120%; height:120%; max-height:none; }
+  #charHallTabs { position:absolute; left:50%; bottom:14px; transform:translateX(-50%); z-index:7; display:flex; gap:7px;
+    width:min(330px,58%); justify-content:center; padding:6px; border:1px solid #343a66; border-radius:14px;
+    background:linear-gradient(180deg,#181a30f2,#0b0d20f4); box-shadow:0 8px 24px #0009, inset 0 1px 0 #ffffff14; }
+  #charHallTabs button { flex:1; min-width:0; border:1px solid #343a66; border-radius:10px; padding:8px 4px;
+    background:linear-gradient(160deg,#23264a,#171a34); color:#cfd4ff; font-weight:900; font-size:12px; }
+  #charHallTabs button.active { color:#fff; border-color:#ffd866; box-shadow:0 0 12px #ffd86655; background:linear-gradient(160deg,#7a4a17,#3b2a12); }
+  .charShowcase { width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:10px; color:#fff; text-align:center; filter:drop-shadow(0 10px 18px #000a); }
+  .charShowcase .gearBig { font-size:132px; line-height:1; animation:floaty 2.4s ease-in-out infinite; }
+  .charShowcase .petBigImg { max-width:86%; max-height:58%; object-fit:contain; filter:drop-shadow(0 12px 18px #000a); animation:floaty 2.6s ease-in-out infinite; }
+  .charShowcase .showcaseTitle { font-size:24px; font-weight:1000; text-shadow:0 3px 8px #000; }
+  .charShowcase .showcaseSub { max-width:70%; font-size:12px; color:#dfe4ff; line-height:1.45; text-shadow:0 2px 5px #000; }
+  @keyframes floaty { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-8px); } }
   .growGrid { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:8px; }
   .growPill { background:#11142a; border:1px solid #343a66; border-radius:9px; padding:7px; font-size:11px; color:#c9cdf0; }
 
@@ -686,6 +699,11 @@
   </div>
   <button id="homeChange" onclick="showCharCostumes()">👗 코스튬 변경</button>
   <button id="homeEnter" onclick="renderCharHeroList()">영웅 목록</button>
+  <div id="charHallTabs">
+    <button data-hall-tab="hero">영웅</button>
+    <button data-hall-tab="gear">장비</button>
+    <button data-hall-tab="pet">펫</button>
+  </div>
 </div>
 
 <div id="menuOverlay" onclick="if(event.target.id==='menuOverlay')closeMenu()">
@@ -905,6 +923,9 @@ let heroDetailIdx = null;      // 영웅 상세(장비) 화면에서 보고있�
 let summonView = 'hero';
 let partyPickUid = null;       // 영웅 탭에서 배치 슬롯을 고르는 중인 영웅
 let selectedCharHeroIdx = null; // 영웅소에서 왼쪽 일러스트로 보고 있는 영웅
+let charHallTab = 'hero';       // 영웅소 하단 탭
+let selectedCharGear = '무기';  // 영웅소 장비 탭에서 보고 있는 장비
+let selectedCharPetIdx = 0;     // 영웅소 펫 탭에서 보고 있는 펫
 
 // 영웅 풀
 // 모험가 동료 캐릭터 — 이름·직업·서사
@@ -2423,7 +2444,150 @@ function renderCharLeftArt(hero){
   document.getElementById('cvName').textContent = selected ? selected.name : skin.name;
   document.getElementById('cvLv').textContent = selected ? heroLevel(selected) : G.plv;
 }
+function syncCharHallTabs(){
+  document.querySelectorAll('#charHallTabs button').forEach(btn=>btn.classList.toggle('active', btn.dataset.hallTab===charHallTab));
+  const costumeBtn = document.getElementById('homeChange');
+  if(costumeBtn) costumeBtn.style.display = charHallTab==='hero' ? 'block' : 'none';
+}
+function setCharHallTab(tab){
+  charHallTab = tab;
+  heroDetailIdx = null;
+  if(tab==='gear') renderCharGear();
+  else if(tab==='pet') renderCharPet();
+  else renderChar();
+}
+function charGearMeta(k){
+  return {
+    '무기': {emo:'🗡️', title:'무기', label:'공격력', unit:'', value:lv=>lv*8, next:lv=>(lv+1)*8, desc:'전투 영웅의 기본 공격력을 끌어올리는 핵심 장비'},
+    '방어구': {emo:'🛡️', title:'방어구', label:'방어력', unit:'', value:lv=>lv*6, next:lv=>(lv+1)*6, desc:'영웅이 받는 피해를 줄이는 방어 장비'},
+    '악세': {emo:'💍', title:'악세', label:'치명타공격력', unit:'%', value:lv=>lv*2, next:lv=>(lv+1)*2, desc:'치명타 피해를 높여 폭발력을 더하는 장신구'}
+  }[k];
+}
+function renderCharGearLeft(){
+  const meta = charGearMeta(selectedCharGear) || charGearMeta('무기');
+  const lv = G.gear[selectedCharGear] || 0;
+  const artEl = document.getElementById('homeArtFull');
+  const key = `gear:${selectedCharGear}:${lv}`;
+  if(artEl.dataset.key !== key){
+    artEl.dataset.key = key;
+    artEl.innerHTML = `<div class="charShowcase gearShowcase">
+      <div class="gearBig">${meta.emo}</div>
+      <div class="showcaseTitle">${meta.title} +${lv}</div>
+      <div class="showcaseSub">${meta.label} +${meta.value(lv).toLocaleString()}${meta.unit}<br>${meta.desc}</div>
+    </div>`;
+  }
+  document.getElementById('charView').classList.remove('fullArt');
+  const sc = document.getElementById('homeScene');
+  sc.style.backgroundImage = `url('assets/bg/home.png${AV}')`;
+  sc.style.backgroundSize='cover'; sc.style.backgroundPosition='center'; sc.style.backgroundRepeat='no-repeat';
+  document.getElementById('charView').style.setProperty('--glow', '#ffd866');
+  document.getElementById('cvName').textContent = `${meta.title} 장비`;
+  document.getElementById('cvLv').textContent = lv;
+}
+function renderCharGearList(){
+  const box = document.getElementById('charHeroList');
+  if(!box) return;
+  let h = `<h3>장비 목록</h3><div class="card small">왼쪽 일러스트는 선택한 장비를 보여줘요. 강화는 전체 전투 능력에 적용됩니다.</div>`;
+  ['무기','방어구','악세'].forEach(k=>{
+    const meta = charGearMeta(k);
+    const lv = G.gear[k] || 0;
+    const one = gearCostMany(k, 1);
+    const ten = gearCostMany(k, 10);
+    const active = selectedCharGear===k;
+    h += `<div class="charHeroItem" onclick="selectCharGear('${k}')" style="${active?'border-color:#ffd866;box-shadow:0 0 12px #ffd86644':''}">
+      <div class="heroFace" style="border-color:#ffd866;background:radial-gradient(circle,#ffd86644,#15172c)">${meta.emo}</div>
+      <div class="heroMeta">
+        <div class="heroName">${meta.title} +${lv}</div>
+        <div class="heroPower">${meta.label} +${meta.value(lv).toLocaleString()}${meta.unit} → +${meta.next(lv).toLocaleString()}${meta.unit}</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:-4px">
+      <div class="gearBtns" style="width:100%">
+        <button class="btn gold" onclick="selectedCharGear='${k}';upgradeGear('${k}',1)" ${G.gold<one.total?'disabled':''}><span class="goldIcon"></span>${one.total.toLocaleString()} +1</button>
+        <button class="btn gold" onclick="selectedCharGear='${k}';upgradeGear('${k}',10)" ${G.gold<ten.total?'disabled':''}><span class="goldIcon"></span>${ten.total.toLocaleString()} +10</button>
+      </div>
+    </div>`;
+  });
+  box.innerHTML = h;
+}
+function selectCharGear(k){
+  selectedCharGear = k;
+  renderCharGear();
+}
+function renderCharGear(){
+  charHallTab = 'gear';
+  syncCharHallTabs();
+  renderCharGearLeft();
+  renderCharGearList();
+}
+function renderCharPetLeft(){
+  if(G.pets.length && (!G.pets[selectedCharPetIdx] || selectedCharPetIdx<0)) selectedCharPetIdx = Math.max(0, G.activePet);
+  const p = G.pets[selectedCharPetIdx] || activePet() || PET_POOL.find(x=>x.grade==='UR') || PET_POOL[0];
+  const artEl = document.getElementById('homeArtFull');
+  const key = `pet:${p.name}:${p.grade}:${p.img}`;
+  if(artEl.dataset.key !== key){
+    artEl.dataset.key = key;
+    const img = p.img ? `<img class="petBigImg" src="${p.img}${AV}" alt="${p.name}">` : `<div class="gearBig">${p.emoji||'🐾'}</div>`;
+    artEl.innerHTML = `<div class="charShowcase petShowcase">
+      ${img}
+      <div class="showcaseTitle"><span class="txt-${p.grade}">[${p.grade}]</span> ${p.name}</div>
+      <div class="showcaseSub">${petBuffText(p)}${p.skill?`<br>${p.skill}`:''}</div>
+    </div>`;
+  }
+  document.getElementById('charView').classList.remove('fullArt');
+  const sc = document.getElementById('homeScene');
+  sc.style.backgroundImage = `url('assets/bg/home.png${AV}')`;
+  sc.style.backgroundSize='cover'; sc.style.backgroundPosition='center'; sc.style.backgroundRepeat='no-repeat';
+  document.getElementById('charView').style.setProperty('--glow', gradeColorOf(p.grade) || '#ffb74d');
+  document.getElementById('cvName').textContent = p.name;
+  document.getElementById('cvLv').textContent = p.grade;
+}
+function renderCharPetList(){
+  const box = document.getElementById('charHeroList');
+  if(!box) return;
+  let h = `<h3>펫 목록</h3><div class="card small">펫을 누르면 왼쪽에 크게 보이고, 장착하면 사냥터 능력에 적용됩니다.</div>`;
+  if(!G.pets.length){
+    h += `<div class="card small">보유한 펫이 없어요. 소환상점에서 펫을 소환해보세요.</div>`;
+  } else {
+    G.pets.forEach((p,i)=>{
+      const active = G.activePet===i;
+      const selected = selectedCharPetIdx===i;
+      h += `<div class="charHeroItem" onclick="selectCharPet(${i})" style="${selected?'border-color:'+gradeColorOf(p.grade):''}">
+        <div class="heroFace g-bg-${p.grade}" style="border-color:${gradeColorOf(p.grade)}">${petVisual(p,'heroListImg')}</div>
+        <div class="heroMeta">
+          <div class="heroName txt-${p.grade}">[${p.grade}] ${p.name} ${active?'<span style="font-size:10px;color:#3be38b">●장착</span>':''}</div>
+          <div class="heroPower">${petBuffText(p)}</div>
+        </div>
+        <button class="btn ${active?'':'gem'}" style="padding:6px 9px" onclick="event.stopPropagation();equipPetFromChar(${i})" ${active?'disabled':''}>${active?'장착중':'장착'}</button>
+      </div>`;
+    });
+  }
+  box.innerHTML = h;
+}
+function selectCharPet(i){
+  selectedCharPetIdx = i;
+  renderCharPet();
+}
+function equipPetFromChar(i){
+  selectedCharPetIdx = i;
+  G.activePet = i;
+  refreshTop(); updatePet();
+  renderCharPet();
+}
+function renderCharPet(){
+  charHallTab = 'pet';
+  syncCharHallTabs();
+  renderCharPetLeft();
+  renderCharPetList();
+}
+function bindCharHallTabs(){
+  document.querySelectorAll('#charHallTabs button').forEach(btn=>{
+    btn.onclick = ()=>setCharHallTab(btn.dataset.hallTab || 'hero');
+  });
+}
 function renderChar(){
+  charHallTab = 'hero';
+  syncCharHallTabs();
   if(selectedCharHeroIdx==null && G.heroes.length){
     const first = orderedCharHeroes()[0];
     if(first) selectedCharHeroIdx = first.i;
@@ -2478,6 +2642,8 @@ function renderCharHeroList(){
   box.innerHTML = h;
 }
 function showCharCostumes(){
+  charHallTab = 'hero';
+  syncCharHallTabs();
   const box = document.getElementById('charHeroList');
   if(!box) return;
   const hero = selectedCharHero();
@@ -2610,7 +2776,7 @@ function viewSummonCashShop(){
       <button class="btn gem" onclick="watchAd('gem');setTimeout(()=>setSummonShopMode('cash'),50)" ${adReady('gem')?'':'disabled'}>${G.adPass?'즉시 받기':(adReady('gem')?'광고 보기':adRemain('gem')+'초')}</button>
     </div></div>`;
 }
-function openChar(){ renderChar(); document.getElementById('charView').style.display='block'; updateTabsVisibility(); }
+function openChar(){ bindCharHallTabs(); renderChar(); document.getElementById('charView').style.display='block'; updateTabsVisibility(); }
 function closeChar(){ document.getElementById('charView').style.display='none'; updateTabsVisibility(); }
 function openMenu(){ updateHomeRes(); document.getElementById('menuOverlay').style.display='flex'; }
 function closeMenu(){ document.getElementById('menuOverlay').style.display='none'; }
@@ -3740,7 +3906,9 @@ function upgradeGear(k, amount=1){
   const pack=gearCostMany(k, amount);
   if(G.gold<pack.total) return;
   G.gold-=pack.total; G.gear[k]=(G.gear[k]||0)+pack.n;
-  refreshTop(); renderPanel();
+  refreshTop();
+  if(document.getElementById('charView')?.style.display==='block' && charHallTab==='gear') renderCharGear();
+  else renderPanel();
 }
 const GEAR_SUMMON_UP = {N:1, R:2, SR:4, SSR:10, UR:25};
 function rollSummonGear(){
@@ -4047,6 +4215,11 @@ function loadGame(){
       if(!G.daily) G.daily = { date:'', counts:{}, claimed:[] };
       if(!G.pets) G.pets = [];
       if(G.petCatalogVer !== PET_CATALOG_VERSION){
+        G.pets = [];
+        G.activePet = -1;
+        G.petCatalogVer = PET_CATALOG_VERSION;
+      }
+      if(G.pets.some(p=>!PET_POOL.some(x=>x.name===p.name && x.grade===p.grade))){
         G.pets = [];
         G.activePet = -1;
         G.petCatalogVer = PET_CATALOG_VERSION;
