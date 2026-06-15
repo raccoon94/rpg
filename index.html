@@ -1305,7 +1305,9 @@ const GRADES = [
 const MONSTERS = ["🟢","👹","🦂","🕷️","🐗","🦇","🐍","👻","🧟","🐲"];
 const MON_NAMES = ["슬라임","고블린","전갈","독거미","멧돼지","박쥐","독사","유령","좀비","드래곤"];
 const MON_ATTACK_TYPES = ['melee','melee','melee','ranged','melee','ranged','melee','ranged','melee','ranged'];
+const MON_ATTRIBUTES = ['자연','대지','암흑','자연','대지','바람','물/얼음','암흑','화염','번개'];
 function monsterAttackType(){ return MON_ATTACK_TYPES[(G.stage-1) % MON_ATTACK_TYPES.length] || 'melee'; }
+function monsterAttribute(){ return MON_ATTRIBUTES[(G.stage-1) % MON_ATTRIBUTES.length] || '대지'; }
 
 let monHpMax = 0, monHp = 0;
 
@@ -1321,7 +1323,7 @@ const ROLE_STAT_MULT = {
   gun:{atk:1.28,hp:.78,def:.74},
   mage:{atk:1.22,hp:.82,def:.72},
   magic:{atk:1.22,hp:.82,def:.72},
-  assassin:{atk:1.18,hp:.86,def:.78},
+  assassin:{atk:.96,hp:.86,def:.78},
   warrior:{atk:1.06,hp:1.06,def:1.04},
   sword:{atk:1.06,hp:1.06,def:1.04},
   knight:{atk:.98,hp:1.20,def:1.22},
@@ -1331,6 +1333,14 @@ const ROLE_STAT_MULT = {
 };
 function roleStatMult(h, key){ return (ROLE_STAT_MULT[h?.cls] && ROLE_STAT_MULT[h.cls][key]) || 1; }
 const GAME_ATTRIBUTES = ['대지','자연','화염','물/얼음','빛','암흑','번개','바람'];
+const ATTRIBUTE_ADVANTAGE = {
+  '화염':'자연', '자연':'대지', '대지':'번개', '번개':'물/얼음',
+  '물/얼음':'화염', '빛':'암흑', '암흑':'바람', '바람':'빛'
+};
+const ATTRIBUTE_SYNERGY = {
+  '화염':'바람', '바람':'번개', '번개':'물/얼음', '물/얼음':'대지',
+  '대지':'자연', '자연':'빛', '빛':'암흑', '암흑':'화염'
+};
 const ATTRIBUTE_MAP = {
   '대지':'대지', '땅':'대지', '자연':'자연', '숲':'자연',
   '불':'화염', '화염':'화염',
@@ -1350,6 +1360,40 @@ function heroAttributes(h){
 function partyAttributes(){
   const attrs = partyHeroes().flatMap(heroAttributes);
   return attrs.filter((v,i,a)=>a.indexOf(v)===i);
+}
+function partyAttributeCounts(){
+  const counts = {};
+  partyHeroes().forEach(h=>{
+    const attr = heroAttributes(h)[0] || '대지';
+    counts[attr] = (counts[attr]||0) + 1;
+  });
+  return counts;
+}
+function attrMatchupInfo(){
+  const monAttr = monsterAttribute();
+  const advantaged = partyHeroes().filter(h=>ATTRIBUTE_ADVANTAGE[heroAttributes(h)[0] || '대지'] === monAttr);
+  const bonus = advantaged.length ? 0.20 + Math.max(0, advantaged.length-1)*0.05 : 0;
+  return { monster:monAttr, heroes:advantaged.map(h=>h.name), bonus };
+}
+function attrSynergyInfo(){
+  const counts = partyAttributeCounts();
+  const attrs = Object.keys(counts);
+  let sameStacks = 0;
+  attrs.forEach(a=>{ if(counts[a]>=2) sameStacks += counts[a]-1; });
+  const seenPairs = new Set();
+  let pairStacks = 0;
+  attrs.forEach(a=>{
+    const b = ATTRIBUTE_SYNERGY[a];
+    if(attrs.includes(b)){
+      const key = [a,b].sort().join('|');
+      if(!seenPairs.has(key)){
+        seenPairs.add(key);
+        pairStacks += Math.min(counts[a]||0, counts[b]||0);
+      }
+    }
+  });
+  const bonus = sameStacks*0.08 + pairStacks*0.05;
+  return { sameStacks, pairStacks, bonus, counts };
 }
 function heroEquipSum(h){ const e=h.equip||{무기:0,방어구:0,장신구:0}; return e.무기+e.방어구+e.장신구; }
 function heroAffinity(h){ return G.affinity[h.name]||0; }
@@ -1423,8 +1467,9 @@ function synergyInfo(){
   return { count:best, cls:bestCls, bonus };
 }
 function synergyMult(){ return 1 + synergyInfo().bonus; }
+function attrSynergyMult(){ return 1 + attrSynergyInfo().bonus; }
 function guildMult(){ return (G.guild && G.guild.joined) ? 1.10 : 1; }  // 길드 가입 시 공격력 +10%
-function totalAtk(){ return Math.round((G.atk + heroAtkTotal() + gearAtkTotal()) * skinMult() * synergyMult() * petAtkMult() * guildMult()); }
+function totalAtk(){ return Math.round((G.atk + heroAtkTotal() + gearAtkTotal()) * skinMult() * synergyMult() * attrSynergyMult() * petAtkMult() * guildMult()); }
 const HUNT_MAX_LEVEL = 1000;
 const SPEED_MAX_LEVEL = 100;
 const SPECIAL_MAX_LEVEL = 50;
@@ -1457,7 +1502,8 @@ function totalCritDmgMult(){ return G.critDmg * critDmgUpgradeMult() * gearCritD
 function bossPowerBonus(){ return ((G.bossPower||1)-1) * (1.00/(SPECIAL_MAX_LEVEL-1)); }
 function bossDmgMult(){ return isBoss ? 1 + bossPowerBonus() : 1; }
 function attrDmgMult(){ return 1 + ((G.attrPower||1)-1) * (0.75/(SPECIAL_MAX_LEVEL-1)); }
-function huntDamageMult(){ return bossDmgMult() * attrDmgMult(); }
+function attrMatchupMult(){ return 1 + attrMatchupInfo().bonus; }
+function huntDamageMult(){ return bossDmgMult() * attrDmgMult() * attrMatchupMult(); }
 
 // ===== 몬스터 =====
 let isBoss = false;
@@ -1474,7 +1520,7 @@ function spawnMonster(){
   mEl.textContent = MONSTERS[idx];
   mEl.classList.toggle('boss', isBoss);
   nEl.classList.toggle('bossName', isBoss);
-  nEl.textContent = (isBoss?'👑 BOSS ':'') + MON_NAMES[idx] + ` · ${monsterAttackType()==='ranged'?'원거리':'근거리'}` + (G.stage>10? " +"+Math.floor(G.stage/10):"");
+  nEl.textContent = (isBoss?'👑 BOSS ':'') + MON_NAMES[idx] + ` · ${monsterAttribute()} · ${monsterAttackType()==='ranged'?'원거리':'근거리'}` + (G.stage>10? " +"+Math.floor(G.stage/10):"");
   if(isBoss) showToast('⚠️ BOSS 등장!', '#ff5e7a', true);
   updateHp();
   renderHeroRow();
@@ -1752,16 +1798,17 @@ function heroSkillCooldown(h, sk){
 }
 function heroSkillPower(h){
   const partySize = Math.max(1, partyHeroes().length);
-  return (heroEffAtk(h) + G.atk/partySize) * skinMult() * (1 + synergyInfo().bonus);
+  return (heroEffAtk(h) + G.atk/partySize) * skinMult() * (1 + synergyInfo().bonus) * attrSynergyMult();
 }
 function heroAttackType(h){
   const magic = ['mage','healer'];
   return magic.includes(h.cls) ? '마법' : '물리';
 }
 function heroCritRate(h){
-  const role = h.cls==='assassin' ? .10 : h.cls==='gunner' ? .08 : h.cls==='warrior' ? .04 : h.cls==='mage' ? .03 : .02;
-  const grade = (GRADE_RANK[h.grade]||0) * .015;
-  return Math.min(.95, totalCritRate() + role + grade);
+  return h.cls==='assassin' ? .20 : .10;
+}
+function heroCritDmg(h){
+  return h.cls==='assassin' ? 3.0 : 2.0;
 }
 function heroAttackSpeed(h){
   const base = {assassin:1.32, gunner:1.20, warrior:1.02, mage:.94, tanker:.86, healer:.90, knight:.96, sword:1.00, magic:.94, gun:1.16}[h.cls] || 1;
@@ -1776,6 +1823,7 @@ function heroStatDetailHtml(hero){
     ['체력', heroMaxHp(hero).toLocaleString()],
     ['방어력', heroDef(hero).toLocaleString()],
     ['치명타 확률', Math.round(heroCritRate(hero)*100)+'%'],
+    ['치명타 피해', `x${heroCritDmg(hero).toFixed(1)}`],
     ['공격속도', heroAttackSpeed(hero).toFixed(2)+'회/초'],
     ['속성', heroAttributes(hero).join(' / ') || '대지'],
     ['공격 타입', heroAttackType(hero)],
@@ -1815,7 +1863,9 @@ function castHeroSkill(h){
   const sk = pack.skills[st.idx % pack.skills.length];
   st.idx++;
   st.readyAt = Date.now() + heroSkillCooldown(h, sk);
-  castSkill(`${h.name} · ${sk.name}`, pack.color, sk.fx, sk.mult, false, heroSkillPower(h));
+  const crit = Math.random() < heroCritRate(h);
+  const critMult = crit ? heroCritDmg(h) : 1;
+  castSkill(`${crit?'CRIT ':''}${h.name} · ${sk.name}`, pack.color, sk.fx, sk.mult, false, heroSkillPower(h) * critMult);
 }
 function castSkill(name, color, fx, mult, multiHit, basePower){
   const b = document.getElementById('battle');
@@ -3822,7 +3872,12 @@ function viewStat(){
   const attrs = partyAttributes();
   const pet = activePet();
   const syn = synergyInfo();
+  const attrSyn = attrSynergyInfo();
+  const attrMatch = attrMatchupInfo();
   const percent = v => Math.round(v*100);
+  const attrCountText = Object.entries(attrSyn.counts).map(([a,n])=>`${a} ${n}`).join(' · ') || '없음';
+  const attrPairText = Object.entries(ATTRIBUTE_SYNERGY).map(([a,b])=>`${a}+${b}`).join(' / ');
+  const attrAdvText = Object.entries(ATTRIBUTE_ADVANTAGE).map(([a,b])=>`${a}>${b}`).join(' / ');
   const statRow = (label, value, note='') => `<div class="row"><div style="flex:1"><b>${label}</b>${note?`<div class="small">${note}</div>`:''}</div><b>${value}</b></div>`;
   return `<h3>내 능력치</h3>
     <div class="card">
@@ -3835,6 +3890,8 @@ function viewStat(){
       ${statRow('방어력', avgDef.toLocaleString(), `배치 영웅 평균 방어력 · 방어구 +${gearDefTotal().toLocaleString()}${pet?.buff==='def'?` · 펫 +${percent(petVal(pet))}%`:''}`)}
       ${statRow('속성', attrs.length ? attrs.join(' / ') : '대지', '배치 영웅 기준 적용 속성')}
       ${statRow('속성 데미지', `+${percent(attrDmgMult()-1)}%`, `특수강화 속성공격력 Lv.${G.attrPower} / ${SPECIAL_MAX_LEVEL}`)}
+      ${statRow('속성 상성', `+${percent(attrMatch.bonus)}%`, `${attrMatch.heroes.length?attrMatch.heroes.join(', '):'상성 영웅 없음'} → ${attrMatch.monster} 몬스터`)}
+      ${statRow('속성 시너지', `+${percent(attrSyn.bonus)}%`, `동속성 ${attrSyn.sameStacks}단계 · 조합 ${attrSyn.pairStacks}단계 · ${attrCountText}`)}
     </div>
     <div class="card">
       <div style="font-weight:bold;margin-bottom:5px">적용 보너스</div>
@@ -3842,6 +3899,8 @@ function viewStat(){
       ${statRow('장비', `무기 +${gearAtkTotal().toLocaleString()} / 방어구 +${gearDefTotal().toLocaleString()} / 악세 치명타 x${gearCritDmgMult().toFixed(2)}`)}
       ${statRow('특수강화', `치확 +${percent(huntCritBonus())}% · 치피 x${critDmgUpgradeMult().toFixed(2)} · 보스 +${percent(bossPowerBonus())}% · 속성 +${percent(attrDmgMult()-1)}%`)}
       ${statRow('코스튬/시너지/길드', `코스튬 +${percent(skinMult()-1)}% · 시너지 +${percent(syn.bonus)}% · 길드 ${G.guild?.joined?'+10%':'없음'}`, syn.bonus>0 ? `${CLASSES[syn.cls]?.name||'직업'} ${syn.count}명 시너지` : '같은 직업 3명부터 시너지 적용')}
+      ${statRow('속성 상성표', attrAdvText)}
+      ${statRow('좋은 속성 조합', attrPairText)}
     </div>
     <div class="card small">게임 속성은 대지 · 자연 · 화염 · 물/얼음 · 빛 · 암흑 · 번개 · 바람 8가지만 적용됩니다.</div>`;
 }
