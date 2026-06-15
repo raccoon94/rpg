@@ -208,6 +208,20 @@
   .skillDetail { margin-top:7px; padding:8px; border:1px solid #343a66; border-radius:10px; background:#10132699; }
   .skillDetail .name { font-size:12px; font-weight:900; }
   .skillDetail .desc { margin-top:4px; font-size:10px; color:#c9cdf0; line-height:1.45; }
+  .statPanel { padding-bottom:18px; overflow-x:hidden; }
+  .statSummary { border-color:#ffd86666; background:linear-gradient(160deg,#2b2a4a,#17182f); }
+  .statSummary .caption { font-size:11px; color:#c9cdf0; line-height:1.45; word-break:keep-all; }
+  .statSummary .total { font-size:25px; font-weight:900; color:#ffd866; margin:4px 0 2px; letter-spacing:0; }
+  .statGridList { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
+  .statItem { min-width:0; background:linear-gradient(160deg,#23264a,#181a32); border:1px solid #343a66;
+    border-radius:10px; padding:8px; overflow:hidden; }
+  .statItem .statLabel { font-size:11px; color:#9aa0d0; font-weight:800; line-height:1.25; word-break:keep-all; }
+  .statItem .statValue { margin-top:3px; font-size:14px; font-weight:900; color:#fff; line-height:1.3;
+    overflow-wrap:anywhere; word-break:keep-all; }
+  .statItem .statNote { margin-top:4px; font-size:10px; color:#b7bce8; line-height:1.45;
+    overflow-wrap:anywhere; word-break:keep-all; }
+  .statWide { grid-column:1 / -1; }
+  .statHelp { line-height:1.55; word-break:keep-all; overflow-wrap:anywhere; }
 
   /* 버튼 */
   .btn { background:linear-gradient(160deg,#5b73ff,#3b4fe0); color:#fff; border:none; padding:9px 13px; border-radius:10px;
@@ -503,6 +517,8 @@
     #panel h3 { font-size:12px; margin-bottom:6px; }
     #panel .small { font-size:10px; }
     #panel .btn { padding:6px 7px; font-size:10.5px; border-radius:8px; }
+    .statGridList { grid-template-columns:1fr; gap:6px; }
+    .statSummary .total { font-size:21px; }
     #tabs { position:fixed; left:0; right:0; bottom:0; height:52px; display:flex; z-index:180;
       box-shadow:0 -4px 14px #0009; }
     #tabs .tab { font-size:12px; padding:13px 0 10px; }
@@ -3935,31 +3951,40 @@ function viewStat(){
   const attrCountText = Object.entries(attrSyn.counts).map(([a,n])=>`${a} ${n}`).join(' · ') || '없음';
   const attrPairText = Object.entries(ATTRIBUTE_SYNERGY).map(([a,b])=>`${a}+${b}`).join(' / ');
   const attrAdvText = Object.entries(ATTRIBUTE_ADVANTAGE).map(([a,b])=>`${a}>${b}`).join(' / ');
-  const statRow = (label, value, note='') => `<div class="row"><div style="flex:1"><b>${label}</b>${note?`<div class="small">${note}</div>`:''}</div><b>${value}</b></div>`;
-  return `<h3>내 능력치</h3>
-    <div class="card">
-      <div class="small">펫 + 특수강화 + 장비 적용 총합</div>
-      <div style="font-size:24px;font-weight:bold;color:#ffd866;margin:3px 0 6px">${totalAtk().toLocaleString()}</div>
-      ${statRow('공격력', totalAtk().toLocaleString(), `기본 ${G.atk.toLocaleString()} + 영웅 ${heroAtkTotal().toLocaleString()} + 무기 ${gearAtkTotal().toLocaleString()}`)}
-      ${statRow('치명타 확률', `${percent(totalCritRate())}%`, `기본 ${percent(G.critRate)}% + 펫 ${percent(petCritBonus())}% + 특수강화 ${percent(huntCritBonus())}%`)}
-      ${statRow('치명타 데미지', `x${totalCritDmgMult().toFixed(2)}`, `기본 x${G.critDmg.toFixed(2)} · 특수강화 x${critDmgUpgradeMult().toFixed(2)} · 악세 x${gearCritDmgMult().toFixed(2)}`)}
-      ${statRow('전투 체력', partyHp.toLocaleString(), `배치 영웅 ${party.length}명의 체력 합산${pet?.buff==='hp'?` · 펫 +${percent(petVal(pet))}%`:''}`)}
-      ${statRow('방어력', avgDef.toLocaleString(), `배치 영웅 평균 방어력 · 방어구 +${gearDefTotal().toLocaleString()}${pet?.buff==='def'?` · 펫 +${percent(petVal(pet))}%`:''}`)}
-      ${statRow('속성', attrs.length ? attrs.join(' / ') : '대지', '배치 영웅 기준 적용 속성')}
-      ${statRow('속성 데미지', `+${percent(attrDmgMult()-1)}%`, `특수강화 속성공격력 Lv.${G.attrPower} / ${SPECIAL_MAX_LEVEL}`)}
-      ${statRow('속성 상성', `+${percent(attrMatch.bonus)}%`, `${attrMatch.heroes.length?attrMatch.heroes.join(', '):'상성 영웅 없음'} → ${attrMatch.monster} 몬스터`)}
-      ${statRow('속성 시너지', `+${percent(attrSyn.bonus)}%`, `동속성 ${attrSyn.sameStacks}단계 · 조합 ${attrSyn.pairStacks}단계 · ${attrCountText}`)}
+  const statCard = (label, value, note='', wide=false) => `<div class="statItem ${wide?'statWide':''}">
+      <div class="statLabel">${label}</div>
+      <div class="statValue">${value}</div>
+      ${note?`<div class="statNote">${note}</div>`:''}
+    </div>`;
+  return `<div class="statPanel">
+    <h3>내 능력치</h3>
+    <div class="card statSummary">
+      <div class="caption">펫 + 특수강화 + 장비 적용 총합</div>
+      <div class="total">${totalAtk().toLocaleString()}</div>
+      <div class="small">아래로 스크롤해서 모든 보너스를 확인할 수 있습니다.</div>
     </div>
-    <div class="card">
-      <div style="font-weight:bold;margin-bottom:5px">적용 보너스</div>
-      ${statRow('펫', pet ? `${pet.name} · ${petBuffText(pet)}` : '착용 없음')}
-      ${statRow('장비', `무기 +${gearAtkTotal().toLocaleString()} / 방어구 +${gearDefTotal().toLocaleString()} / 악세 치명타 x${gearCritDmgMult().toFixed(2)}`)}
-      ${statRow('특수강화', `치확 +${percent(huntCritBonus())}% · 치피 x${critDmgUpgradeMult().toFixed(2)} · 보스 +${percent(bossPowerBonus())}% · 속성 +${percent(attrDmgMult()-1)}%`)}
-      ${statRow('코스튬/시너지/길드', `코스튬 +${percent(skinMult()-1)}% · 시너지 +${percent(syn.bonus)}% · 길드 ${G.guild?.joined?'+10%':'없음'}`, syn.bonus>0 ? `${CLASSES[syn.cls]?.name||'직업'} ${syn.count}명 시너지` : '같은 직업 3명부터 시너지 적용')}
-      ${statRow('속성 상성표', attrAdvText)}
-      ${statRow('좋은 속성 조합', attrPairText)}
+    <div class="statGridList">
+      ${statCard('공격력', totalAtk().toLocaleString(), `기본 ${G.atk.toLocaleString()} + 영웅 ${heroAtkTotal().toLocaleString()} + 무기 ${gearAtkTotal().toLocaleString()}`)}
+      ${statCard('치명타 확률', `${percent(totalCritRate())}%`, `기본 ${percent(G.critRate)}% + 펫 ${percent(petCritBonus())}% + 특수강화 ${percent(huntCritBonus())}%`)}
+      ${statCard('치명타 데미지', `x${totalCritDmgMult().toFixed(2)}`, `기본 x${G.critDmg.toFixed(2)} · 특수강화 x${critDmgUpgradeMult().toFixed(2)} · 악세 x${gearCritDmgMult().toFixed(2)}`)}
+      ${statCard('전투 체력', partyHp.toLocaleString(), `배치 영웅 ${party.length}명 체력 합산${pet?.buff==='hp'?` · 펫 +${percent(petVal(pet))}%`:''}`)}
+      ${statCard('방어력', avgDef.toLocaleString(), `배치 영웅 평균 방어력 · 방어구 +${gearDefTotal().toLocaleString()}${pet?.buff==='def'?` · 펫 +${percent(petVal(pet))}%`:''}`)}
+      ${statCard('속성', attrs.length ? attrs.join(' / ') : '대지', '배치 영웅 기준 적용 속성')}
+      ${statCard('속성 데미지', `+${percent(attrDmgMult()-1)}%`, `특수강화 속성공격력 Lv.${G.attrPower} / ${SPECIAL_MAX_LEVEL}`)}
+      ${statCard('속성 상성', `+${percent(attrMatch.bonus)}%`, `${attrMatch.heroes.length?attrMatch.heroes.join(', '):'상성 영웅 없음'} → ${attrMatch.monster} 몬스터`, true)}
+      ${statCard('속성 시너지', `+${percent(attrSyn.bonus)}%`, `동속성 ${attrSyn.sameStacks}단계 · 조합 ${attrSyn.pairStacks}단계 · ${attrCountText}`, true)}
     </div>
-    <div class="card small">게임 속성은 대지 · 자연 · 화염 · 물/얼음 · 빛 · 암흑 · 번개 · 바람 8가지만 적용됩니다.</div>`;
+    <h3 style="margin-top:12px">적용 보너스</h3>
+    <div class="statGridList">
+      ${statCard('펫', pet ? `${pet.name} · ${petBuffText(pet)}` : '착용 없음', '', true)}
+      ${statCard('장비', `무기 +${gearAtkTotal().toLocaleString()} / 방어구 +${gearDefTotal().toLocaleString()} / 악세 치명타 x${gearCritDmgMult().toFixed(2)}`, '', true)}
+      ${statCard('특수강화', `치확 +${percent(huntCritBonus())}% · 치피 x${critDmgUpgradeMult().toFixed(2)} · 보스 +${percent(bossPowerBonus())}% · 속성 +${percent(attrDmgMult()-1)}%`, '', true)}
+      ${statCard('코스튬/시너지/길드', `코스튬 +${percent(skinMult()-1)}% · 시너지 +${percent(syn.bonus)}% · 길드 ${G.guild?.joined?'+10%':'없음'}`, syn.bonus>0 ? `${CLASSES[syn.cls]?.name||'직업'} ${syn.count}명 시너지` : '같은 직업 3명부터 시너지 적용', true)}
+      ${statCard('속성 상성표', attrAdvText, '', true)}
+      ${statCard('좋은 속성 조합', attrPairText, '', true)}
+    </div>
+    <div class="card small statHelp" style="margin-top:9px">게임 속성은 대지 · 자연 · 화염 · 물/얼음 · 빛 · 암흑 · 번개 · 바람 8가지만 적용됩니다.</div>
+  </div>`;
 }
 
 // ===== 상단 갱신 =====
