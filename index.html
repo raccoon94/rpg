@@ -790,6 +790,7 @@ const G = {
   ownedCostumes: ['lin_default','rubia_default','sapphira_default','silvia_default','kael_default','emeria_default','kaira_default','kairon_default'], // 보유 코스튬(기본은 기본보유)
   mats: {},                    // 요일던전 재료 (id: 개수) — 나중에 무기 초월에 사용
   heroDust: 0,                 // 영웅 분해 재료
+  petDust: 0,                  // 펫 분해 재료
   dungeon: { date:'', left:3 },// 요일던전 일일 입장 횟수
   mail: [                      // 우편함 (패키지/공지)
     { id:'welcome', title:'🎁 환영 패키지', body:'게임 시작을 환영합니다! 보석과 골드를 받으세요.', reward:{gem:300, gold:1000}, claimed:false },
@@ -1328,7 +1329,8 @@ function petVisual(p, cls='petListImg'){
   return p.img ? `<img class="${cls}" src="${p.img}${AV}" alt="${p.name}" onerror="this.onerror=null;this.outerHTML='<span class=&quot;hp-emoji&quot; style=&quot;font-size:26px&quot;>${safe}</span>'">` : `<span class="hp-emoji" style="font-size:26px">${safe}</span>`;
 }
 function activePet(){ return (G.activePet>=0 && G.pets[G.activePet]) ? G.pets[G.activePet] : null; }
-function petVal(p){ const b=p ? PET_BUFF[p.buff] : null; return b ? (b.val[p.grade]||0) : 0; }
+function petGrowthMult(p){ return p ? 1 + (petLevel(p)-1)*0.012 + petAscCount(p)*0.12 : 1; }
+function petVal(p){ const b=p ? PET_BUFF[p.buff] : null; return b ? (b.val[p.grade]||0) * petGrowthMult(p) : 0; }
 function petAtkMult(){ const p=activePet(); return (p&&p.buff==='atk') ? 1+petVal(p) : 1; }
 function petCritBonus(){ const p=activePet(); return (p&&p.buff==='crit') ? petVal(p) : 0; }
 function petHpMult(){ const p=activePet(); return (p&&p.buff==='hp') ? 1+petVal(p) : 1; }
@@ -1387,6 +1389,8 @@ const HERO_GRADE_ORDER = ['N','R','SR','SSR','UR'];
 const HERO_GRADE_MULT = {N:.45, R:.68, SR:1, SSR:3.5, UR:9};
 const HERO_DUST_ICON = '💠';
 const HERO_DUST_BY_GRADE = {N:1, R:3, SR:10, SSR:40, UR:120};
+const PET_DUST_ICON = '🐾';
+const PET_DUST_BY_GRADE = {N:1, R:3, SR:10, SSR:35, UR:100};
 const HERO_MAT = { 린:'wind', 루비아:'fire', 실비아:'water', 사피라:'water', 카엘:'fire', 에메리아:'wind', 카이라:'dark', 카이론:'water' };
 const ROLE_STAT_MULT = {
   gunner:{atk:1.28,hp:.78,def:.74},
@@ -2530,8 +2534,8 @@ function renderCharPetLeft(){
     const img = p.img ? `<img class="petBigImg" src="${p.img}${AV}" alt="${p.name}">` : `<div class="gearBig">${p.emoji||'🐾'}</div>`;
     artEl.innerHTML = `<div class="charShowcase petShowcase">
       ${img}
-      <div class="showcaseTitle"><span class="txt-${p.grade}">[${p.grade}]</span> ${p.name}</div>
-      <div class="showcaseSub">${petBuffText(p)}${p.skill?`<br>${p.skill}`:''}</div>
+      <div class="showcaseTitle"><span class="txt-${p.grade}">[${p.grade}]</span> ${p.name} Lv.${petLevel(p)}/${petCap(p)}</div>
+      <div class="showcaseSub">펫 전투력 ${petPower(p).toLocaleString()}<br>${petBuffText(p)}${p.skill?`<br>${p.skill}`:''}</div>
     </div>`;
   }
   document.getElementById('charView').classList.remove('fullArt');
@@ -2545,21 +2549,22 @@ function renderCharPetLeft(){
 function renderCharPetList(){
   const box = document.getElementById('charHeroList');
   if(!box) return;
-  let h = `<h3>펫 목록</h3><div class="card small">펫을 누르면 왼쪽에 크게 보이고, 장착하면 사냥터 능력에 적용됩니다.</div>`;
+  let h = `<h3>펫 목록</h3><div class="card small">${PET_DUST_ICON} 펫 결정 <b>${(G.petDust||0).toLocaleString()}</b> · 펫을 누르면 왼쪽에 크게 보이고, 성장/분해할 수 있어요.</div>`;
   if(!G.pets.length){
     h += `<div class="card small">보유한 펫이 없어요. 소환상점에서 펫을 소환해보세요.</div>`;
   } else {
-    G.pets.forEach((p,i)=>{
+    orderedPetEntries().forEach(({pet:p,i})=>{
       const active = G.activePet===i;
       const selected = selectedCharPetIdx===i;
       h += `<div class="charHeroItem" onclick="selectCharPet(${i})" style="${selected?'border-color:'+gradeColorOf(p.grade):''}">
         <div class="heroFace g-bg-${p.grade}" style="border-color:${gradeColorOf(p.grade)}">${petVisual(p,'heroListImg')}</div>
         <div class="heroMeta">
-          <div class="heroName txt-${p.grade}">[${p.grade}] ${p.name} ${active?'<span style="font-size:10px;color:#3be38b">●장착</span>':''}</div>
-          <div class="heroPower">${petBuffText(p)}</div>
+          <div class="heroName txt-${p.grade}">[${p.grade}] ${p.name} Lv.${petLevel(p)} ${active?'<span style="font-size:10px;color:#3be38b">●장착</span>':''}</div>
+          <div class="heroPower">전투력 ${petPower(p).toLocaleString()} · ${petBuffText(p)}</div>
         </div>
         <button class="btn ${active?'':'gem'}" style="padding:6px 9px" onclick="event.stopPropagation();equipPetFromChar(${i})" ${active?'disabled':''}>${active?'장착중':'장착'}</button>
-      </div>`;
+      </div>
+      ${selected ? petGrowthHtml(i,'char') + petDismantleHtml(i,'char') : ''}`;
     });
   }
   box.innerHTML = h;
@@ -2884,7 +2889,10 @@ function viewBag(){
   let h=`<h3>🧪 초월 재료</h3>
   <div class="card"><div class="row"><div style="font-size:24px">${HERO_DUST_ICON}</div>
     <div style="flex:1;text-align:left"><b>영웅 결정</b><div class="small">영웅 분해로 획득 · 영웅 초월/등급업에 사용</div></div>
-    <b style="font-size:16px">${(G.heroDust||0).toLocaleString()}</b></div></div>`;
+    <b style="font-size:16px">${(G.heroDust||0).toLocaleString()}</b></div></div>
+  <div class="card"><div class="row"><div style="font-size:24px">${PET_DUST_ICON}</div>
+    <div style="flex:1;text-align:left"><b>펫 결정</b><div class="small">펫 분해로 획득 · 펫 초월/등급업에 사용</div></div>
+    <b style="font-size:16px">${(G.petDust||0).toLocaleString()}</b></div></div>`;
   for(const k in MATERIALS){
     const m=MATERIALS[k], n=G.mats[k]||0;
     h+=`<div class="card" style="${n>0?'':'opacity:.55'}"><div class="row">
@@ -3353,8 +3361,74 @@ function randomPetByGrade(grade){
 function makePetFromBase(base, grade){
   return {
     name:base.name, emoji:base.emoji, buff:base.buff, grade:grade||base.grade||'N',
-    img:base.img||'', stats:base.stats||'', skill:base.skill||''
+    img:base.img||'', stats:base.stats||'', skill:base.skill||'', level:1, cap:10
   };
+}
+function petLevel(p){ return Math.max(1, Math.min(HERO_MAX_LEVEL, p.level||1)); }
+function petCap(p){ return Math.max(10, Math.min(HERO_MAX_LEVEL, p.cap||10)); }
+function petAscCount(p){ return Math.max(0, Math.floor(petCap(p)/10)-1); }
+function petGradeMult(p){ return HERO_GRADE_MULT[p.grade] || 1; }
+function petPower(p){ return Math.round((80 + petLevel(p)*18 + petAscCount(p)*160) * petGradeMult(p)); }
+function petLevelCost(p){ return Math.floor(120 * Math.pow(petLevel(p), 1.38) * petGradeMult(p)); }
+function petTransCost(p){
+  const gradeUp = petLevel(p)>=HERO_MAX_LEVEL && p.grade!=='UR';
+  const dust = gradeUp ? (p.grade==='SR'?70:p.grade==='SSR'?140:45) : (5 + petCap(p));
+  return { dust, gold:Math.floor(petLevelCost(p) * (gradeUp?9:4)), gradeUp };
+}
+function petDismantleReward(p){
+  const base = PET_DUST_BY_GRADE[p.grade] || 1;
+  return Math.max(1, Math.floor(base + petLevel(p)*0.35 + petAscCount(p)*base*0.45));
+}
+function petIsMaxed(p){ return p.grade==='UR' && petLevel(p)>=HERO_MAX_LEVEL && petCap(p)>=HERO_MAX_LEVEL; }
+function orderedPetEntries(){
+  return G.pets.map((pet,i)=>({pet,i})).sort((a,b)=>{
+    const aa = a.i===G.activePet ? 0 : 1;
+    const ba = b.i===G.activePet ? 0 : 1;
+    if(aa!==ba) return aa-ba;
+    const al = petLevel(a.pet), bl = petLevel(b.pet);
+    if(al!==bl) return bl-al;
+    const ag = GRADE_RANK[a.pet.grade] ?? 0, bg = GRADE_RANK[b.pet.grade] ?? 0;
+    if(ag!==bg) return bg-ag;
+    return petPower(b.pet)-petPower(a.pet);
+  });
+}
+function petGrowthHtml(i, mode='panel'){
+  const p = G.pets[i]; if(!p) return '';
+  const lv = petLevel(p), cap = petCap(p), maxed = petIsMaxed(p);
+  const lvCost = petLevelCost(p);
+  const tr = petTransCost(p);
+  const canLevel = !maxed && lv < cap;
+  const canTrans = !maxed && lv >= cap;
+  const dustHave = G.petDust || 0;
+  const nextGrade = p.grade==='SR' ? 'SSR' : p.grade==='SSR' ? 'UR' : p.grade==='R' ? 'SR' : 'R';
+  return `<div class="card" style="border-color:${gradeColorOf(p.grade)}">
+    <div style="font-weight:bold">펫 성장 <span class="txt-${p.grade}">[${p.grade}] Lv.${lv}/${cap}</span></div>
+    <div class="growGrid">
+      <div class="growPill">펫 전투력<br><b style="color:#ffd866">${petPower(p).toLocaleString()}</b></div>
+      <div class="growPill">대표 효과<br><b style="color:#7fd0ff">${(PET_BUFF[p.buff]?.label)||'능력치'}</b></div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="btn gold" onclick="upPetLevel(${i},'${mode}')" ${(!canLevel||G.gold<lvCost)?'disabled':''}>${canLevel?`<span class="goldIcon"></span>${lvCost.toLocaleString()} 레벨업`:'초월 필요'}</button>
+      <button class="btn gem" onclick="transcendPet(${i},'${mode}')" ${(!canTrans||G.gold<tr.gold||dustHave<tr.dust)?'disabled':''}>${maxed?'최대치':tr.gradeUp?`${nextGrade} 등급업`:'초월'}</button>
+    </div>
+    <div class="small" style="margin-top:6px">
+      레벨업: 골드 소비, 능력치 상승 · 초월: ${PET_DUST_ICON}펫 결정 ${dustHave}/${tr.dust} + <span class="goldIcon"></span>${tr.gold.toLocaleString()}
+      ${tr.gradeUp&&!maxed?` · 성공 시 ${nextGrade} 1레벨로 승급`:''}
+    </div>
+  </div>`;
+}
+function petDismantleHtml(i, mode='panel'){
+  const p = G.pets[i]; if(!p) return '';
+  const reward = petDismantleReward(p);
+  return `<div class="card" style="border-color:#ff9f43">
+    <div class="row">
+      <div style="flex:1">
+        <div style="font-weight:bold;color:#ffcf8a">펫 분해</div>
+        <div class="small">분해 시 ${PET_DUST_ICON}펫 결정 <b>${reward}</b>개 획득 · 펫 초월 필요 재료로 사용</div>
+      </div>
+      <button class="btn" style="background:linear-gradient(135deg,#ffb74d,#9a4b00)" onclick="dismantlePet(${i},'${mode}')">분해</button>
+    </div>
+  </div>`;
 }
 function petRewardHtml(pet){
   return `<div class="hp-card g-bg-${pet.grade}" style="width:86px;height:86px;margin:0 auto 8px;border-color:${gradeColorOf(pet.grade)}">
@@ -3405,25 +3479,71 @@ function summonPetShop(count=1){
   showPityToast('pet');
 }
 function equipPet(i){ G.activePet=i; refreshTop(); currentScreen ? renderScreen() : renderPanel(); updatePet(); }
+function refreshPetViews(mode='panel'){
+  refreshTop(); updatePet();
+  if(mode==='char') renderCharPet();
+  else if(currentScreen==='pet') renderScreen();
+  else renderPanel();
+}
+function upPetLevel(i, mode='panel'){
+  const p = G.pets[i]; if(!p || petIsMaxed(p)) return;
+  const lv = petLevel(p), cap = petCap(p);
+  if(lv>=cap) return;
+  const cost = petLevelCost(p);
+  if(G.gold<cost) return;
+  G.gold -= cost;
+  p.level = lv + 1;
+  refreshPetViews(mode);
+}
+function transcendPet(i, mode='panel'){
+  const p = G.pets[i]; if(!p || petIsMaxed(p)) return;
+  const lv = petLevel(p), cap = petCap(p);
+  if(lv < cap) return;
+  const tr = petTransCost(p);
+  if((G.petDust||0) < tr.dust || G.gold < tr.gold) return;
+  G.petDust -= tr.dust;
+  G.gold -= tr.gold;
+  if(cap >= HERO_MAX_LEVEL && p.grade !== 'UR'){
+    p.grade = p.grade === 'SR' ? 'SSR' : p.grade === 'SSR' ? 'UR' : p.grade === 'R' ? 'SR' : 'R';
+    p.level = 1;
+    p.cap = 10;
+  } else {
+    p.cap = Math.min(HERO_MAX_LEVEL, cap + 10);
+  }
+  refreshPetViews(mode);
+}
+function dismantlePet(i, mode='panel'){
+  const p = G.pets[i]; if(!p) return;
+  const reward = petDismantleReward(p);
+  if(!confirm(`[${p.grade}] ${p.name} 펫을 분해할까요?\n\n획득: ${PET_DUST_ICON} 펫 결정 ${reward}개\n분해한 펫은 사라집니다.`)) return;
+  G.petDust = (G.petDust||0) + reward;
+  G.pets.splice(i,1);
+  if(G.activePet === i) G.activePet = G.pets.length ? 0 : -1;
+  else if(G.activePet > i) G.activePet--;
+  selectedCharPetIdx = Math.max(0, Math.min(selectedCharPetIdx, G.pets.length-1));
+  refreshPetViews(mode);
+  popReward('🐾 펫 분해 완료', `<div style="font-size:42px">${PET_DUST_ICON}</div><div style="font-weight:bold">펫 결정 +${reward}</div>`);
+}
 function viewPet(){
   let h=`<div class="card" style="border-color:#ffb74d"><div class="row">
       <div style="flex:1"><b>🐾 펫 소환</b><div class="small">N 54.9% · R 30% · SR 12% · SSR 3% · UR 0.1%<br>${pityLabel('pet')}</div></div>
       <button class="btn gem" onclick="summonPet()" ${G.gem<200?'disabled':''}>💎 200</button>
       <button class="btn" onclick="openSelectSummon('pet')" ${G.selectTickets?.pet>0?'':'disabled'}>UR 선택</button>
     </div></div>
+    <div class="card small">${PET_DUST_ICON} 펫 결정 <b>${(G.petDust||0).toLocaleString()}</b> · 펫 분해로 획득, 초월에 사용</div>
     <h3>보유 펫 (${G.pets.length})</h3>`;
   if(G.pets.length===0) h+=`<div class="card small">아직 펫이 없어요. 소환해보세요!</div>`;
-  G.pets.forEach((p,i)=>{
+  orderedPetEntries().forEach(({pet:p,i})=>{
     const active=G.activePet===i;
     h+=`<div class="card" style="${active?'border-color:'+gradeColorOf(p.grade):''}"><div class="row">
       <div class="hp-card g-bg-${p.grade}" style="width:50px;height:50px;border-color:${gradeColorOf(p.grade)}">
         <div class="hp-grade txt-${p.grade}" style="font-size:9px">${p.grade}</div>
         ${petVisual(p)}</div>
-      <div style="flex:1"><div style="font-weight:bold">[${p.grade}] ${p.name} ${active?'<span style="font-size:10px;color:#3be38b">●장착</span>':''}</div>
+      <div style="flex:1"><div style="font-weight:bold">[${p.grade}] ${p.name} Lv.${petLevel(p)}/${petCap(p)} ${active?'<span style="font-size:10px;color:#3be38b">●장착</span>':''}</div>
         <div class="small">${petBuffText(p)}</div>
         ${p.skill?`<div class="small">스킬: ${p.skill}</div>`:''}</div>
       <button class="btn ${active?'':'gem'}" onclick="equipPet(${i})" ${active?'disabled':''}>${active?'장착중':'장착'}</button>
-    </div></div>`;
+    </div></div>${petGrowthHtml(i,'panel')}${petDismantleHtml(i,'panel')}`;
   });
   return h;
 }
@@ -4200,6 +4320,7 @@ function loadGame(){
       });
       if(!G.mats) G.mats = {};
       if(G.heroDust==null) G.heroDust = 0;
+      if(G.petDust==null) G.petDust = 0;
       if(!G.dungeon) G.dungeon = { date:'', left:3 };
       if(!G.mail) G.mail = [];
       if(!G.questClaimed) G.questClaimed = [];
@@ -4226,6 +4347,10 @@ function loadGame(){
       }
       G.pets.forEach(p=>{
         if(!p.grade) p.grade = 'N';
+        if(!p.level) p.level = 1;
+        if(!p.cap) p.cap = 10;
+        p.level = Math.max(1, Math.min(HERO_MAX_LEVEL, p.level));
+        p.cap = Math.max(10, Math.min(HERO_MAX_LEVEL, p.cap));
         if(!PET_BUFF[p.buff]) p.buff = 'atk';
         if(!p.img){
           const match = PET_POOL.find(x=>x.name===p.name && x.grade===p.grade) || PET_POOL.find(x=>x.buff===p.buff && x.grade===p.grade);
