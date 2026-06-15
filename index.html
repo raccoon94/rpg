@@ -753,7 +753,7 @@ const G = {
   selectTickets: { hero:0, gear:0, pet:0 },
   hero: 'lin',                 // 착용 영웅
   heroCostume: {},             // 영웅별 착용 코스튬 {heroId: costumeId}
-  ownedCostumes: ['lin_default','rubia_default','sapphira_default','silvia_default'], // 보유 코스튬(기본은 기본보유)
+  ownedCostumes: ['lin_default','rubia_default','sapphira_default','silvia_default','kael_default','emeria_default','kaira_default','kairon_default'], // 보유 코스튬(기본은 기본보유)
   mats: {},                    // 요일던전 재료 (id: 개수) — 나중에 무기 초월에 사용
   heroDust: 0,                 // 영웅 분해 재료
   dungeon: { date:'', left:3 },// 요일던전 일일 입장 횟수
@@ -813,17 +813,47 @@ const HEROES = [
     costumes:[
       { id:'lin_default', name:'기본', img:'assets/char/base/lin_base.png', sd:'assets/char/sd_custom/sd_viola.png', price:0, desc:'총잡이 기본 복장' },
       { id:'lin_swim', name:'수영복', img:'assets/skins/swim.png', price:1500, aura:'#22d3ee', bonus:0.05, fxEmoji:'💧', scene:'assets/bg/beach.png', desc:'여름 수영복 · 해변 배경' },
+      { id:'lin_summer_event', name:'물총 축제', img:'assets/char/event/lin_summer.png', sd:'assets/char/sd_custom/sd_viola.png', price:1800, aura:'#38d5ff', bonus:0.08, fxEmoji:'💦', scene:'assets/bg/beach.png', desc:'여름 이벤트 복장 · 바람과 물총 축제' },
     ]},
   { id:'rubia', name:'루비아', emoji:'🔥', cls:'magic', attr:'화염', aura:'#ff6b6b', bonus:0.20, fx:'flame', fxEmoji:'🔥',
-    costumes:[ { id:'rubia_default', name:'기본', img:'assets/char/base/sapphira_base.png', sd:'assets/char/sd_custom/sd_ceres.png', price:0, desc:'마법사 기본 복장' } ]},
+    costumes:[
+      { id:'rubia_default', name:'기본', img:'assets/char/base/sapphira_base.png', sd:'assets/char/sd_custom/sd_ceres.png', price:0, desc:'마법사 기본 복장' },
+      { id:'rubia_summer_event', name:'홍련 비치', img:'assets/char/event/rubia_summer.jpg', sd:'assets/char/sd_custom/sd_ceres.png', price:1800, aura:'#ff6b6b', bonus:0.08, fxEmoji:'🔥', scene:'assets/bg/beach.png', desc:'여름 이벤트 복장 · 홍련 마법사의 해변 축제' },
+    ]},
   { id:'sapphira', name:'사피라', emoji:'⚔️', cls:'sword', attr:'물/얼음', aura:'#5b9bff', bonus:0.22, fx:'water', fxEmoji:'💧',
-    costumes:[ { id:'sapphira_default', name:'기본', img:'assets/char/base/silvia_base.png', sd:'assets/char/sd_custom/sd_linea.png', price:0, desc:'전사 기본 복장' } ]},
+    costumes:[
+      { id:'sapphira_default', name:'기본', img:'assets/char/base/silvia_base.png', sd:'assets/char/sd_custom/sd_linea.png', price:0, desc:'전사 기본 복장' },
+      { id:'sapphira_summer_event', name:'아쿠아 블레이드', img:'assets/char/event/sapphira_summer.jpg', sd:'assets/char/sd_custom/sd_linea.png', price:1800, aura:'#22d3ee', bonus:0.08, fxEmoji:'🌊', scene:'assets/bg/beach.png', desc:'여름 이벤트 복장 · 물/얼음 검사의 해변 장비' },
+    ]},
   { id:'silvia', name:'실비아', emoji:'🛡️', cls:'sword', attr:'빛', aura:'#ffe08a', bonus:0.25, fx:'feather', fxEmoji:'✨',
-    costumes:[ { id:'silvia_default', name:'기본', img:'assets/char/base/rubia_base.png', sd:'assets/char/sd_custom/sd_amelia.png', price:0, desc:'성기사 기본 복장' } ]},
+    costumes:[
+      { id:'silvia_default', name:'기본', img:'assets/char/base/rubia_base.png', sd:'assets/char/sd_custom/sd_amelia.png', price:0, desc:'성기사 기본 복장' },
+      { id:'silvia_summer_event', name:'선샤인 가드', img:'assets/char/event/silvia_summer.jpg', sd:'assets/char/sd_custom/sd_amelia.png', price:1800, aura:'#ffe08a', bonus:0.08, fxEmoji:'✨', scene:'assets/bg/beach.png', desc:'여름 이벤트 복장 · 빛의 수호자 해변 장비' },
+    ]},
+  { id:'kael', name:'카엘', emoji:'🔥', cls:'warrior', attr:'화염', aura:'#ff5b3f', bonus:0.20, fx:'flame', fxEmoji:'🔥',
+    costumes:[
+      { id:'kael_default', name:'기본', img:'assets/char/base/kael_base.png', sd:'assets/char/sd_custom/sd_draka.png', price:0, desc:'화염 전사 기본 복장' },
+      { id:'kael_summer_event', name:'용염 서퍼', img:'assets/char/event/kael_summer.jpg', sd:'assets/char/sd_custom/sd_draka.png', price:1800, aura:'#ff7a3d', bonus:0.08, fxEmoji:'🔥', scene:'assets/bg/beach.png', desc:'여름 이벤트 복장 · 뜨거운 해변의 화염검' },
+    ]},
+  { id:'emeria', name:'에메리아', emoji:'🌿', cls:'healer', attr:'자연', aura:'#74d680', bonus:0.18, fx:'leaf', fxEmoji:'🌿',
+    costumes:[
+      { id:'emeria_default', name:'기본', img:'assets/char/base/emeria_base.png', sd:'assets/char/sd_custom/sd_foret.png', price:0, desc:'자연 힐러 기본 복장' },
+      { id:'emeria_summer_event', name:'블로섬 비치', img:'assets/char/event/emeria_summer.png', sd:'assets/char/sd_custom/sd_foret.png', price:1800, aura:'#8ee8a8', bonus:0.08, fxEmoji:'🌸', scene:'assets/bg/beach.png', desc:'여름 이벤트 복장 · 꽃향기 가득한 해변 축제' },
+    ]},
+  { id:'kaira', name:'카이라', emoji:'🗡️', cls:'assassin', attr:'암흑', aura:'#ff4d6d', bonus:0.20, fx:'dark', fxEmoji:'🌑',
+    costumes:[
+      { id:'kaira_default', name:'기본', img:'assets/char/base/kaira_base.png', sd:'assets/char/sd_custom/sd_noxia.png', price:0, desc:'암살자 기본 복장' },
+      { id:'kaira_summer_event', name:'나이트 워터', img:'assets/char/event/kaira_summer.png', sd:'assets/char/sd_custom/sd_noxia.png', price:1800, aura:'#45b7ff', bonus:0.08, fxEmoji:'💧', scene:'assets/bg/beach.png', desc:'여름 이벤트 복장 · 물결 속 암살자의 휴가' },
+    ]},
+  { id:'kairon', name:'카이론', emoji:'⚔️', cls:'knight', attr:'물/얼음', aura:'#4f8cff', bonus:0.22, fx:'ice', fxEmoji:'❄️',
+    costumes:[
+      { id:'kairon_default', name:'기본', img:'assets/char/base/kairon_base.png', sd:'assets/char/sd_custom/sd_lumiel.png', price:0, desc:'빙결 기사 기본 복장' },
+      { id:'kairon_summer_event', name:'블루 썸머', img:'assets/char/event/kairon_summer.png', sd:'assets/char/sd_custom/sd_lumiel.png', price:1800, aura:'#4f8cff', bonus:0.08, fxEmoji:'💧', scene:'assets/bg/beach.png', desc:'여름 이벤트 복장 · 푸른 검의 해변 장비' },
+    ]},
 ];
 const AV = '?v=10';   // 이미지 캐시 버전 (그림 교체 시 숫자 올리면 새로 로드됨)
 function heroObj(id){ return HEROES.find(h=>h.id===(id||G.hero)) || HEROES[0]; }
-const HERO_NAME_TO_COSTUME_ID = { 린:'lin', 루비아:'rubia', 사피라:'sapphira', 실비아:'silvia' };
+const HERO_NAME_TO_COSTUME_ID = { 린:'lin', 루비아:'rubia', 사피라:'sapphira', 실비아:'silvia', 카엘:'kael', 에메리아:'emeria', 카이라:'kaira', 카이론:'kairon' };
 function costumeHeroIdByName(name){ return HERO_NAME_TO_COSTUME_ID[name] || null; }
 function selectedCharHero(){ return selectedCharHeroIdx!=null ? G.heroes[selectedCharHeroIdx] : null; }
 function curCostumeId(h){ h=h||heroObj(); return (G.heroCostume && G.heroCostume[h.id]) || h.costumes[0].id; }
@@ -3936,7 +3966,10 @@ function loadGame(){
       G.pity = G.summonPity.hero;
       if(!G.hero) G.hero = 'lin';
       if(!G.heroCostume) G.heroCostume = {};
-      if(!G.ownedCostumes) G.ownedCostumes = ['lin_default','rubia_default','sapphira_default','silvia_default'];
+      if(!G.ownedCostumes) G.ownedCostumes = ['lin_default','rubia_default','sapphira_default','silvia_default','kael_default','emeria_default','kaira_default','kairon_default'];
+      ['lin_default','rubia_default','sapphira_default','silvia_default','kael_default','emeria_default','kaira_default','kairon_default'].forEach(cid=>{
+        if(!G.ownedCostumes.includes(cid)) G.ownedCostumes.push(cid);
+      });
       if(!G.mats) G.mats = {};
       if(G.heroDust==null) G.heroDust = 0;
       if(!G.dungeon) G.dungeon = { date:'', left:3 };
