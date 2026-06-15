@@ -809,16 +809,16 @@ const ACHIEVEMENTS = [
 // ===== 영웅 → 코스튬 구조 =====
 // 각 영웅(캐릭터)이 자기 코스튬들을 가짐. 코스튬 선택 시 그 영웅의 외형/배경 적용
 const HEROES = [
-  { id:'lin', name:'린', emoji:'🔫', cls:'gun', attr:'번개/얼음', aura:'#7fd0ff', bonus:0.20, fx:'water', fxEmoji:'❄️',
+  { id:'lin', name:'린', emoji:'🔫', cls:'gun', attr:'바람', aura:'#7fd0ff', bonus:0.20, fx:'water', fxEmoji:'🌀',
     costumes:[
       { id:'lin_default', name:'기본', img:'assets/char/base/lin_base.png', sd:'assets/char/sd_custom/sd_viola.png', price:0, desc:'총잡이 기본 복장' },
       { id:'lin_swim', name:'수영복', img:'assets/skins/swim.png', price:1500, aura:'#22d3ee', bonus:0.05, fxEmoji:'💧', scene:'assets/bg/beach.png', desc:'여름 수영복 · 해변 배경' },
     ]},
-  { id:'rubia', name:'루비아', emoji:'🔥', cls:'magic', attr:'불', aura:'#ff6b6b', bonus:0.20, fx:'flame', fxEmoji:'🔥',
+  { id:'rubia', name:'루비아', emoji:'🔥', cls:'magic', attr:'화염', aura:'#ff6b6b', bonus:0.20, fx:'flame', fxEmoji:'🔥',
     costumes:[ { id:'rubia_default', name:'기본', img:'assets/char/base/sapphira_base.png', sd:'assets/char/sd_custom/sd_ceres.png', price:0, desc:'마법사 기본 복장' } ]},
-  { id:'sapphira', name:'사피라', emoji:'⚔️', cls:'sword', attr:'얼음', aura:'#5b9bff', bonus:0.22, fx:'water', fxEmoji:'💧',
+  { id:'sapphira', name:'사피라', emoji:'⚔️', cls:'sword', attr:'물/얼음', aura:'#5b9bff', bonus:0.22, fx:'water', fxEmoji:'💧',
     costumes:[ { id:'sapphira_default', name:'기본', img:'assets/char/base/silvia_base.png', sd:'assets/char/sd_custom/sd_linea.png', price:0, desc:'전사 기본 복장' } ]},
-  { id:'silvia', name:'실비아', emoji:'🛡️', cls:'sword', attr:'얼음/빛', aura:'#ffe08a', bonus:0.25, fx:'feather', fxEmoji:'✨',
+  { id:'silvia', name:'실비아', emoji:'🛡️', cls:'sword', attr:'빛', aura:'#ffe08a', bonus:0.25, fx:'feather', fxEmoji:'✨',
     costumes:[ { id:'silvia_default', name:'기본', img:'assets/char/base/rubia_base.png', sd:'assets/char/sd_custom/sd_amelia.png', price:0, desc:'성기사 기본 복장' } ]},
 ];
 const AV = '?v=10';   // 이미지 캐시 버전 (그림 교체 시 숫자 올리면 새로 로드됨)
@@ -888,35 +888,35 @@ const WORLD = {
 };
 // 캐릭터별 서사 (키 = 이름)
 const CHARACTERS = {
-  "린": { title:"정확한 빙결의 총잡이", persona:"빠르고 정확한 해결사", attr:"번개 / 얼음", weapon:"장총",
-    profile:"순간적으로 거리를 벌리며 가장 가까운 적을 정확히 꿰뚫는 총잡이. 냉기 탄환과 바람 보법으로 전장을 제어한다.",
+  "린": { title:"질풍의 총잡이", persona:"빠르고 정확한 해결사", attr:"바람", weapon:"장총",
+    profile:"순간적으로 거리를 벌리며 가장 가까운 적을 정확히 꿰뚫는 총잡이. 바람 탄환과 질풍 보법으로 전장을 제어한다.",
     quote:"빠르고 정확하게! 린이 전부 처리할게!",
-    skills:["퀵 드로우","프로스트 버스트","윈드 스텝","실버 레인"],
-    story:"빙결 탄환을 다루는 떠돌이 총잡이. 위험한 전장일수록 웃으며 먼저 움직이고, 동료가 다치기 전 적의 발을 묶는다.",
-    talk:["빠르고 정확하게, 그게 내 방식이야!","빙결탄 장전 완료. 어디부터 처리할까?","걱정 마. 네 앞길은 내가 열어줄게."],
+    skills:["게일 드로우","게일 버스트","윈드 스텝","실버 스톰"],
+    story:"바람 탄환을 다루는 떠돌이 총잡이. 위험한 전장일수록 웃으며 먼저 움직이고, 동료가 다치기 전 적의 진형을 흐트러뜨린다.",
+    talk:["빠르고 정확하게, 그게 내 방식이야!","질풍탄 장전 완료. 어디부터 처리할까?","걱정 마. 네 앞길은 내가 열어줄게."],
     episodes:[] },
-  "루비아": { title:"홍련 마도회의 화염 마법사", persona:"밝고 집요한 화염술사", attr:"불", weapon:"마도구 - 홍련의 오브",
+  "루비아": { title:"홍련 마도회의 화염 마법사", persona:"밝고 집요한 화염술사", attr:"화염", weapon:"마도구 - 홍련의 오브",
     profile:"밝은 머리칼처럼 뜨겁고 강렬한 마력을 지닌 마법사. 세상의 어둠을 태워 없애는 홍련 마도회의 핵심 마도구를 사용한다.",
     quote:"모든 것을 태워버릴게, 후회할 틈도 없이!",
     skills:["파이어 볼","플레임 서클","버닝 임팩트","크림슨 노바","홍련의 심판"],
     story:"고대 마도서 홍련서를 손에 넣은 뒤, 루비아는 세상을 위협하는 불씨이자 어둠을 태워 없애는 희망이 되었다.",
     talk:["화력은 충분해. 더 크게 터뜨려볼까?","내 마법은 뜨겁지만, 동료는 다치게 하지 않아.","어둠은 남김없이 태워버릴 거야."],
     episodes:[] },
-  "실비아": { title:"불굴의 성기사", persona:"강인하고 따뜻한 수호자", attr:"얼음 / 빛", weapon:"대형 해머, 방패",
-    profile:"바다와 빛의 가호를 받은 성기사. 전장의 선봉에서 모든 공격을 받아내고, 동료를 지키는 것을 사명으로 삼는다.",
+  "실비아": { title:"불굴의 성기사", persona:"강인하고 따뜻한 수호자", attr:"빛", weapon:"대형 해머, 방패",
+    profile:"빛의 가호를 받은 성기사. 전장의 선봉에서 모든 공격을 받아내고, 신성한 방벽으로 동료를 지키는 것을 사명으로 삼는다.",
     quote:"내가 있는 한, 누구도 동료를 해치지 못한다!",
-    skills:["아이기스 배리어","워터 브레이크","세인트 카운터","오션 발키리","불굴의 의지"],
+    skills:["아이기스 배리어","라이트 브레이크","세인트 카운터","오로라 발키리","불굴의 의지"],
     story:"전쟁의 선봉에서 쓰러진 공적을 모두 받아내며 동료들을 지켜온 기사. 위기 속에서도 결코 흔들리지 않는다.",
     talk:["방패는 준비됐어. 뒤는 내게 맡겨.","동료를 지키는 게 내 싸움의 이유야.","괜찮아. 이 정도 공격은 버틸 수 있어."],
     episodes:[] },
-  "사피라": { title:"청휘의 검", persona:"침착한 푸른 검객", attr:"얼음", weapon:"대검",
+  "사피라": { title:"청휘의 검", persona:"침착한 푸른 검객", attr:"물/얼음", weapon:"대검",
     profile:"푸른 검의 빛으로 길을 여는 전사. 물의 검기를 두른 대검으로 광역의 적을 베어내고 아군을 보호한다.",
     quote:"푸른 검의 빛이 나의 길을 비출 거야!",
     skills:["루나 크레스트 슬래시","아쿠아 블레이드 러시","사파이어 가드","오션 브레이커"],
     story:"청휘의 힘을 품은 검을 이어받은 전사. 검이 비추는 길을 따라 전장을 가르고, 소중한 이를 지킨다.",
     talk:["검의 흐름을 읽으면 승부는 이미 끝나.","내 검은 지키기 위해 휘둘러.","푸른 빛이 길을 열어줄 거야."],
     episodes:[] },
-  "카엘": { title:"꺼지지 않는 불꽃의 전사", persona:"거칠지만 책임감 있는 검사", attr:"불", weapon:"화염검",
+  "카엘": { title:"꺼지지 않는 불꽃의 전사", persona:"거칠지만 책임감 있는 검사", attr:"화염", weapon:"화염검",
     profile:"불타오르는 검심을 지닌 전사. 검에 불을 두르고 전방을 베어 화상을 남기며, 위험할수록 더 강해진다.",
     quote:"불타오르는 검심, 그 불꽃은 꺼지지 않는다.",
     skills:["열화 베기","불꽃 돌진","용염 폭발","불멸의 의지","불의 심장"],
@@ -930,18 +930,18 @@ const CHARACTERS = {
     story:"태초의 숲에서 태어난 성녀. 생명의 순환을 수호하며 쓰러진 자에게 다시 일어설 힘을 건넨다.",
     talk:["다친 곳은 없나요? 제가 회복해드릴게요.","숲의 숨결이 우리를 지켜줄 거예요.","무사히 돌아오는 것, 그게 가장 중요해요."],
     episodes:[] },
-  "카이라": { title:"그림자 속의 암살자", persona:"냉혹하지만 장난기 있는 단검술사", attr:"어둠", weapon:"쌍단검",
+  "카이라": { title:"그림자 속의 암살자", persona:"냉혹하지만 장난기 있는 단검술사", attr:"암흑", weapon:"쌍단검",
     profile:"어둠 속에서 태어나 그림자처럼 움직이는 암살자. 순식간에 적의 뒤로 파고들어 출혈과 연속 베기로 숨통을 끊는다.",
     quote:"들키지 않았어? 이미 네 그림자 뒤에 있었는데.",
     skills:["쉐도우 팽","블러드 스텝","크림슨 댄스","나이트메어 이그제큐션"],
     story:"소리가 닿기 전에 검이 먼저 닿는 암살자. 그녀의 존재는 그림자조차 기억하지 못한다.",
     talk:["쉿. 이미 끝났어.","뒤를 조심해. 아니, 이미 늦었나?","네 그림자는 내가 지킬게."],
     episodes:[] },
-  "카이론": { title:"푸른 검의 계승자", persona:"과묵하고 냉철한 성역 기사", attr:"얼음", weapon:"푸른 대검",
-    profile:"무너지는 왕국의 마지막 성역 기사. 푸른 오라로 자신을 강화하고 거대한 검성으로 적을 제압한다.",
+  "카이론": { title:"빙결 검의 계승자", persona:"과묵하고 냉철한 성역 기사", attr:"물/얼음", weapon:"푸른 대검",
+    profile:"무너지는 왕국의 마지막 성역 기사. 냉기의 오라로 자신을 강화하고 거대한 빙결 검성으로 적을 제압한다.",
     quote:"왕국이 무너지는 날까지... 내 검은 멈추지 않는다.",
-    skills:["블루 크레센트","팬텀 스텝","가디언 오라","천공의 심판","창천의 의지"],
-    story:"푸른 검의 계승자라 불리는 기사. 책임감이 강하고 냉철하며, 왕국의 마지막 방패로 전장에 선다.",
+    skills:["프로스트 크레센트","빙영 스텝","아이스 가디언","빙천의 심판","동토의 의지"],
+    story:"빙결 검의 계승자라 불리는 기사. 책임감이 강하고 냉철하며, 왕국의 마지막 방패로 전장에 선다.",
     talk:["내 검은 멈추지 않는다.","전열을 유지해. 틈은 내가 막겠다.","왕국의 이름으로, 물러서지 않는다."],
     episodes:[] },
 };
@@ -1304,6 +1304,8 @@ const GRADES = [
 ];
 const MONSTERS = ["🟢","👹","🦂","🕷️","🐗","🦇","🐍","👻","🧟","🐲"];
 const MON_NAMES = ["슬라임","고블린","전갈","독거미","멧돼지","박쥐","독사","유령","좀비","드래곤"];
+const MON_ATTACK_TYPES = ['melee','melee','melee','ranged','melee','ranged','melee','ranged','melee','ranged'];
+function monsterAttackType(){ return MON_ATTACK_TYPES[(G.stage-1) % MON_ATTACK_TYPES.length] || 'melee'; }
 
 let monHpMax = 0, monHp = 0;
 
@@ -1314,17 +1316,31 @@ const HERO_GRADE_MULT = {N:.45, R:.68, SR:1, SSR:3.5, UR:9};
 const HERO_DUST_ICON = '💠';
 const HERO_DUST_BY_GRADE = {N:1, R:3, SR:10, SSR:40, UR:120};
 const HERO_MAT = { 린:'wind', 루비아:'fire', 실비아:'water', 사피라:'water', 카엘:'fire', 에메리아:'wind', 카이라:'dark', 카이론:'water' };
-const GAME_ATTRIBUTES = ['대지','자연','불','얼음','빛','어둠','번개'];
+const ROLE_STAT_MULT = {
+  gunner:{atk:1.28,hp:.78,def:.74},
+  gun:{atk:1.28,hp:.78,def:.74},
+  mage:{atk:1.22,hp:.82,def:.72},
+  magic:{atk:1.22,hp:.82,def:.72},
+  assassin:{atk:1.18,hp:.86,def:.78},
+  warrior:{atk:1.06,hp:1.06,def:1.04},
+  sword:{atk:1.06,hp:1.06,def:1.04},
+  knight:{atk:.98,hp:1.20,def:1.22},
+  tanker:{atk:.82,hp:1.58,def:1.68},
+  tank:{atk:.82,hp:1.58,def:1.68},
+  healer:{atk:.86,hp:1.18,def:1.10}
+};
+function roleStatMult(h, key){ return (ROLE_STAT_MULT[h?.cls] && ROLE_STAT_MULT[h.cls][key]) || 1; }
+const GAME_ATTRIBUTES = ['대지','자연','화염','물/얼음','빛','암흑','번개','바람'];
 const ATTRIBUTE_MAP = {
   '대지':'대지', '땅':'대지', '자연':'자연', '숲':'자연',
-  '불':'불', '화염':'불',
-  '얼음':'얼음', '빙결':'얼음', '물':'얼음', '청람':'얼음',
-  '빛':'빛', '어둠':'어둠', '암흑':'어둠',
-  '번개':'번개', '전기':'번개', '바람':'번개'
+  '불':'화염', '화염':'화염',
+  '얼음':'물/얼음', '빙결':'물/얼음', '물':'물/얼음', '물/얼음':'물/얼음', '청람':'물/얼음',
+  '빛':'빛', '어둠':'암흑', '암흑':'암흑',
+  '번개':'번개', '전기':'번개', '바람':'바람'
 };
 function normalizeAttrName(attr){ return ATTRIBUTE_MAP[String(attr||'').trim()] || '대지'; }
 function splitAttrs(raw){
-  return String(raw||'대지').split(/[\/,·]/).map(normalizeAttrName).filter((v,i,a)=>GAME_ATTRIBUTES.includes(v) && a.indexOf(v)===i);
+  return String(raw||'대지').split(/[,·]/).map(normalizeAttrName).filter((v,i,a)=>GAME_ATTRIBUTES.includes(v) && a.indexOf(v)===i);
 }
 function heroAttributes(h){
   const data = charData(typeof h==='string' ? h : h?.name);
@@ -1343,19 +1359,19 @@ function heroAscCount(h){ return Math.max(0, Math.floor(heroCap(h)/10)-1); }
 function heroGradeMult(h){ return HERO_GRADE_MULT[h.grade] || 1; }
 function heroRawAtk(h){
   const mult = heroGradeMult(h);
-  return Math.round((h.atk||50) * mult + (heroLevel(h)-1) * 12 * mult + heroAscCount(h) * 120 * mult);
+  return Math.round(((h.atk||50) * mult + (heroLevel(h)-1) * 12 * mult + heroAscCount(h) * 120 * mult) * roleStatMult(h, 'atk'));
 }
 function heroEffAtk(h){ return Math.round(heroRawAtk(h) * (1 + heroEquipSum(h)*0.10) * (1 + heroAffinity(h)*0.003)); } // 레벨/초월/등급 + 장비 +10%/단계, 호감도 +0.3%/포인트
 function heroMaxHp(h){
   const mult = heroGradeMult(h);
-  const role = h.cls==='tank' ? 1.45 : h.cls==='healer' ? 1.12 : h.cls==='assassin' ? .88 : 1;
+  const role = roleStatMult(h, 'hp');
   return Math.round((520 + heroLevel(h)*72 + heroAscCount(h)*680 + (h.atk||50)*5) * mult * role * (1 + (h.equip?.방어구||0)*0.16) * petHpMult());
 }
 function gearDefTotal(){ return (G.gear.방어구||0) * 6; }
 function gearCritDmgMult(){ return 1 + (G.gear.악세||0) * 0.02; }
 function heroDef(h){
   const mult = heroGradeMult(h);
-  const role = h.cls==='tank' ? 1.55 : h.cls==='healer' ? 1.15 : h.cls==='assassin' ? .82 : 1;
+  const role = roleStatMult(h, 'def');
   return Math.round((28 + heroLevel(h)*5 + heroAscCount(h)*55 + (h.equip?.방어구||0)*38 + (h.equip?.장신구||0)*14 + gearDefTotal()) * mult * role * petDefMult());
 }
 function ensureHeroHp(h){
@@ -1458,7 +1474,7 @@ function spawnMonster(){
   mEl.textContent = MONSTERS[idx];
   mEl.classList.toggle('boss', isBoss);
   nEl.classList.toggle('bossName', isBoss);
-  nEl.textContent = (isBoss?'👑 BOSS ':'') + MON_NAMES[idx] + (G.stage>10? " +"+Math.floor(G.stage/10):"");
+  nEl.textContent = (isBoss?'👑 BOSS ':'') + MON_NAMES[idx] + ` · ${monsterAttackType()==='ranged'?'원거리':'근거리'}` + (G.stage>10? " +"+Math.floor(G.stage/10):"");
   if(isBoss) showToast('⚠️ BOSS 등장!', '#ff5e7a', true);
   updateHp();
   renderHeroRow();
@@ -1583,7 +1599,9 @@ function monsterAttack(){
   const slots = partySlots();
   const living = slots.map((h,i)=>h?{h,i}:null).filter(x=>x && ensureHeroHp(x.h)>0);
   if(!living.length){ partyWipe(); return; }
-  const target = living[Math.floor(Math.random()*living.length)];
+  const frontLiving = living.filter(x=>x.i < 2);
+  const candidates = monsterAttackType()==='melee' && frontLiving.length ? frontLiving : living;
+  const target = candidates[Math.floor(Math.random()*candidates.length)];
   const raw = monsterAtk();
   const dmg = Math.max(1, Math.floor(raw * 100 / (100 + heroDef(target.h))));
   G.heroHp[target.h.uid] = Math.max(0, ensureHeroHp(target.h) - dmg);
@@ -1673,10 +1691,10 @@ function restartMonsterAttack(){
 // ===== 캐릭터별 시그니처 스킬 (코스튬 착용 시 발동) =====
 const CHAR_SKILLS = {
   '린':    { color:'#7fd0ff', skills:[
-    {name:'퀵 드로우',      fx:'✦',  mult:5, desc:'가까운 적에게 고속 사격 · 짧은 무적 · 치명타↑'},
-    {name:'프로스트 버스트', fx:'❄️', mult:6, desc:'범위 빙결 폭발 사격 · 이동속도 감소'},
-    {name:'윈드 스텝',      fx:'🌀', mult:4, desc:'바람처럼 회피 후 강화 사격 · 공격속도↑'},
-    {name:'실버 레인',      fx:'💫', mult:9, desc:'전방 탄막 난사 · 방어 무시 · 보스 추가피해'},
+    {name:'게일 드로우',    fx:'🌀', mult:5, desc:'바람을 실은 고속 사격 · 짧은 회피 · 치명타↑'},
+    {name:'스톰 버스트',    fx:'🌪️', mult:6, desc:'폭풍 탄환 폭발 · 적 공격속도 감소'},
+    {name:'윈드 스텝',      fx:'🌀', mult:4, desc:'바람처럼 이동 후 강화 사격 · 공격속도↑'},
+    {name:'실버 스톰',      fx:'💨', mult:9, desc:'전방 질풍 탄막 · 방어 무시 · 보스 추가피해'},
   ]},
   '루비아':{ color:'#ff6b6b', skills:[
     {name:'파이어 볼',       fx:'🔥', mult:5, desc:'화염 구체 발사 · 단일 피해'},
@@ -1691,10 +1709,10 @@ const CHAR_SKILLS = {
     {name:'오션 브레이커',       fx:'💥', mult:9, desc:'바다를 가르는 일격 · 광역 폭발'},
   ]},
   '실비아':{ color:'#ffe08a', skills:[
-    {name:'아이기스 베리어', fx:'🛡️', mult:4, desc:'신성 방벽 · 아군 보호'},
-    {name:'워터 브레이크',   fx:'🌊', mult:6, desc:'물의 망치 강타 · 도발/제어'},
+    {name:'아이기스 베리어', fx:'🛡️', mult:4, desc:'빛의 방벽 · 아군 보호'},
+    {name:'라이트 브레이크', fx:'✨', mult:6, desc:'신성한 해머 강타 · 도발/제어'},
     {name:'세인트 카운터',   fx:'✝️', mult:5, desc:'반격의 빛 · 받은 피해 반사'},
-    {name:'오션 발키리',     fx:'⚡', mult:9, desc:'성스러운 심판 · 광역 진압'},
+    {name:'오로라 발키리',   fx:'🌟', mult:9, desc:'빛의 심판 · 광역 진압'},
   ]},
   '카엘':{ color:'#ff5b3f', skills:[
     {name:'열화 베기', fx:'🔥', mult:6, desc:'화염 검격 · 화상 부여'},
@@ -1715,10 +1733,10 @@ const CHAR_SKILLS = {
     {name:'나이트메어 이그제큐션', fx:'🌑', mult:9, desc:'후방 암살 · 보스 약화'},
   ]},
   '카이론':{ color:'#4f8cff', skills:[
-    {name:'블루 크레센트', fx:'🌙', mult:6, desc:'푸른 초승달 검기'},
-    {name:'팬텀 스텝', fx:'🌀', mult:6, desc:'후방 베기 · 회피 증가'},
-    {name:'가디언 오라', fx:'🛡️', mult:5, desc:'방어력 강화와 재생'},
-    {name:'천공의 심판', fx:'⚔️', mult:10, desc:'거대한 검성 강림'},
+    {name:'프로스트 크레센트', fx:'❄️', mult:6, desc:'냉기의 초승달 검기'},
+    {name:'빙영 스텝', fx:'🧊', mult:6, desc:'서리 그림자 이동 · 회피 증가'},
+    {name:'아이스 가디언', fx:'🛡️', mult:5, desc:'빙결 방어막 · 방어력 강화와 재생'},
+    {name:'빙천의 심판', fx:'❄️', mult:10, desc:'거대한 얼음 검성 강림'},
   ]},
 };
 const heroSkillState = {};
@@ -2104,7 +2122,7 @@ function heroSdVisual(h, cls='heroListImg'){
   return art.img ? `<img class="${cls}" src="${art.img}${AV}" alt="${h.name}">` : `<span class="hp-emoji" style="font-size:26px">${h.emoji}</span>`;
 }
 function heroAttackMotion(){
-  const slots = Array.from(document.querySelectorAll('#heroRow .heroSlot:not(.empty)'));
+  const slots = Array.from(document.querySelectorAll('#heroRow .heroSlot:not(.empty):not(.downed)'));
   if(!slots.length) return;
   const slot = slots[Math.floor(Math.random()*slots.length)];
   slot.classList.remove('atk');
@@ -3825,7 +3843,7 @@ function viewStat(){
       ${statRow('특수강화', `치확 +${percent(huntCritBonus())}% · 치피 x${critDmgUpgradeMult().toFixed(2)} · 보스 +${percent(bossPowerBonus())}% · 속성 +${percent(attrDmgMult()-1)}%`)}
       ${statRow('코스튬/시너지/길드', `코스튬 +${percent(skinMult()-1)}% · 시너지 +${percent(syn.bonus)}% · 길드 ${G.guild?.joined?'+10%':'없음'}`, syn.bonus>0 ? `${CLASSES[syn.cls]?.name||'직업'} ${syn.count}명 시너지` : '같은 직업 3명부터 시너지 적용')}
     </div>
-    <div class="card small">게임 속성은 대지 · 자연 · 불 · 얼음 · 빛 · 어둠 · 번개 7가지만 적용됩니다.</div>`;
+    <div class="card small">게임 속성은 대지 · 자연 · 화염 · 물/얼음 · 빛 · 암흑 · 번개 · 바람 8가지만 적용됩니다.</div>`;
 }
 
 // ===== 상단 갱신 =====
