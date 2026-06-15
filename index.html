@@ -812,12 +812,12 @@ const HEROES = [
   { id:'lin', name:'린', emoji:'🔫', cls:'gun', attr:'바람', aura:'#7fd0ff', bonus:0.20, fx:'water', fxEmoji:'🌀',
     costumes:[
       { id:'lin_default', name:'기본', img:'assets/char/base/lin_base.png', sd:'assets/char/sd_custom/sd_viola.png', price:0, desc:'총잡이 기본 복장' },
-      { id:'lin_summer_event', name:'물총 축제', img:'assets/char/event/lin_summer_cutout.png', sd:'assets/char/sd_custom/sd_viola.png', price:1800, aura:'#38d5ff', bonus:0.08, fxEmoji:'💦', scene:'assets/bg/beach.png', artScale:1.46, desc:'여름 이벤트 복장 · 바람과 물총 축제' },
+      { id:'lin_summer_event', name:'물총 축제', img:'assets/char/event/lin_summer_cutout.png', sd:'assets/char/sd_custom/sd_viola.png', price:1800, aura:'#38d5ff', bonus:0.08, fxEmoji:'💦', scene:'assets/bg/beach.png', artScale:1.58, artX:'-9%', desc:'여름 이벤트 복장 · 바람과 물총 축제' },
     ]},
   { id:'rubia', name:'루비아', emoji:'🔥', cls:'magic', attr:'화염', aura:'#ff6b6b', bonus:0.20, fx:'flame', fxEmoji:'🔥',
     costumes:[
       { id:'rubia_default', name:'기본', img:'assets/char/base/sapphira_base.png', sd:'assets/char/sd_custom/sd_ceres.png', price:0, desc:'마법사 기본 복장' },
-      { id:'rubia_summer_event', name:'홍련 비치', img:'assets/char/event/rubia_summer_cutout.png', sd:'assets/char/sd_custom/sd_ceres.png', price:1800, aura:'#ff6b6b', bonus:0.08, fxEmoji:'🔥', scene:'assets/bg/beach.png', desc:'여름 이벤트 복장 · 홍련 마법사의 해변 축제' },
+      { id:'rubia_summer_event', name:'홍련 비치', img:'assets/char/event/rubia_summer_cutout.png', sd:'assets/char/sd_custom/sd_ceres.png', price:1800, aura:'#ff6b6b', bonus:0.08, fxEmoji:'🔥', scene:'assets/bg/beach.png', artScale:1.12, desc:'여름 이벤트 복장 · 홍련 마법사의 해변 축제' },
     ]},
   { id:'sapphira', name:'사피라', emoji:'⚔️', cls:'sword', attr:'물/얼음', aura:'#5b9bff', bonus:0.22, fx:'water', fxEmoji:'💧',
     costumes:[
@@ -2216,6 +2216,10 @@ function heroDisplayScale(h){
   const c = heroEquippedCostume(h);
   return (c && c.artScale) ? c.artScale : 1.25;
 }
+function heroDisplayOffsetX(h){
+  const c = heroEquippedCostume(h);
+  return (c && c.artX) ? c.artX : '0%';
+}
 function heroSdVisual(h, cls='heroListImg'){
   const art = heroSdArt(h);
   return art.img ? `<img class="${cls}" src="${art.img}${AV}" alt="${h.name}">` : `<span class="hp-emoji" style="font-size:26px">${h.emoji}</span>`;
@@ -2374,7 +2378,7 @@ function renderCharLeftArt(hero){
   const skin = skinObj();
   const artEl = document.getElementById('homeArtFull');
   const art = selected ? heroDisplayArt(selected) : '';
-  const key = selected ? 'hero:'+selected.uid+':'+(art||selected.name) : 'char:'+skin.id;
+  const key = selected ? 'hero:'+selected.uid+':'+(art||selected.name)+':'+heroDisplayScale(selected)+':'+heroDisplayOffsetX(selected) : 'char:'+skin.id;
   if(artEl.dataset.key !== key){
     artEl.dataset.key = key;
     artEl.innerHTML = '';
@@ -2383,7 +2387,7 @@ function renderCharLeftArt(hero){
     if(!selected && skin.bg){ img.style.objectFit='cover'; img.style.objectPosition='center 14%'; }
     else { img.style.objectFit='contain'; img.style.objectPosition='center top'; }
     if(selected){
-      img.style.transform = `scale(${heroDisplayScale(selected)})`;
+      img.style.transform = `translateX(${heroDisplayOffsetX(selected)}) scale(${heroDisplayScale(selected)})`;
       img.style.transformOrigin = 'left top';
     }
     img.onerror = function(){ artEl.innerHTML = `<div class="homeEmoji">${selected ? selected.emoji : skin.emoji}</div>`; };
