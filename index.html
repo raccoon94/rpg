@@ -426,6 +426,8 @@
   #charView { position:fixed; inset:0; max-width:480px; margin:0 auto; z-index:62; display:none; overflow:hidden; }
   #charView #homeArtFull { left:-7%; right:42%; top:42px; bottom:46px; justify-content:flex-start; padding-left:0; }
   #charView #homeArtFull img { transform:scale(1.25); transform-origin:left top; object-position:left top; }
+  #charView #homeArtFull.petArtMode { left:2%; right:34%; top:34px; bottom:48px; align-items:center; justify-content:center; }
+  #charView #homeArtFull.petArtMode img { transform:none; transform-origin:center center; object-position:center center; }
   #charView.fullArt #homeArtFull { left:-7%; right:42%; top:0; bottom:0; }
   #charHeroList { position:absolute; top:56px; right:12px; bottom:62px; width:36%; min-width:230px; z-index:5;
     border:1px solid #343a66; border-radius:12px; background:linear-gradient(180deg,#181a30ee,#0f1020f2);
@@ -2276,6 +2278,7 @@ function renderCharLeftArt(hero){
   const selected = hero || selectedCharHero();
   const skin = skinObj();
   const artEl = document.getElementById('homeArtFull');
+  artEl.classList.remove('petArtMode');
   const art = selected ? heroDisplayArt(selected) : '';
   const key = selected ? 'hero:'+selected.uid+':'+(art||selected.name)+':'+heroDisplayScale(selected)+':'+heroDisplayOffsetX(selected) : 'char:'+skin.id;
   if(artEl.dataset.key !== key){
@@ -2325,6 +2328,7 @@ function renderCharGearLeft(){
   const meta = charGearMeta(selectedCharGear) || charGearMeta('무기');
   const lv = G.gear[selectedCharGear] || 0;
   const artEl = document.getElementById('homeArtFull');
+  artEl.classList.remove('petArtMode');
   const key = `gear:${selectedCharGear}:${lv}`;
   if(artEl.dataset.key !== key){
     artEl.dataset.key = key;
@@ -2382,6 +2386,7 @@ function renderCharPetLeft(){
   if(G.pets.length && (!G.pets[selectedCharPetIdx] || selectedCharPetIdx<0)) selectedCharPetIdx = Math.max(0, G.activePet);
   const p = G.pets[selectedCharPetIdx] || activePet() || PET_POOL.find(x=>x.grade==='UR') || PET_POOL[0];
   const artEl = document.getElementById('homeArtFull');
+  artEl.classList.add('petArtMode');
   const key = `pet:${p.name}:${p.grade}:${p.img}:${petLevel(p)}:${petCap(p)}:${p.stats}:${p.skill}`;
   if(artEl.dataset.key !== key){
     artEl.dataset.key = key;
