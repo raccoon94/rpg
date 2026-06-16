@@ -787,6 +787,9 @@
   <div id="summonHint">화면을 탭하면 닫혀요</div>
 </div>
 
+<script src="assets/data/balance.js?v=10"></script>
+<script src="assets/data/heroes.js?v=10"></script>
+<script src="assets/data/pets.js?v=10"></script>
 <script>
 // ===== 게임 상태 =====
 const G = {
@@ -865,48 +868,7 @@ const ACHIEVEMENTS = [
 // 코스튬/스킨 카탈로그 — img는 "이미지 슬롯": 해당 경로에 PNG를 넣으면 그 그림으로 바뀌고, 없으면 이모지로 표시
 // ===== 영웅 → 코스튬 구조 =====
 // 각 영웅(캐릭터)이 자기 코스튬들을 가짐. 코스튬 선택 시 그 영웅의 외형/배경 적용
-const HEROES = [
-  { id:'lin', name:'린', emoji:'🔫', cls:'gun', attr:'바람', aura:'#7fd0ff', bonus:0.20, fx:'water', fxEmoji:'🌀',
-    costumes:[
-      { id:'lin_default', name:'기본', img:'assets/char/base/lin_base.png', sd:'assets/char/sd_custom/sd_viola.png', price:0, desc:'총잡이 기본 복장' },
-      { id:'lin_summer_event', name:'물총 축제', img:'assets/char/event/lin_summer_cutout.png', sd:'assets/char/sd_custom/sd_viola.png', price:1800, aura:'#38d5ff', bonus:0.08, fxEmoji:'💦', scene:'assets/bg/beach.png', artScale:1.70, artX:'-9%', desc:'여름 이벤트 복장 · 바람과 물총 축제' },
-    ]},
-  { id:'rubia', name:'루비아', emoji:'🔥', cls:'magic', attr:'화염', aura:'#ff6b6b', bonus:0.20, fx:'flame', fxEmoji:'🔥',
-    costumes:[
-      { id:'rubia_default', name:'기본', img:'assets/char/base/sapphira_base.png', sd:'assets/char/sd_custom/sd_ceres.png', price:0, desc:'마법사 기본 복장' },
-      { id:'rubia_summer_event', name:'홍련 비치', img:'assets/char/event/rubia_summer_cutout.png', sd:'assets/char/sd_custom/sd_ceres.png', price:1800, aura:'#ff6b6b', bonus:0.08, fxEmoji:'🔥', scene:'assets/bg/beach.png', artScale:1.12, desc:'여름 이벤트 복장 · 홍련 마법사의 해변 축제' },
-    ]},
-  { id:'sapphira', name:'사피라', emoji:'⚔️', cls:'sword', attr:'물/얼음', aura:'#5b9bff', bonus:0.22, fx:'water', fxEmoji:'💧',
-    costumes:[
-      { id:'sapphira_default', name:'기본', img:'assets/char/base/silvia_base.png', sd:'assets/char/sd_custom/sd_linea.png', price:0, desc:'전사 기본 복장' },
-      { id:'sapphira_summer_event', name:'아쿠아 블레이드', img:'assets/char/event/sapphira_summer_cutout.png', sd:'assets/char/sd_custom/sd_linea.png', price:1800, aura:'#22d3ee', bonus:0.08, fxEmoji:'🌊', scene:'assets/bg/beach.png', desc:'여름 이벤트 복장 · 물/얼음 검사의 해변 장비' },
-    ]},
-  { id:'silvia', name:'실비아', emoji:'🛡️', cls:'sword', attr:'빛', aura:'#ffe08a', bonus:0.25, fx:'feather', fxEmoji:'✨',
-    costumes:[
-      { id:'silvia_default', name:'기본', img:'assets/char/base/rubia_base.png', sd:'assets/char/sd_custom/sd_amelia.png', price:0, desc:'성기사 기본 복장' },
-      { id:'silvia_summer_event', name:'선샤인 가드', img:'assets/char/event/silvia_summer_cutout.png', sd:'assets/char/sd_custom/sd_amelia.png', price:1800, aura:'#ffe08a', bonus:0.08, fxEmoji:'✨', scene:'assets/bg/beach.png', artScale:1.08, desc:'여름 이벤트 복장 · 빛의 수호자 해변 장비' },
-    ]},
-  { id:'kael', name:'카엘', emoji:'🔥', cls:'warrior', attr:'화염', aura:'#ff5b3f', bonus:0.20, fx:'flame', fxEmoji:'🔥',
-    costumes:[
-      { id:'kael_default', name:'기본', img:'assets/char/base/kael_base.png', sd:'assets/char/sd_custom/sd_draka.png', price:0, desc:'화염 전사 기본 복장' },
-      { id:'kael_summer_event', name:'용염 서퍼', img:'assets/char/event/kael_summer_cutout.png', sd:'assets/char/sd_custom/sd_draka.png', price:1800, aura:'#ff7a3d', bonus:0.08, fxEmoji:'🔥', scene:'assets/bg/beach.png', artScale:1.05, desc:'여름 이벤트 복장 · 뜨거운 해변의 화염검' },
-    ]},
-  { id:'emeria', name:'에메리아', emoji:'🌿', cls:'healer', attr:'자연', aura:'#74d680', bonus:0.18, fx:'leaf', fxEmoji:'🌿',
-    costumes:[
-      { id:'emeria_default', name:'기본', img:'assets/char/base/emeria_base.png', sd:'assets/char/sd_custom/sd_foret.png', price:0, desc:'자연 힐러 기본 복장' },
-      { id:'emeria_summer_event', name:'블로섬 비치', img:'assets/char/event/emeria_summer_cutout.png', sd:'assets/char/sd_custom/sd_foret.png', price:1800, aura:'#8ee8a8', bonus:0.08, fxEmoji:'🌸', scene:'assets/bg/beach.png', artScale:1.42, desc:'여름 이벤트 복장 · 꽃향기 가득한 해변 축제' },
-    ]},
-  { id:'kaira', name:'카이라', emoji:'🗡️', cls:'assassin', attr:'암흑', aura:'#ff4d6d', bonus:0.20, fx:'dark', fxEmoji:'🌑',
-    costumes:[
-      { id:'kaira_default', name:'기본', img:'assets/char/base/kaira_base.png', sd:'assets/char/sd_custom/sd_noxia.png', price:0, desc:'암살자 기본 복장' },
-      { id:'kaira_summer_event', name:'나이트 워터', img:'assets/char/event/kaira_summer_cutout.png', sd:'assets/char/sd_custom/sd_noxia.png', price:1800, aura:'#45b7ff', bonus:0.08, fxEmoji:'💧', scene:'assets/bg/beach.png', desc:'여름 이벤트 복장 · 물결 속 암살자의 휴가' },
-    ]},
-  { id:'kairon', name:'카이론', emoji:'⚔️', cls:'knight', attr:'물/얼음', aura:'#4f8cff', bonus:0.22, fx:'ice', fxEmoji:'❄️',
-    costumes:[
-      { id:'kairon_default', name:'기본', img:'assets/char/base/kairon_base.png', sd:'assets/char/sd_custom/sd_lumiel.png', price:0, desc:'빙결 기사 기본 복장' },
-      { id:'kairon_summer_event', name:'블루 썸머', img:'assets/char/event/kairon_summer_cutout.png', sd:'assets/char/sd_custom/sd_lumiel.png', price:1800, aura:'#4f8cff', bonus:0.08, fxEmoji:'💧', scene:'assets/bg/beach.png', artScale:1.42, desc:'여름 이벤트 복장 · 푸른 검의 해변 장비' },
-    ]},
-];
+// Hero costume catalog data is loaded from assets/data.
 const AV = '?v=10';   // 이미지 캐시 버전 (그림 교체 시 숫자 올리면 새로 로드됨)
 function heroObj(id){ return HEROES.find(h=>h.id===(id||G.hero)) || HEROES[0]; }
 const HERO_NAME_TO_COSTUME_ID = { 린:'lin', 루비아:'rubia', 사피라:'sapphira', 실비아:'silvia', 카엘:'kael', 에메리아:'emeria', 카이라:'kaira', 카이론:'kairon' };
@@ -930,15 +892,7 @@ function skinVisual(skin, px){
   return `<img src="${skin.img}${AV}" alt="" style="width:${px}px;height:${px}px;object-fit:contain;vertical-align:middle"
     onerror="this.onerror=null;this.outerHTML='<span style=&quot;font-size:${Math.round(px*0.8)}px&quot;>${safe}</span>'">`;
 }
-const PITY_MAX = 1000;         // 1000회마다 UR 선택소환권
-const GRADE_STARS = {N:1, R:2, SR:3, SSR:5, UR:6};
-const GRADE_GRAD = {           // 등급별 배경 그라데이션
-  N:  'linear-gradient(160deg,#7b8494,#3f4654)',
-  R:  'linear-gradient(160deg,#4f9bff,#1b3a8a)',
-  SR: 'linear-gradient(160deg,#c06bff,#5b1d97)',
-  SSR:'linear-gradient(160deg,#ffd24a,#ff8a00,#ff5e7a)',
-  UR:'linear-gradient(160deg,#8b5cf6,#ff4fd8,#ffd24a)',
-};
+// Summon grade balance data is loaded from assets/data.
 let autoTimer = null;
 let monsterTimer = null;
 let heroDetailIdx = null;      // 영웅 상세(장비) 화면에서 보고있는 영웅
@@ -951,30 +905,9 @@ let selectedCharPetIdx = 0;     // 영웅소 펫 탭에서 보고 있는 펫
 
 // 영웅 풀
 // 모험가 동료 캐릭터 — 이름·직업·서사
-const HERO_POOL = [
-  {name:"린", emoji:"🔫", cls:"gunner", grade:"SR", atk:50},
-  {name:"루비아", emoji:"🔥", cls:"mage", grade:"SR", atk:50},
-  {name:"실비아", emoji:"🛡️", cls:"tanker", grade:"SR", atk:50},
-  {name:"사피라", emoji:"⚔️", cls:"warrior", grade:"SR", atk:50},
-  {name:"카엘", emoji:"🔥", cls:"warrior", grade:"SR", atk:50},
-  {name:"에메리아", emoji:"🌿", cls:"healer", grade:"SR", atk:50},
-  {name:"카이라", emoji:"🗡️", cls:"assassin", grade:"SR", atk:50},
-  {name:"카이론", emoji:"⚔️", cls:"knight", grade:"SR", atk:50},
-];
+// Hero summon pool data is loaded from assets/data.
 // 세계관
-const WORLD = {
-  title:"여명의 끝, 아스트라이아",
-  prologue:[
-    {who:"", text:"별이 떨어지던 밤, 하늘에 균열이 열렸다."},
-    {who:"", text:"균열에서 쏟아지는 마수에 맞서, 사람들은 모험가의 도시 '루멘'에 길드를 세웠다."},
-    {who:"", text:"'{이름}' — 너는 오늘, 길드 명부에 그 이름을 올렸다. 신참 파티의 리더로서."},
-    {who:"린", text:"…네가 새 리더? 흐음. 눈은 나쁘지 않네."},
-    {who:"린", text:"좋아, 첫 동료는 나야. 빠르고 정확하게 — 따라와. 세계의 끝을 막으러."},
-    {who:"", text:"— 동료들과 유대를 쌓고, 종말의 별 '노바'로부터 세계를 지켜라."},
-    {who:"", text:"(하늘의 균열 너머 — 거대한 무언가가 이쪽을 내려다보고 있다)"},
-    {who:"???", text:"……또, 막아서는가. 부질없는 것을."},
-  ],
-};
+// World prologue data is loaded from assets/data.
 // 캐릭터별 서사 (키 = 이름)
 const CHARACTERS = {
   "린": { title:"질풍의 총잡이", persona:"빠르고 정확한 해결사", attr:"바람", weapon:"장총",
@@ -1287,63 +1220,7 @@ const CHAR_TALK_HIGH = {
 const CHAR_ART = { 린:'assets/char/base/lin_base.png', 루비아:'assets/char/base/sapphira_base.png', 사피라:'assets/char/base/silvia_base.png', 실비아:'assets/char/base/rubia_base.png' };
 function charArt(name){ return CHAR_ART[name] || ('assets/char/'+encodeURIComponent(name)+'.png'); }
 // ===== 펫 =====
-const PET_CATALOG_VERSION = '20260615';
-const PET_IMG = 'assets/pet/catalog_20260615/';
-const PET_POOL = [
-  {name:'아기 고양이', emoji:'🐱', buff:'gold', grade:'N', img:PET_IMG+'pet_n_cat.png', stats:'체력 +5% · 공격력 +4% · 방어력 +4%', skill:'반짝반짝 발견: 10초 동안 골드 획득량 +10%'},
-  {name:'아기 토끼', emoji:'🐰', buff:'hp', grade:'N', img:PET_IMG+'pet_n_rabbit.png', stats:'체력 +5% · HP 회복 +5% · 골드 획득량 +5%', skill:'당근 냠냠: 8초 동안 체력 +8%'},
-  {name:'아기 부엉이', emoji:'🦉', buff:'crit', grade:'N', img:PET_IMG+'pet_n_owl.png', stats:'공격력 +5% · 치명타 확률 +3% · 치명타 피해 +5%', skill:'밤의 지혜: 10초 동안 치명타 확률 +8%'},
-  {name:'아기 다람쥐', emoji:'🐿️', buff:'def', grade:'N', img:PET_IMG+'pet_n_squirrel.png', stats:'방어력 +6% · 피해 감소 +4% · 골드 획득량 +5%', skill:'도토리 비축: 8초 동안 방어력 +10%'},
-  {name:'아기 슬라임', emoji:'💧', buff:'heal', grade:'N', img:PET_IMG+'pet_n_slime.png', stats:'HP 회복 +6% · 방어력 +4% · 피해 감소 +4%', skill:'점액 재생: 10초 동안 체력 +8%'},
-
-  {name:'바람 여우', emoji:'🦊', buff:'atk', grade:'R', img:PET_IMG+'pet_r_wind_fox.png', stats:'체력 +10% · 공격력 +6% · 방어력 +6% · 치명타 확률 +4%', skill:'질풍의 가호: 10초 동안 공격력 +12%'},
-  {name:'화염 코알라', emoji:'🐨', buff:'atk', grade:'R', img:PET_IMG+'pet_r_fire_koala.png', stats:'공격력 +8% · 화염속성 피해 +8% · 치명타 피해 +6% · 피해 감소 +4%', skill:'화염 폭주: 8초 동안 속성 피해 +15%'},
-  {name:'번개 까마귀', emoji:'🐦‍⬛', buff:'crit', grade:'R', img:PET_IMG+'pet_r_thunder_raven.png', stats:'공격력 +7% · 번개속성 피해 +10% · 치명타 확률 +5% · 방어력 +5%', skill:'번개 낙인: 10초 동안 번개속성 피해 +12%'},
-  {name:'대지 거북이', emoji:'🐢', buff:'def', grade:'R', img:PET_IMG+'pet_r_earth_turtle.png', stats:'체력 +12% · 방어력 +10% · 피해 감소 +6% · 치명타 피해 +4%', skill:'대지의 보호막: 10초 동안 받는 피해 -15%'},
-  {name:'신비한 아르마딜로', emoji:'🦔', buff:'crit', grade:'R', img:PET_IMG+'pet_r_arc_armadillo.png', stats:'공격력 +7% · 치명타 확률 +6% · 피해 감소 +5% · 치명타 피해 +6%', skill:'마력 순환: 10초 동안 치명타 피해 +12%'},
-
-  {name:'기계 골렘', emoji:'🤖', buff:'def', grade:'SR', img:PET_IMG+'pet_sr_mecha_golem.png', stats:'방어력 +12% · 체력 +8% · 공격력 +6%', skill:'오버드라이브: 10초 동안 받는 피해 -20%'},
-  {name:'그림자 박쥐', emoji:'🦇', buff:'crit', grade:'SR', img:PET_IMG+'pet_sr_shadow_bat.png', stats:'치명타 확률 +6% · 치명타 피해 +8% · 공격력 +6%', skill:'어둠의 일격: 8초 동안 치명타 피해 +20%'},
-  {name:'아쿠아 해달', emoji:'🦦', buff:'speed', grade:'SR', img:PET_IMG+'pet_sr_aqua_otter.png', stats:'스킬 쿨타임 감소 +5% · 공격속도 +6% · 치명타 확률 +6%', skill:'물의 축복: 10초 동안 MP 회복 +20%'},
-  {name:'암석 사마귀', emoji:'🦂', buff:'atk', grade:'SR', img:PET_IMG+'pet_sr_rock_scorpion.png', stats:'공격력 +8% · 대지속성 피해 +6% · 치명타 확률 +6%', skill:'대지 분쇄: 8초 동안 스킬 피해량 +20%'},
-  {name:'요정 나비', emoji:'🦋', buff:'heal', grade:'SR', img:PET_IMG+'pet_sr_fairy_butterfly.png', stats:'HP 회복 +8% · 공격속도 +4% · 회피율 +6%', skill:'바람의 날갯짓: 8초 동안 HP 회복 +15%'},
-  {name:'번개 모요', emoji:'🦊', buff:'atk', grade:'SR', img:PET_IMG+'pet_sr_thunder_moyo.png', stats:'공격속도 +5% · 번개속성 피해 +8% · 치명타 확률 +6%', skill:'전격 폭풍: 8초 동안 적 전체 번개 피해'},
-  {name:'숲의 고슴도치', emoji:'🦔', buff:'hp', grade:'SR', img:PET_IMG+'pet_sr_forest_hedgehog.png', stats:'체력 +10% · 회피율 +5% · 공격력 +6%', skill:'가시 방어막: 8초 동안 받는 피해 -20%'},
-  {name:'유령 고양이', emoji:'🐈', buff:'magic', grade:'SR', img:PET_IMG+'pet_sr_ghost_cat.png', stats:'공격력 +8% · 치명타 확률 +5% · 암흑속성 피해 +6%', skill:'혼령의 장난: 8초 동안 적 공격력 -20%'},
-  {name:'태양 사자', emoji:'🦁', buff:'crit', grade:'SR', img:PET_IMG+'pet_sr_sun_lion.png', stats:'치명타 확률 +8% · 치명타 피해 +12% · 공격력 +6%', skill:'태양의 가호: 10초 동안 치명타 피해 +25%'},
-  {name:'빙결 펭귄', emoji:'🐧', buff:'def', grade:'SR', img:PET_IMG+'pet_sr_ice_penguin.png', stats:'방어력 +10% · 빙결속성 피해 +8% · 체력 +6%', skill:'빙결 파동: 8초 동안 적 전체 빙결 확률 +30%'},
-
-  {name:'별빛 고래', emoji:'🐳', buff:'skill', grade:'SSR', img:PET_IMG+'pet_ssr_star_whale.png', stats:'체력 +15% · 공격력 +10% · 치명타 확률 +10%', skill:'별의 치유: 10초 동안 받는 피해 -20%, 체력 +15%'},
-  {name:'시간의 수호자', emoji:'⏳', buff:'speed', grade:'SSR', img:PET_IMG+'pet_ssr_time_keeper.png', stats:'스킬 쿨타임 감소 +12% · 치명타 확률 +7% · 공격력 +8%', skill:'시간 역행: 8초 동안 스킬 쿨타임 감소 +30%, 공격속도 +20%'},
-  {name:'화산 도마뱀', emoji:'🦎', buff:'atk', grade:'SSR', img:PET_IMG+'pet_ssr_volcano_lizard.png', stats:'공격력 +15% · 화염속성 피해 +15% · 치명타 피해 +10%', skill:'용암 폭발: 10초 동안 화염속성 피해 +20%, 공격력 +15%'},
-  {name:'유령 사신', emoji:'💀', buff:'magic', grade:'SSR', img:PET_IMG+'pet_ssr_ghost_reaper.png', stats:'공격력 +15% · 암흑속성 피해 +15% · 치명타 확률 +10%', skill:'영혼 수확: 10초 동안 암흑속성 피해 +20%, 공격력 +15%'},
-  {name:'금빛 여우', emoji:'🦊', buff:'gold', grade:'SSR', img:PET_IMG+'pet_ssr_gold_fox.png', stats:'골드 획득량 +20% · 공격속도 +7% · 치명타 확률 +5%', skill:'황금의 축복: 10초 동안 골드 획득량 +30%, 공격속도 +20%'},
-  {name:'천둥 군주 볼테온', emoji:'🐺', buff:'atk', grade:'SSR', img:PET_IMG+'pet_ssr_thunder_bolteon.png', stats:'체력 +20% · 공격력 +20% · 공격속도 +15%', skill:'전격 폭발: 10초 동안 번개속성 피해 +20%, 치명타 확률 +15%'},
-  {name:'대지 수호 골렘', emoji:'🪨', buff:'def', grade:'SSR', img:PET_IMG+'pet_ssr_earth_golem.png', stats:'체력 +25% · 방어력 +25% · 피해 감소 +20%', skill:'대지의 보호막: 10초 동안 받는 피해 -25%, 방어력 +20%'},
-  {name:'바람 정령 실피드', emoji:'🧚', buff:'speed', grade:'SSR', img:PET_IMG+'pet_ssr_wind_sylphid.png', stats:'공격속도 +20% · 회피율 +15% · 바람속성 피해 +25%', skill:'질풍의 노래: 10초 동안 공격속도 +30%, 회피율 +20%'},
-  {name:'빛의 성기사 아우렐', emoji:'🛡️', buff:'hp', grade:'SSR', img:PET_IMG+'pet_ssr_light_aurel.png', stats:'방어력 +20% · 피해 감소 +15% · 치명타 피해 +15%', skill:'신성한 수호: 10초 동안 받는 피해 -20%, 치명타 피해 +20%'},
-  {name:'심연 마도사 겔루스', emoji:'🧙', buff:'magic', grade:'SSR', img:PET_IMG+'pet_ssr_abyss_gellus.png', stats:'공격력 +20% · 치명타 피해 +15% · 암흑속성 피해 +25%', skill:'암흑 폭풍: 10초 동안 암흑속성 피해 +20%, 스킬 피해량 +15%'},
-
-  {name:'불사신 수호자', emoji:'🦁', buff:'atk', grade:'UR', img:PET_IMG+'pet_ur_immortal_guardian.png', stats:'체력 +30% · 공격력 +30% · 방어력 +25% · 화염속성 피해 +20% · 공격속도 +15% · 치명타 확률 +20%', skill:'영혼의 불꽃: 10초 동안 아군 전체 화염속성 피해 +35%, 화상 피해 +20%'},
-  {name:'아이스 드래곤', emoji:'🐉', buff:'atk', grade:'UR', img:PET_IMG+'pet_ur_ice_dragon.png', stats:'체력 +30% · 공격력 +35% · 방어력 +20% · 빙결속성 피해 +20% · 공격속도 +15% · 치명타 확률 +10%', skill:'빙하의 분노: 10초 동안 아군 전체 빙결속성 피해 +35%, 적 전체 공격속도 -20%'},
-  {name:'신성한 루미엘', emoji:'🧚', buff:'hp', grade:'UR', img:PET_IMG+'pet_ur_holy_lumiel.png', stats:'체력 +30% · 공격력 +35% · 치명타 확률 +25% · 치명타 피해 +25% · 공격속도 +20% · 피해 감소 +15%', skill:'천상의 축복: 10초 동안 아군 전체 치명타 피해 +35%, 치명타 확률 +20%'},
-  {name:'파멸의 이그니스', emoji:'😈', buff:'magic', grade:'UR', img:PET_IMG+'pet_ur_ruin_ignis.png', stats:'공격력 +35% · 화염속성 피해 +30% · 치명타 확률 +20% · 치명타 피해 +25% · 공격속도 +15% · 피해 증가 +15%', skill:'혼돈의 심연: 10초 동안 아군 전체 화염속성 피해 +35%, 적 전체 저주 피해 +20%'},
-  {name:'생명의 가디언', emoji:'🌿', buff:'heal', grade:'UR', img:PET_IMG+'pet_ur_life_guardian.png', stats:'체력 +35% · 자연속성 피해 +20% · 치명타 확률 +15% · 공격속도 +15% · 체력 회복 +25%', skill:'자연의 울림: 10초 동안 아군 전체 자연속성 피해 +35%, 체력 회복 +30%'},
-  {name:'번개의 제왕 라이덴스', emoji:'🐺', buff:'speed', grade:'UR', img:PET_IMG+'pet_ur_thunder_raimense.png', stats:'체력 +30% · 번개속성 피해 +25% · 치명타 피해 +20% · 공격속도 +20% · 감전 피해 +20%', skill:'천둥 강림: 10초 동안 아군 전체 번개속성 피해 +35%, 감전 피해 +8%'},
-  {name:'대지의 거신 가이아', emoji:'🪨', buff:'def', grade:'UR', img:PET_IMG+'pet_ur_earth_gaia.png', stats:'체력 +35% · 방어력 +35% · 대지속성 피해 +20% · 피해 감소 +15% · 공격속도 +15%', skill:'대지의 진노: 10초 동안 아군 전체 대지속성 피해 +35%, 방어력 +20%, 피해 감소 +20%'},
-  {name:'바람의 실피리아', emoji:'🧚', buff:'speed', grade:'UR', img:PET_IMG+'pet_ur_wind_sylphia.png', stats:'체력 +25% · 공격속도 +25% · 회피율 +20% · 바람속성 피해 +25% · 치명타 확률 +15% · 치명타 피해 +26%', skill:'순풍의 가호: 10초 동안 아군 전체 바람속성 피해 +35%, 공격속도 +20%, 치명타 확률 +15%'},
-];
-const PET_BUFF = {
-  atk:   {label:'공격력',   icon:'⚔️', val:{N:0.04,R:0.07,SR:0.08,SSR:0.15,UR:0.35}},
-  crit:  {label:'치명타율', icon:'🎯', val:{N:0.03,R:0.06,SR:0.08,SSR:0.10,UR:0.20}},
-  gold:  {label:'골드 획득', icon:'<span class="goldIcon"></span>', val:{N:0.05,R:0.08,SR:0.12,SSR:0.20,UR:0.35}},
-  hp:    {label:'체력',     icon:'❤️', val:{N:0.05,R:0.10,SR:0.10,SSR:0.20,UR:0.30}},
-  def:   {label:'방어력',   icon:'🛡️', val:{N:0.04,R:0.10,SR:0.12,SSR:0.25,UR:0.35}},
-  heal:  {label:'HP 회복',  icon:'✚', val:{N:0.06,R:0.08,SR:0.08,SSR:0.15,UR:0.25}},
-  speed: {label:'공격속도', icon:'⚡', val:{N:0.03,R:0.05,SR:0.06,SSR:0.20,UR:0.25}},
-  magic: {label:'마법 공격력', icon:'🔮', val:{N:0.05,R:0.07,SR:0.08,SSR:0.20,UR:0.35}},
-  skill: {label:'스킬 피해량', icon:'✦', val:{N:0.04,R:0.06,SR:0.08,SSR:0.12,UR:0.20}},
-};
+// Pet catalog and buffs data is loaded from assets/data.
 function petBuffText(p){ const b=PET_BUFF[p.buff]||PET_BUFF.atk; return p.stats || `${b.icon} ${b.label} +${Math.round((b.val[p.grade]||0)*100)}%`; }
 function petStatChipsHtml(p){
   const raw = (p.stats || petBuffText(p) || '').split('·').map(x=>x.trim()).filter(Boolean);
@@ -1430,27 +1307,7 @@ function monsterAttribute(){ return MON_ATTRIBUTES[(G.stage-1) % MON_ATTRIBUTES.
 let monHpMax = 0, monHp = 0;
 
 // ===== 능력치 계산 =====
-const HERO_MAX_LEVEL = 50;
-const HERO_GRADE_ORDER = ['N','R','SR','SSR','UR'];
-const HERO_GRADE_MULT = {N:.45, R:.68, SR:1, SSR:3.5, UR:9};
-const HERO_DUST_ICON = '💠';
-const HERO_DUST_BY_GRADE = {N:1, R:3, SR:10, SSR:40, UR:120};
-const PET_DUST_ICON = '🐾';
-const PET_DUST_BY_GRADE = {N:1, R:3, SR:10, SSR:35, UR:100};
-const HERO_MAT = { 린:'wind', 루비아:'fire', 실비아:'water', 사피라:'water', 카엘:'fire', 에메리아:'wind', 카이라:'dark', 카이론:'water' };
-const ROLE_STAT_MULT = {
-  gunner:{atk:1.28,hp:.78,def:.74},
-  gun:{atk:1.28,hp:.78,def:.74},
-  mage:{atk:1.22,hp:.82,def:.72},
-  magic:{atk:1.22,hp:.82,def:.72},
-  assassin:{atk:.96,hp:.86,def:.78},
-  warrior:{atk:1.06,hp:1.06,def:1.04},
-  sword:{atk:1.06,hp:1.06,def:1.04},
-  knight:{atk:.98,hp:1.20,def:1.22},
-  tanker:{atk:.82,hp:1.58,def:1.68},
-  tank:{atk:.82,hp:1.58,def:1.68},
-  healer:{atk:.86,hp:1.18,def:1.10}
-};
+// Hero and pet growth balance data is loaded from assets/data.
 function roleStatMult(h, key){ return (ROLE_STAT_MULT[h?.cls] && ROLE_STAT_MULT[h.cls][key]) || 1; }
 const GAME_ATTRIBUTES = ['대지','자연','화염','물/얼음','빛','암흑','번개','바람'];
 const ATTRIBUTE_ADVANTAGE = {
@@ -1855,56 +1712,7 @@ function restartMonsterAttack(){
 
 // ===== 스킬 (직업별 자동 발동) =====
 // ===== 캐릭터별 시그니처 스킬 (코스튬 착용 시 발동) =====
-const CHAR_SKILLS = {
-  '린':    { color:'#7fd0ff', skills:[
-    {name:'게일 드로우',    fx:'🌀', mult:5, desc:'바람을 실은 고속 사격 · 짧은 회피 · 치명타↑'},
-    {name:'스톰 버스트',    fx:'🌪️', mult:6, desc:'폭풍 탄환 폭발 · 적 공격속도 감소'},
-    {name:'윈드 스텝',      fx:'🌀', mult:4, desc:'바람처럼 이동 후 강화 사격 · 공격속도↑'},
-    {name:'실버 스톰',      fx:'💨', mult:9, desc:'전방 질풍 탄막 · 방어 무시 · 보스 추가피해'},
-  ]},
-  '루비아':{ color:'#ff6b6b', skills:[
-    {name:'파이어 볼',       fx:'🔥', mult:5, desc:'화염 구체 발사 · 단일 피해'},
-    {name:'플레임 서클',     fx:'✴️', mult:6, desc:'마법진 전개 · 지속 피해'},
-    {name:'버닝 임팩트',     fx:'💥', mult:7, desc:'강력한 폭발 · 광역 피해'},
-    {name:'크림슨 노바',     fx:'🌋', mult:9, desc:'주변 화염 폭발 · 광역 피해'},
-  ]},
-  '사피라':{ color:'#5b9bff', skills:[
-    {name:'루나 크레스트 슬래시', fx:'🌙', mult:5, desc:'반월 검기 · 단일 연속베기'},
-    {name:'아쿠아 블레이드 러시', fx:'🌊', mult:6, desc:'물의 검 돌진 · 다단히트'},
-    {name:'사파이어 가드',       fx:'🛡️', mult:4, desc:'방어 태세 · 반격 강화'},
-    {name:'오션 브레이커',       fx:'💥', mult:9, desc:'바다를 가르는 일격 · 광역 폭발'},
-  ]},
-  '실비아':{ color:'#ffe08a', skills:[
-    {name:'아이기스 베리어', fx:'🛡️', mult:4, desc:'빛의 방벽 · 아군 보호'},
-    {name:'라이트 브레이크', fx:'✨', mult:6, desc:'신성한 해머 강타 · 도발/제어'},
-    {name:'세인트 카운터',   fx:'✝️', mult:5, desc:'반격의 빛 · 받은 피해 반사'},
-    {name:'오로라 발키리',   fx:'🌟', mult:9, desc:'빛의 심판 · 광역 진압'},
-  ]},
-  '카엘':{ color:'#ff5b3f', skills:[
-    {name:'열화 베기', fx:'🔥', mult:6, desc:'화염 검격 · 화상 부여'},
-    {name:'불꽃 돌진', fx:'💥', mult:7, desc:'전방 돌진 · 기절'},
-    {name:'용염 폭발', fx:'🌋', mult:8, desc:'주변 폭발 · 피해 증가'},
-    {name:'불멸의 의지', fx:'🛡️', mult:5, desc:'공격력/방어력 상승'},
-  ]},
-  '에메리아':{ color:'#74d680', skills:[
-    {name:'블레싱 리프', fx:'🌿', mult:4, desc:'지속 회복'},
-    {name:'에메랄드 오라', fx:'✨', mult:5, desc:'공격력/방어력 증가'},
-    {name:'플라워 생츄어리', fx:'🌸', mult:5, desc:'피해 감소와 회복'},
-    {name:'월드 트리 프레이어', fx:'🌳', mult:8, desc:'광역 회복과 속도 증가'},
-  ]},
-  '카이라':{ color:'#ff4d6d', skills:[
-    {name:'쉐도우 팽', fx:'✖', mult:6, desc:'그림자 돌진 · 출혈'},
-    {name:'블러드 스텝', fx:'🩸', mult:5, desc:'회피 증가 · 치명타 확정'},
-    {name:'크림슨 댄스', fx:'🗡️', mult:8, desc:'초고속 연속 베기'},
-    {name:'나이트메어 이그제큐션', fx:'🌑', mult:9, desc:'후방 암살 · 보스 약화'},
-  ]},
-  '카이론':{ color:'#4f8cff', skills:[
-    {name:'프로스트 크레센트', fx:'❄️', mult:6, desc:'냉기의 초승달 검기'},
-    {name:'빙영 스텝', fx:'🧊', mult:6, desc:'서리 그림자 이동 · 회피 증가'},
-    {name:'아이스 가디언', fx:'🛡️', mult:5, desc:'빙결 방어막 · 방어력 강화와 재생'},
-    {name:'빙천의 심판', fx:'❄️', mult:10, desc:'거대한 얼음 검성 강림'},
-  ]},
-};
+// Hero skill catalog data is loaded from assets/data.
 const heroSkillState = {};
 function heroSkillPack(h){
   const cs = CHAR_SKILLS[h.name];
@@ -4489,6 +4297,9 @@ const battleEl = document.getElementById('battle');
 battleEl.addEventListener('click', manualTap);
 battleEl.addEventListener('touchstart', manualTap, {passive:false});
 </script>
+<script src="assets/ui/admin-test.js?v=10"></script>
 </body>
 </html>
+
+
 
