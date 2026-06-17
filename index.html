@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>방치형 RPG</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
@@ -11,7 +11,7 @@
     background:#0f1020; color:#e8e8f0; overflow:hidden;
     user-select:none; -webkit-user-select:none;
   }
-  #app { max-width:480px; margin:0 auto; height:100vh; display:flex; flex-direction:column; }
+  #app { max-width:480px; margin:0 auto; height:100vh; height:100dvh; display:flex; flex-direction:column; }
 
   /* 상단 자원바 */
   #topbar {
@@ -742,6 +742,7 @@
       <button onclick="closeMenu();openFromHome('costume')">👗<i>코스튬</i></button>
       <button onclick="closeMenu();openFromHome('gear')">⚔️<i>장비</i></button>
       <button onclick="closeMenu();openFromHome('shop')">🛒<i>상점</i></button>
+      <button onclick="closeMenu();openScreen('settings')">⚙️<i>설정</i></button>
     </div>
   </div>
 </div>
@@ -795,6 +796,7 @@
 <script src="assets/logic/pet-helpers.js?v=10"></script>
 <script src="assets/logic/stats.js?v=10"></script>
 <script src="assets/ui/char-hall.js?v=10"></script>
+<script src="assets/ui/sound.js?v=10"></script>
 <script>
 // ===== 게임 상태 =====
 const G = {
@@ -807,6 +809,7 @@ const G = {
   gear: { 무기:0, 방어구:0, 악세:0 },  // 강화 단계
   tapPower: 1, autoPower: 1, autoSpeed: 1,  // 사냥 업그레이드 단계
   critChance: 1, critDmgPower: 1, bossPower: 1, attrPower: 1,
+  sfxOn: true,                 // 효과음 켜기
   firstPayDone: false,
   adPass: false,               // 광고 스킵 패스(월 구독) 활성 여부
   adCd: { gold:0, gem:0, pull:0 }, // 보상형 광고 쿨다운(다시 가능 시각 ms)
@@ -1622,6 +1625,7 @@ function killMonster(){
   G.gold += reward;
   G.exp += G.stage * (isBoss?5:1);
   // 처치 연출
+  sfx(isBoss?'boss':'kill');
   monsterExplode();
   coinBurst(isBoss?12:6);
   if(isBoss){ screenFlash('#ff5e7a'); document.getElementById('battle').classList.add('shake'); setTimeout(()=>document.getElementById('battle').classList.remove('shake'),200); }
@@ -1629,6 +1633,7 @@ function killMonster(){
   const prevLv = G.plv;
   while(G.exp >= G.plv*20){ G.exp -= G.plv*20; G.plv++; G.atk += 5; }
   if(G.plv>prevLv){
+    sfx('levelup');
     showToast('⭐ LEVEL UP! Lv.'+G.plv, '#ffd866', true);
     const ring=document.createElement('div'); ring.className='lvring';
     document.getElementById('battle').appendChild(ring); setTimeout(()=>ring.remove(),700);
@@ -1704,6 +1709,7 @@ function summonHero(count){
   const cost = count===11 ? 3000 : 300;
   if(G.gem < cost){ alert('💎 보석이 부족해요!\n상점에서 광고/충전으로 보석을 모아보세요.'); return; }
   G.gem -= cost;
+  sfx('gacha');
   const results = [];
   dailyInc('summon', count);
   for(let i=0;i<count;i++) results.push(makeHeroFromGrade(rollHeroGrade()));
@@ -2079,6 +2085,7 @@ function grantReward(r){
   if(r.mat)  for(const k in r.mat) G.mats[k] = (G.mats[k]||0) + r.mat[k];
   if(r.heroDust) G.heroDust = (G.heroDust||0) + r.heroDust;
   if(r.petDust)  G.petDust  = (G.petDust||0)  + r.petDust;
+  if(typeof sfx==='function') sfx('reward');
   refreshTop();
 }
 function rewardText(r){
@@ -2121,7 +2128,7 @@ function confirmPlayerName(){
 // ===== 풀스크린 서브 화면 (홈 메뉴에서 진입) =====
 let currentScreen = null;
 function openScreen(name){
-  const titles = {dungeon:'🗓️ 요일던전', mail:'📬 우편함', quest:'📜 퀘스트', achieve:'🏆 업적', attend:'📅 출석', bond:'💗 교감', story:'📖 메인 스토리', mission:'📋 일일 미션', pet:'🐾 펫소환', guild:'🏛️ 길드소', summon:'✨ 소환상점', bag:'🎒 가방', shop:'🛒 상점'};
+  const titles = {dungeon:'🗓️ 요일던전', mail:'📬 우편함', quest:'📜 퀘스트', achieve:'🏆 업적', attend:'📅 출석', bond:'💗 교감', story:'📖 메인 스토리', mission:'📋 일일 미션', pet:'🐾 펫소환', guild:'🏛️ 길드소', summon:'✨ 소환상점', bag:'🎒 가방', shop:'🛒 상점', settings:'⚙️ 설정'};
   if(name==='summon') summonView='hub';
   currentScreen = name;
   document.getElementById('screenTitle').textContent = titles[name]||'';
@@ -2145,6 +2152,7 @@ function renderScreen(){
   else if(currentScreen==='guild') b.innerHTML = viewGuild();
   else if(currentScreen==='summon') b.innerHTML = viewSummon();
   else if(currentScreen==='bag') b.innerHTML = viewBag();
+  else if(currentScreen==='settings') b.innerHTML = viewSettings();
   else if(currentScreen==='shop') b.innerHTML = viewShop();
   updateHomeRes();
 }
@@ -2218,6 +2226,62 @@ function viewBag(){
     <b style="font-size:16px">${(G.guild&&G.guild.coin)||0}</b></div></div>
   <div class="card small">💡 부족할 때: 재료=🗓️요일던전 · 영웅 결정=영웅 분해 · 소환권=소환 누적</div>`;
   return h;
+}
+// ===== 설정 — 효과음 토글 + 세이브 백업 =====
+function viewSettings(){
+  const on = G.sfxOn !== false;
+  return `
+    <h3>🔊 사운드</h3>
+    <div class="card"><div class="row" style="align-items:center">
+      <div style="flex:1;text-align:left"><b>효과음</b><div class="small">타격·처치·보상·가챠 효과음</div></div>
+      <button class="btn ${on?'gem':''}" onclick="toggleSfx()">${on?'🔊 켜짐':'🔇 꺼짐'}</button>
+    </div></div>
+
+    <h3 style="margin-top:12px">💾 데이터 백업</h3>
+    <div class="card small" style="text-align:left">진행 데이터는 이 기기에만 저장돼요. 기기를 바꾸거나 브라우저 정리 전에 <b>백업 코드</b>를 복사해 두면 복구할 수 있어요.</div>
+    <div class="card">
+      <button class="btn gold" style="width:100%" onclick="showBackupCode()">📤 백업 코드 만들기</button>
+      <button class="btn" style="width:100%;margin-top:8px" onclick="showRestoreBox()">📥 백업 코드로 복구</button>
+    </div>
+    <div id="backupArea"></div>
+
+    <h3 style="margin-top:12px">ℹ️ 정보</h3>
+    <div class="card small" style="text-align:left">방치형 RPG · 모험가 ${vnEsc(pName())} · Lv.${G.plv} · 스테이지 ${G.stage}</div>`;
+}
+function toggleSfx(){
+  G.sfxOn = (G.sfxOn === false);
+  saveGame();
+  if(G.sfxOn) sfx('click');
+  if(currentScreen==='settings') renderScreen();
+}
+function makeBackupCode(){ try{ return btoa(unescape(encodeURIComponent(JSON.stringify(G)))); }catch(e){ return ''; } }
+function showBackupCode(){
+  const code = makeBackupCode();
+  document.getElementById('backupArea').innerHTML =
+    `<div class="card"><div class="small" style="margin-bottom:6px;text-align:left">아래 코드를 길게 눌러 전체 복사해서 안전한 곳에 보관하세요.</div>
+     <textarea readonly onclick="this.select()" style="width:100%;height:90px;border-radius:10px;border:1px solid #4a5090;background:#0f1020;color:#cfc8f5;font-size:11px;padding:8px;word-break:break-all">${code}</textarea>
+     <button class="btn gem" style="width:100%;margin-top:8px" onclick="copyBackup(this,\`${code}\`)">📋 복사하기</button></div>`;
+}
+function copyBackup(btn, code){
+  const done=()=>{ btn.textContent='✓ 복사됨!'; setTimeout(()=>btn.textContent='📋 복사하기',1500); };
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(code).then(done, done); }
+  else done();
+}
+function showRestoreBox(){
+  document.getElementById('backupArea').innerHTML =
+    `<div class="card"><div class="small" style="margin-bottom:6px;text-align:left">백업 코드를 붙여넣고 복구하세요. <b style="color:#ff8ab4">현재 진행도는 덮어쓰여집니다.</b></div>
+     <textarea id="restoreInput" placeholder="백업 코드 붙여넣기" style="width:100%;height:90px;border-radius:10px;border:1px solid #4a5090;background:#0f1020;color:#fff;font-size:11px;padding:8px"></textarea>
+     <button class="btn gold" style="width:100%;margin-top:8px" onclick="restoreBackup()">📥 이 코드로 복구</button></div>`;
+}
+function restoreBackup(){
+  const v=(document.getElementById('restoreInput').value||'').trim();
+  if(!v){ alert('백업 코드를 붙여넣어 주세요.'); return; }
+  let data;
+  try{ data = JSON.parse(decodeURIComponent(escape(atob(v)))); }catch(e){ alert('백업 코드가 올바르지 않아요. 다시 확인해 주세요.'); return; }
+  if(!data || typeof data!=='object' || data.plv==null){ alert('백업 코드가 올바르지 않아요.'); return; }
+  if(!confirm('현재 진행도를 백업 데이터로 덮어쓸까요? 되돌릴 수 없어요.')) return;
+  localStorage.setItem('idleRPG', JSON.stringify(data));
+  location.reload();
 }
 function enterDungeon(tierId){
   dungeonReset();
@@ -2465,7 +2529,7 @@ function showVNLine(node){
   vnLogArr.push({who:(who==='나'?pName():who), text:txt});
   // 두근두근 연출: heart 플래그 또는 💗/두근 포함 대사 → 핑크 글로우 + 하트 파티클
   const box=document.getElementById('vnBox');
-  if(node.heart || /💗|두근/.test(txt)){ box.classList.add('heartGlow'); spawnVNHearts(); }
+  if(node.heart || /💗|두근/.test(txt)){ box.classList.add('heartGlow'); spawnVNHearts(); if(typeof sfx==='function') sfx('heart'); }
   else box.classList.remove('heartGlow');
   if(node.shake){ const v=document.getElementById('vn'); v.classList.remove('shake'); void v.offsetWidth; v.classList.add('shake'); }
   typeText(txt);
@@ -3667,6 +3731,7 @@ function loadGame(){
       if(!G.attend) G.attend = { last:'', day:0 };
       if(!G.affinity) G.affinity = {};
       if(G.playerName==null) G.playerName = '';
+      if(G.sfxOn==null) G.sfxOn = true;
       if(!G.storyDone) G.storyDone = [];
       if(!G.epDone) G.epDone = [];
       if(!G.talkDate) G.talkDate = {};
@@ -3774,11 +3839,18 @@ function manualTap(e){
   if(now-lastManualTapAt<90) return;
   lastManualTapAt = now;
   showTapHitMotion(e);
+  sfx('tap');
   attack(true);
 }
 const battleEl = document.getElementById('battle');
 battleEl.addEventListener('click', manualTap);
 battleEl.addEventListener('touchstart', manualTap, {passive:false});
+
+// 세이브 안전장치 — 모바일은 앱이 백그라운드로 가거나 종료될 때 데이터가 날아갈 수 있어 즉시 저장
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden) saveGame(); });
+window.addEventListener('pagehide', saveGame);
+window.addEventListener('blur', saveGame);
+setInterval(saveGame, 30000); // 30초마다 자동 저장
 </script>
 <script src="assets/ui/admin-test.js?v=10"></script>
 </body>
