@@ -76,9 +76,9 @@
   #player .aura { position:absolute; bottom:54px; left:50%; transform:translateX(-50%);
     width:80px; height:26px; border-radius:50%; filter:blur(7px); opacity:.85; z-index:-1; }
   .lvtag { margin-top:6px; font-size:11px; color:#ffd866; font-weight:bold; text-shadow:0 1px 2px #000; }
-  #petCompanion { position:absolute; left:258px; bottom:145px; font-size:34px; z-index:7;
-    animation:bob 2s ease-in-out infinite; filter:drop-shadow(0 3px 4px #0008); }
-  #petCompanion img { width:54px; height:54px; object-fit:contain; display:block; }
+  #petCompanion { position:absolute; left:24.5%; top:47%; width:76px; height:76px; display:flex; align-items:flex-end; justify-content:center;
+    font-size:58px; z-index:7; pointer-events:none; animation:bob 2s ease-in-out infinite; filter:drop-shadow(0 6px 6px #0008); }
+  #petCompanion img { width:104px; height:104px; max-width:none; max-height:none; object-fit:contain; display:block; }
   .petProj { position:absolute; font-size:22px; z-index:6; pointer-events:none; filter:drop-shadow(0 0 6px #ffd86688); }
   .petProj img { width:30px; height:30px; object-fit:contain; display:block; }
 
@@ -638,7 +638,6 @@
     <div id="arena">
       <div id="player">
         <div class="aura"></div>
-        <div id="petCompanion"></div>
         <div class="char">🦸</div>
         <div class="lvtag">Lv.<span id="plvBattle">1</span></div>
       </div>
@@ -650,6 +649,7 @@
       </div>
     </div>
     <div id="heroRow"></div>
+    <div id="petCompanion"></div>
   </div>
 
   <div id="panel"></div>
@@ -1157,8 +1157,8 @@ function normalizeHeroCatalog(){
     h.name = base.name;
     h.emoji = base.emoji;
     h.cls = base.cls;
-    if(!['SR','SSR','UR'].includes(h.grade)) h.grade = 'SR';
-    h.atk = base.atk || 50;
+    if(!HERO_GRADE_ORDER.includes(h.grade)) h.grade = base.grade || 'SR';
+    h.atk = h.atk || base.atk || 50;
     h.level = Math.max(1, Math.min(HERO_MAX_LEVEL, h.level||1));
     h.cap = Math.max(10, Math.min(HERO_MAX_LEVEL, h.cap||10));
     if(h.level > h.cap) h.level = h.cap;
@@ -1280,12 +1280,12 @@ let monHpMax = 0, monHp = 0;
 // ===== 몬스터 =====
 let isBoss = false;
 function monsterAtk(){
-  return Math.floor((22 + 5 * Math.pow(G.stage, 1.10)) * (1 + G.kills*0.03) * (isBoss?2.2:1));
+  return Math.floor((32 + 8 * Math.pow(G.stage, 1.16)) * (1 + G.kills*0.04) * (isBoss?2.8:1));
 }
 function spawnMonster(){
   const idx = (G.stage-1) % MONSTERS.length;
   isBoss = (G.stage % 10 === 0);  // 10층마다 보스
-  monHpMax = Math.floor(40 * Math.pow(1.25, G.stage-1) * (1 + G.kills*0.05) * (isBoss?6:1));
+  monHpMax = Math.floor(70 * Math.pow(1.30, G.stage-1) * (1 + G.kills*0.07) * (isBoss?8:1));
   monHp = monHpMax;
   partyHeroes().forEach(ensureHeroHp);
   const mEl = document.getElementById('monster'), nEl = document.getElementById('monName');
@@ -2827,7 +2827,7 @@ function updatePet(){
   const el=document.getElementById('petCompanion'); if(!el) return;
   const p=activePet();
   el.innerHTML = p ? (p.img ? `<img src="${p.img}${AV}" alt="${p.name}">` : p.emoji) : '';
-  el.style.display = p ? 'block' : 'none';
+  el.style.display = p ? 'flex' : 'none';
 }
 // ===== 길드소 =====
 const GUILD_MEMBERS = ['검은매','아이언울프','루나','세라핀','카이젤','미스트','발할라','은빛여우'];
@@ -3572,6 +3572,25 @@ function refreshTop(){
 
 // ===== 저장/불러오기 =====
 function saveGame(){ try{ G.lastSeen = Date.now(); localStorage.setItem('idleRPG', JSON.stringify(G)); }catch(e){} }
+const STARTER_HERO_NAMES = ['카이론','린','사피라'];
+function makeStarterHero(name){
+  const base = HERO_POOL.find(h=>h.name===name) || HERO_POOL[0];
+  return {
+    uid:newHeroUid(), name:base.name, emoji:base.emoji, cls:base.cls,
+    grade:'N', atk:18, level:1, cap:10,
+    equip:{무기:0,방어구:0,장신구:0}
+  };
+}
+function ensureStarterHeroes(){
+  if(!Array.isArray(G.heroes)) G.heroes = [];
+  if(G.heroes.length) return false;
+  G.heroes = STARTER_HERO_NAMES.map(makeStarterHero);
+  G.party = G.heroes.slice(0,5).map(h=>h.uid);
+  while(G.party.length<5) G.party.push(null);
+  normalizeHeroCatalog();
+  G.heroes.forEach(ensureHeroHp);
+  return true;
+}
 function loadGame(){
   try{
     const s = localStorage.getItem('idleRPG');
@@ -3669,6 +3688,7 @@ function loadGame(){
 
 // ===== 시작 =====
 loadGame();
+ensureStarterHeroes();
 offlineRewardCheck();  // 접속 전 방치 보상 계산(refreshTop이 lastSeen 덮어쓰기 전에)
 spawnMonster();
 renderHeroRow();
