@@ -604,27 +604,18 @@
   /* 두근두근 하트 파티클 */
   .vnHeart { position:absolute; z-index:5; font-size:18px; pointer-events:none; opacity:0; animation:heartFloat 1.7s ease-out forwards; }
   @keyframes heartFloat { 0%{opacity:0; transform:translateY(0) scale(.5);} 15%{opacity:1;} 100%{opacity:0; transform:translateY(-130px) scale(1.35) rotate(14deg);} }
-  /* ===== 요일던전 전투 ===== */
-  #dunBattle { position:fixed; inset:0; z-index:130; display:none; flex-direction:column; align-items:center;
-    background:radial-gradient(ellipse at 50% 35%, #2a1f4a, #0c0a1c 70%); overflow:hidden; touch-action:manipulation; }
-  #dunBattle.show { display:flex; }
-  #dunTop { width:100%; max-width:480px; padding:16px 14px 8px; text-align:center; }
-  #dunTierName { font-size:15px; font-weight:900; letter-spacing:1px; }
-  #dunTimerWrap { margin-top:8px; height:10px; background:#1a1c38; border-radius:6px; overflow:hidden; border:1px solid #343a66; }
-  #dunTimerFill { height:100%; width:100%; background:linear-gradient(90deg,#ffd866,#ff7a3b); transition:width .1s linear; }
-  #dunTimerText { font-size:12px; color:#c3c8f5; margin-top:4px; }
-  #dunArena { flex:1; width:100%; max-width:480px; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-  #dunBossWrap { text-align:center; }
-  #dunBoss { font-size:96px; filter:drop-shadow(0 10px 18px #000a); animation:bob 2.4s ease-in-out infinite; cursor:pointer; }
-  #dunBoss.hit { animation:none; transform:scale(.9) rotate(6deg); filter:drop-shadow(0 10px 18px #000a) brightness(2) saturate(.4); }
-  #dunHpWrap { width:230px; height:16px; background:#2a2d50; border-radius:9px; overflow:hidden; margin:14px auto 4px; border:1px solid #00000055; }
-  #dunHpFill { height:100%; width:100%; background:linear-gradient(90deg,#ff5e7a,#ff3b5c); transition:width .1s; }
-  #dunHpText { font-size:12px; color:#c9cdf0; }
-  #dunTapHint { margin-top:18px; font-size:15px; font-weight:bold; color:#ffd866; animation:pulse 1.2s infinite; }
-  #dunBtns { width:100%; max-width:480px; padding:12px 14px calc(14px + env(safe-area-inset-bottom)); display:flex; gap:8px; }
-  #dunBtns button { flex:1; }
-  .dunDmg { position:absolute; font-weight:bold; pointer-events:none; z-index:6; color:#ffe08a; text-shadow:0 2px 4px #000; animation:dmgFloat .7s ease-out forwards; }
-  .dunDmg.crit { color:#ff7a95; }
+  /* ===== 요일던전 전투 배너 (사냥터 화면 상단 오버레이) ===== */
+  #dunBanner { position:absolute; top:8px; left:8px; right:8px; z-index:9; display:none;
+    background:linear-gradient(180deg,#1a1330ee,#0c0a1ccc); border:1px solid #8b6fd6aa; border-radius:12px;
+    padding:8px 10px; box-shadow:0 4px 16px #0008; }
+  #dunBanner.show { display:block; }
+  #dunBannerTop { font-size:12px; color:#e8e8f0; text-align:center; line-height:1.4; }
+  #dunBannerTop b { color:#ffd866; }
+  #dunTimerWrap { margin-top:6px; height:9px; background:#1a1c38; border-radius:5px; overflow:hidden; border:1px solid #343a66; }
+  #dunTimerFill2 { height:100%; width:100%; background:linear-gradient(90deg,#ffd866,#ff7a3b); transition:width .1s linear; }
+  #dunBannerBot { display:flex; align-items:center; justify-content:space-between; margin-top:5px; }
+  #dunTimerText2 { font-size:12px; font-weight:bold; color:#ffd866; }
+  #dunQuitBtn { background:#2a2d50; border:1px solid #4a5090; color:#cfc8f5; font-size:11px; padding:4px 10px; border-radius:8px; }
   /* 대화 기록(LOG) */
   #vnLog { position:absolute; inset:0; z-index:8; background:#0c0a1cee; display:none; flex-direction:column; padding:16px; cursor:default; }
   #vnLogList { flex:1; overflow-y:auto; padding-right:4px; }
@@ -650,6 +641,11 @@
   <div id="battle">
     <div id="stars"></div>
     <div id="ground"></div>
+    <div id="dunBanner">
+      <div id="dunBannerTop"></div>
+      <div id="dunTimerWrap"><div id="dunTimerFill2"></div></div>
+      <div id="dunBannerBot"><span id="dunTimerText2"></span><button id="dunQuitBtn" onclick="quitDunRaid()">⬅ 포기</button></div>
+    </div>
     <div id="stageLabel">스테이지 <span id="stage">1</span> - <span id="kills">0</span>/10</div>
     <div id="powerBadge">⚔️ 전투력 <b id="cp">0</b></div>
     <div id="comboBox"><span id="comboNum">0</span><small>COMBO</small></div>
@@ -765,25 +761,6 @@
       <button onclick="closeMenu();openFromHome('shop')">🛒<i>상점</i></button>
       <button onclick="closeMenu();openScreen('settings')">⚙️<i>설정</i></button>
     </div>
-  </div>
-</div>
-
-<div id="dunBattle">
-  <div id="dunTop">
-    <div id="dunTierName"></div>
-    <div id="dunTimerWrap"><div id="dunTimerFill"></div></div>
-    <div id="dunTimerText"></div>
-  </div>
-  <div id="dunArena">
-    <div id="dunBossWrap">
-      <div id="dunBoss" onclick="dunTap(event)">🌀</div>
-    </div>
-    <div id="dunHpWrap"><div id="dunHpFill"></div></div>
-    <div id="dunHpText"></div>
-    <div id="dunTapHint">👆 보스를 탭해서 공격하세요!</div>
-  </div>
-  <div id="dunBtns">
-    <button class="btn" onclick="closeDunBattle()">⬅ 포기</button>
   </div>
 </div>
 
@@ -1323,7 +1300,7 @@ const MON_NAMES = ["슬라임","고블린","전갈","독거미","멧돼지","박
 const MON_ATTACK_TYPES = ['melee','melee','melee','ranged','melee','ranged','melee','ranged','melee','ranged'];
 const MON_ATTRIBUTES = ['자연','대지','암흑','자연','대지','바람','물/얼음','암흑','화염','번개'];
 function monsterAttackType(){ return MON_ATTACK_TYPES[(G.stage-1) % MON_ATTACK_TYPES.length] || 'melee'; }
-function monsterAttribute(){ return MON_ATTRIBUTES[(G.stage-1) % MON_ATTRIBUTES.length] || '대지'; }
+function monsterAttribute(){ if(typeof dunMode!=='undefined' && dunMode) return dunMode.attr; return MON_ATTRIBUTES[(G.stage-1) % MON_ATTRIBUTES.length] || '대지'; }
 
 let monHpMax = 0, monHp = 0;
 
@@ -1660,6 +1637,7 @@ function castSkill(name, color, fx, mult, multiHit, basePower){
   setTimeout(()=>{ vignette(false); pl.classList.remove('cast'); }, 650);
 }
 function killMonster(){
+  if(dunMode){ dunRaidEnd(true); return; }   // 던전 보스 처치 → 던전 클리어 처리(스테이지 진행 안 함)
   dailyInc('kill',1);
   const reward = Math.floor(5 * Math.pow(1.2, G.stage-1)) * (isBoss?10:1) * petGoldMult();
   G.gold += reward;
@@ -2328,73 +2306,93 @@ function enterDungeon(tierId){
   if(G.dungeon.left<=0) return;
   const t = dungeonTier(tierId);
   if(G.stage < t.stage) return;   // 미해금 난이도 차단
+  if(livingPartyHeroes().length===0){ alert('전투할 동료가 없어요! 파티를 편성해 주세요.'); return; }
   G.dungeon.left--; dailyInc('dungeon',1); saveGame();
   closePopup();
-  startDunBattle(t);
+  startDunRaid(t);
 }
-// ===== 요일던전 전투 =====
-// 보스 HP = 내 전투력 × 난이도 초수. 자동 공격은 일정 시간 동안 누적되고, 탭으로 추가타.
-// 일반은 자동만으로도 클리어, 지옥은 제한시간이 빠듯해 탭이 필요 — 난이도별 긴장감 부여.
-const DUN_CFG = { normal:{clearSec:5, timeSec:12}, elite:{clearSec:11, timeSec:14}, hell:{clearSec:17, timeSec:16} };
-let dunState = null, dunTimer = null;
-function startDunBattle(t){
+// ===== 요일던전 전투 — 실제 사냥터 화면에서 파티가 싸운다 + 속성 상성 가중치 =====
+// 던전 속성 vs 파티 속성: 내 캐릭이 던전 속성을 상성으로 누르면 데미지↑, 반대면↓ (dunMatchupMult → huntDamageMult)
+const DUN_ELEMENT = { chaos:'번개', steel:'대지', fire:'화염', water:'물/얼음', wind:'바람', light:'빛', dark:'암흑' };
+const DUN_CFG = { normal:{sec:14, hpSec:6}, elite:{sec:16, hpSec:11}, hell:{sec:18, hpSec:16} };
+let dunMode = null, dunTimer = null;
+// 던전 속성 가중치: 파티원이 던전 속성을 상성으로 누르면 +, 던전 속성에 약하면 -
+function dunMatchupMult(){
+  if(!dunMode) return 1;
+  const elem = dunMode.attr; let mult = 1;
+  partyHeroes().forEach(h=>{
+    const a = (heroAttributes(h)[0]) || '대지';
+    if(ATTRIBUTE_ADVANTAGE[a] === elem) mult += 0.15;        // 내 캐릭이 던전 속성에 강함
+    else if(ATTRIBUTE_ADVANTAGE[elem] === a) mult -= 0.10;   // 던전 속성이 내 캐릭에 강함(약점)
+  });
+  return Math.max(0.4, mult);
+}
+function dunMatchupInfo(){
+  if(!dunMode) return {mult:1, strong:[], weak:[]};
+  const elem = dunMode.attr, strong=[], weak=[];
+  partyHeroes().forEach(h=>{
+    const a = (heroAttributes(h)[0]) || '대지';
+    if(ATTRIBUTE_ADVANTAGE[a] === elem) strong.push(h.name);
+    else if(ATTRIBUTE_ADVANTAGE[elem] === a) weak.push(h.name);
+  });
+  return { mult:dunMatchupMult(), strong, weak };
+}
+function startDunRaid(t){
   const d = WEEKDAY_DUNGEON[new Date().getDay()];
   const cfg = DUN_CFG[t.id] || DUN_CFG.normal;
-  const power = Math.max(1, totalAtk());
-  const hpMax = Math.round(power * cfg.clearSec);
-  dunState = { tier:t, mat:d.mat, hp:hpMax, hpMax, power, time:cfg.timeSec, total:cfg.timeSec, ended:false };
-  document.getElementById('dunTierName').innerHTML = `${t.emoji} <span style="color:${t.color}">${t.name} 던전</span> · ${MATERIALS[d.mat].emoji} ${MATERIALS[d.mat].name}`;
-  const boss = document.getElementById('dunBoss');
-  boss.textContent = (MONSTERS && MONSTERS.length) ? MONSTERS[(G.stage-1)%MONSTERS.length] : '👾';
-  document.getElementById('dunTapHint').style.display='';
-  document.getElementById('dunBattle').classList.add('show');
-  dunRender();
+  const elem = DUN_ELEMENT[d.mat] || '대지';
+  // 보스 체력: 자동 공격 기준 처치목표 시간만큼 (상성에 따라 실제 처치속도가 달라져 클리어/실패가 갈림)
+  const dps = Math.max(1, totalAtk()) * autoMult();
+  const hpMax = Math.max(200, Math.round(dps * cfg.hpSec * 10));  // 10틱/초 가정
+  dunMode = { tier:t, mat:d.mat, attr:elem, time:cfg.sec, total:cfg.sec, ended:false };
+  enterHunt();              // 실제 사냥터 화면으로 전환
+  healPartyFull();
+  spawnDunBoss(hpMax, elem, t);
+  showDunBanner();
   clearInterval(dunTimer);
-  dunTimer = setInterval(dunTick, 100);
+  dunTimer = setInterval(dunRaidTick, 100);
 }
-function dunRender(){
-  if(!dunState) return;
-  document.getElementById('dunHpFill').style.width = Math.max(0, dunState.hp/dunState.hpMax*100)+'%';
-  document.getElementById('dunHpText').textContent = `${Math.max(0,Math.ceil(dunState.hp)).toLocaleString()} / ${dunState.hpMax.toLocaleString()}`;
-  document.getElementById('dunTimerFill').style.width = Math.max(0, dunState.time/dunState.total*100)+'%';
-  document.getElementById('dunTimerText').textContent = '⏱ ' + dunState.time.toFixed(1) + '초';
+function spawnDunBoss(hpMax, elem, t){
+  monHpMax = hpMax; monHp = hpMax; isBoss = true;
+  const mEl = document.getElementById('monster'), nEl = document.getElementById('monName');
+  mEl.textContent = (typeof MONSTERS!=='undefined' && MONSTERS.length) ? MONSTERS[(G.stage-1)%MONSTERS.length] : '👾';
+  mEl.classList.add('boss'); nEl.classList.add('bossName');
+  nEl.textContent = `${t.emoji} ${t.name} 던전 보스 · ${elem}`;
+  updateHp(); renderHeroRow();
 }
-function dunTick(){
-  if(!dunState || dunState.ended) return;
-  // 자동 공격: clearSec 동안 풀피를 깎는 속도 (= power*0.1/tick)
-  dunDamage(dunState.power * 0.1, false, false);
-  dunState.time -= 0.1;
-  if(dunState.time <= 0){ dunState.time = 0; dunRender(); endDunBattle(false); return; }
-  dunRender();
+function showDunBanner(){
+  const b = document.getElementById('dunBanner'); if(!b || !dunMode) return;
+  const info = dunMatchupInfo();
+  const pct = Math.round((info.mult-1)*100);
+  const matchTxt = info.strong.length ? `<span style="color:#7be38b">상성 우세 +${pct}%</span> (${info.strong.join(', ')})`
+                 : info.weak.length ? `<span style="color:#ff7a95">상성 불리 ${pct}%</span> (${info.weak.join(', ')})`
+                 : `<span style="color:#9aa0d0">상성 영향 없음</span>`;
+  b.querySelector('#dunBannerTop').innerHTML =
+    `${dunMode.tier.emoji} ${dunMode.tier.name} 던전 · 속성 <b style="color:#ffd866">${dunMode.attr}</b> · ${matchTxt}`;
+  b.classList.add('show');
+  updateDunTimer();
 }
-function dunDamage(dmg, crit, showFx){
-  if(!dunState || dunState.ended) return;
-  dunState.hp -= dmg;
-  if(showFx){
-    const arena = document.getElementById('dunArena');
-    const el = document.createElement('div'); el.className='dunDmg'+(crit?' crit':'');
-    el.textContent = (crit?'CRIT ':'')+Math.ceil(dmg).toLocaleString();
-    el.style.left = (44+Math.random()*16)+'%'; el.style.top = '34%';
-    el.style.fontSize = (crit?26:20)+'px';
-    arena.appendChild(el); setTimeout(()=>el.remove(),700);
-    const boss=document.getElementById('dunBoss'); boss.classList.add('hit'); setTimeout(()=>boss.classList.remove('hit'),90);
-  }
-  if(dunState.hp <= 0){ dunState.hp = 0; dunRender(); endDunBattle(true); }
+function updateDunTimer(){
+  const f = document.getElementById('dunTimerFill2'), tx = document.getElementById('dunTimerText2');
+  if(!dunMode) return;
+  if(f) f.style.width = Math.max(0, dunMode.time/dunMode.total*100)+'%';
+  if(tx) tx.textContent = '⏱ '+dunMode.time.toFixed(1)+'초';
 }
-function dunTap(e){
-  if(!dunState || dunState.ended) return;
-  const crit = Math.random() < totalCritRate();
-  let dmg = dunState.power * 0.8 * (crit? totalCritDmgMult() : 1);
-  sfx(crit?'crit':'tap');
-  dunDamage(dmg, crit, true);
+function dunRaidTick(){
+  if(!dunMode || dunMode.ended) return;
+  dunMode.time -= 0.1;
+  if(dunMode.time <= 0){ dunMode.time = 0; updateDunTimer(); dunRaidEnd(false); return; }
+  updateDunTimer();
 }
-function endDunBattle(win){
-  if(!dunState || dunState.ended) return;
-  dunState.ended = true;
-  clearInterval(dunTimer); dunTimer=null;
-  document.getElementById('dunTapHint').style.display='none';
-  const t = dunState.tier, mat = dunState.mat;
-  document.getElementById('dunBattle').classList.remove('show');
+function dunRaidEnd(win){
+  if(!dunMode || dunMode.ended) return;
+  dunMode.ended = true;
+  clearInterval(dunTimer); dunTimer = null;
+  const t = dunMode.tier, mat = dunMode.mat;
+  document.getElementById('dunBanner').classList.remove('show');
+  dunMode = null;
+  spawnMonster();           // 일반 사냥 몬스터로 복구
+  openScreen('dungeon');    // 요일던전 화면으로 복귀
   if(win){
     sfx(t.id==='hell'?'boss':'kill');
     const amt = dungeonBaseAmt()*t.matMul;
@@ -2419,19 +2417,19 @@ function endDunBattle(win){
     if(currentScreen==='dungeon') renderScreen();
     popReward('💥 토벌 실패', `<div style="font-size:42px">😵</div>
       <div style="font-weight:bold;margin-top:6px">시간 내에 처치하지 못했어요…</div>
-      <div class="small" style="margin-top:6px">전투력을 더 키우거나, 보스를 더 빠르게 <b>탭</b>해 보세요!</div>
+      <div class="small" style="margin-top:6px">전투력을 키우거나, <b>던전 속성에 강한 동료</b>로 파티를 맞춰 보세요!</div>
       <div class="small" style="color:#9aa0d0;margin-top:4px">입장 횟수는 소모됐어요.</div>`);
   }
-  dunState = null;
 }
-function closeDunBattle(){
-  if(dunState && !dunState.ended){
-    if(!confirm('던전을 포기할까요? 입장 횟수는 돌려받지 못해요.')) return;
-  }
-  clearInterval(dunTimer); dunTimer=null;
-  if(dunState) dunState.ended = true;
-  dunState = null;
-  document.getElementById('dunBattle').classList.remove('show');
+function quitDunRaid(){
+  if(!dunMode) return;
+  if(!confirm('던전을 포기할까요? 입장 횟수는 돌려받지 못해요.')) return;
+  dunMode.ended = true;
+  clearInterval(dunTimer); dunTimer = null;
+  document.getElementById('dunBanner').classList.remove('show');
+  dunMode = null;
+  spawnMonster();
+  openScreen('dungeon');
 }
 
 // ===== 우편함 =====

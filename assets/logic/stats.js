@@ -171,5 +171,6 @@ function bossPowerBonus(){ return ((G.bossPower||1)-1) * (1.00/(SPECIAL_MAX_LEVE
 function bossDmgMult(){ return isBoss ? 1 + bossPowerBonus() : 1; }
 function attrDmgMult(){ return 1 + ((G.attrPower||1)-1) * (0.75/(SPECIAL_MAX_LEVEL-1)); }
 function attrMatchupMult(){ return 1 + attrMatchupInfo().bonus; }
-function huntDamageMult(){ return bossDmgMult() * attrDmgMult() * attrMatchupMult(); }
+function dunRaidMult(){ return (typeof dunMode!=='undefined' && dunMode && typeof dunMatchupMult==='function') ? dunMatchupMult() : 1; }
+function huntDamageMult(){ return bossDmgMult() * attrDmgMult() * attrMatchupMult() * dunRaidMult(); }
 
