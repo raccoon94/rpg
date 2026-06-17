@@ -57,6 +57,9 @@
   #skillToast.show { animation:skillPop 1s ease-out; }
   @keyframes skillPop { 0%{opacity:0; transform:scale(.6);} 25%{opacity:1; transform:scale(1.1);} 70%{opacity:1; transform:scale(1);} 100%{opacity:0; transform:scale(1.05) translateY(-20px);} }
   .bullet { position:absolute; font-size:20px; pointer-events:none; z-index:6; }
+  .attackSprite { position:absolute; z-index:8; pointer-events:none; width:92px; height:92px; object-fit:contain;
+    transform:translate(-50%,-50%); filter:drop-shadow(0 0 9px currentColor) drop-shadow(0 7px 7px #0009); }
+  .attackSprite.projectile { width:58px; height:58px; }
   .hitring { position:absolute; width:24px; height:24px; border:3px solid currentColor; border-radius:50%;
     pointer-events:none; z-index:6; animation:ringExp .42s ease-out forwards; }
   @keyframes ringExp { from{ opacity:.9; transform:scale(.3); } to{ opacity:0; transform:scale(2.6); } }
@@ -100,6 +103,8 @@
     filter:blur(6px); opacity:.78; }
   #monster::after { content:''; position:absolute; left:20%; right:20%; bottom:10px; height:12px; border-radius:50%;
     background:#0008; filter:blur(7px); transform:translateY(20px); z-index:-2; }
+  #monster img { width:128%; height:128%; object-fit:contain; display:block; transform:translateY(-6px);
+    filter:drop-shadow(0 12px 10px #0009); pointer-events:none; }
   #monster.hit { transform:translateX(-14px) scale(.9) rotate(7deg) !important; animation:none;
     filter:drop-shadow(0 8px 6px #0007) brightness(2.2) saturate(.3); }
   #monster.boss { width:142px; height:142px; font-size:84px; border-color:#ffb74d;
@@ -107,6 +112,7 @@
       radial-gradient(circle at 36% 28%, #fff6bd99, transparent 16%),
       radial-gradient(circle at 50% 48%, #7b2b4d 0%, #3b1739 44%, #12091f 78%);
     box-shadow:0 14px 22px #000a, inset 0 3px 0 #ffffff38, inset 0 -20px 34px #0009,0 0 26px #ff5e7a77; }
+  #monster.boss img { width:138%; height:138%; transform:translateY(-9px); filter:drop-shadow(0 14px 12px #000b) drop-shadow(0 0 14px #ff5e7a77); }
   @keyframes bob { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);} }
 
   /* 이펙트 */
@@ -389,7 +395,7 @@
     opacity:.42; filter:drop-shadow(0 8px 16px #000); }
   .summonHeroBanner > * { position:relative; z-index:1; }
   #summonShopView { position:fixed; inset:0; z-index:82; display:none; overflow:hidden; background:#1b0f07; }
-  #summonShopBg { position:absolute; inset:0; background:url('assets/bg/summon_shop_20260611.png?v=1') center/cover no-repeat; }
+  #summonShopBg { position:absolute; inset:0; background:url('assets/bg/summon_shop_counter_20260617.png?v=1') center/cover no-repeat; }
   .summonHit { position:absolute; z-index:2; border:0; background:transparent; border-radius:18px; cursor:pointer; padding:0; }
   .summonHit:active { background:#ffffff22; box-shadow:0 0 20px #ffd86688 inset; }
   #summonShopView[data-mode="cash"] .summonHero1,
@@ -405,19 +411,38 @@
   #summonShopView[data-mode="package"] .summonPet1,
   #summonShopView[data-mode="package"] .summonPet11 { display:none; }
   .summonBackHit { left:1.2%; top:2.2%; width:12.5%; height:9%; }
-  .summonHero1 { left:14.4%; top:64.8%; width:10.2%; height:6.2%; }
-  .summonHero11 { left:25.3%; top:64.8%; width:11.3%; height:6.2%; }
-  .summonGear1 { left:39.3%; top:64.8%; width:10.2%; height:6.2%; }
-  .summonGear11 { left:50.3%; top:64.8%; width:11.3%; height:6.2%; }
-  .summonPet1 { left:64.2%; top:64.8%; width:10.2%; height:6.2%; }
-  .summonPet11 { left:75.2%; top:64.8%; width:11.3%; height:6.2%; }
-  .summonPackageHit { left:22.5%; top:91%; width:18.8%; height:7%; z-index:5; }
-  .summonMainHit { left:41.6%; top:91%; width:17%; height:7%; z-index:5; }
-  .summonGemHit { left:58.8%; top:91%; width:17.7%; height:7%; z-index:5; }
+  .summonHero1 { left:14.0%; top:62.6%; width:10.8%; height:5.9%; }
+  .summonHero11 { left:25.4%; top:62.6%; width:10.8%; height:5.9%; }
+  .summonGear1 { left:39.5%; top:62.6%; width:10.8%; height:5.9%; }
+  .summonGear11 { left:50.8%; top:62.6%; width:10.8%; height:5.9%; }
+  .summonPet1 { left:64.5%; top:62.6%; width:10.8%; height:5.9%; }
+  .summonPet11 { left:75.8%; top:62.6%; width:10.8%; height:5.9%; }
+  .summonPackageHit { left:22.7%; top:84.8%; width:20.0%; height:13.1%; z-index:5; }
+  .summonMainHit { left:42.9%; top:85.3%; width:15.0%; height:12.0%; z-index:5; }
+  .summonGemHit { left:58.1%; top:85.3%; width:17.4%; height:12.0%; z-index:5; }
   #summonShopPanel { position:absolute; left:8%; right:8%; top:15%; bottom:12%; z-index:3; display:none;
     overflow-y:auto; padding:12px; border-radius:18px; background:linear-gradient(180deg,#261506ee,#140b03ee);
     border:2px solid #9c642a; box-shadow:0 12px 28px #0009, inset 0 1px 0 #ffffff26; }
   #summonShopPanel .card { background:linear-gradient(160deg,#3a210d,#221006); border-color:#a86c2f; }
+  #summonShopCounters { position:absolute; inset:0; z-index:4; pointer-events:none; }
+  #summonShopWallet { position:absolute; right:2.4%; top:2.0%; z-index:5; display:flex; gap:7px; align-items:center;
+    pointer-events:none; }
+  .summonWalletPill { min-width:96px; padding:7px 10px; border-radius:999px; border:1px solid #f5c66a99;
+    background:linear-gradient(180deg,#2d1908e8,#0d0804f2); color:#fff; font-weight:900; font-size:14px;
+    text-align:center; text-shadow:0 2px 4px #000; box-shadow:0 5px 14px #0008, inset 0 1px 0 #ffffff22; }
+  .summonCounterCard { position:absolute; top:74.0%; width:21.8%; height:7.8%; padding:6px 10px; box-sizing:border-box;
+    border-radius:10px; color:#fff3c4; text-align:center; text-shadow:0 2px 4px #000; display:flex; flex-direction:column;
+    align-items:center; justify-content:flex-start; overflow:hidden; }
+  .summonCounterCard.hero { left:14.8%; }
+  .summonCounterCard.gear { left:39.2%; }
+  .summonCounterCard.pet { left:63.6%; }
+  .summonCounterCard .count { font-weight:900; font-size:16px; line-height:1.1; color:#fff; white-space:nowrap; }
+  .summonCounterCard .ticket { font-size:11px; line-height:1.15; color:#ffe79a; margin-top:4px; white-space:nowrap; }
+  .summonCounterCard .selectBtn { pointer-events:auto; margin-top:4px; min-width:94px; padding:4px 10px; border:1px solid #fff0a0;
+    border-radius:999px; background:linear-gradient(135deg,#ffd24a,#ff7a38); color:#3a1800; font-size:11px; font-weight:900;
+    box-shadow:0 2px 6px #0008; cursor:pointer; }
+  #summonShopView[data-mode="cash"] #summonShopCounters,
+  #summonShopView[data-mode="package"] #summonShopCounters { display:none; }
   #charBtn { position:absolute; bottom:14px; left:50%; transform:translateX(-50%); z-index:4;
     background:linear-gradient(160deg,#3b4fe0,#2a2d80); color:#fff; border:1px solid #5b6bd0; padding:10px 20px;
     border-radius:20px; font-weight:bold; font-size:13px; box-shadow:0 3px 12px #00000066; }
@@ -477,6 +502,31 @@
     background:linear-gradient(135deg,#1d2758dd,#171b37dd); color:#dfe7ff; font-size:11px; line-height:1.42; }
   .petSkillBox b { color:#9fe9ff; }
   #charHeroList .petDetailPanel { width:100%; box-sizing:border-box; margin:-2px 0 7px; }
+  .heroHallSummary { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; margin-bottom:8px; }
+  .heroHallMetric { background:#101326aa; border:1px solid #343a66; border-radius:9px; padding:8px; min-width:0; }
+  .heroHallMetric .label { font-size:10px; color:#9aa0d0; }
+  .heroHallMetric .value { margin-top:3px; font-size:14px; font-weight:900; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .heroHallParty { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:5px; margin-top:7px; }
+  .heroHallSlot { min-height:48px; border:1px solid #343a66; border-radius:9px; background:#101326aa; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; overflow:hidden; }
+  .heroHallSlot.on { border-color:#3be38b; box-shadow:0 0 10px #3be38b22; }
+  .heroHallSlot img { width:36px; height:30px; object-fit:contain; filter:drop-shadow(0 2px 3px #0008); }
+  .heroHallSlot .empty { color:#6b7099; font-size:11px; }
+  .heroHallSlot .slotName { max-width:100%; padding:0 3px; font-size:9px; color:#dfe4ff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .heroHallRoleRow { display:flex; gap:5px; flex-wrap:wrap; margin-top:7px; }
+  .heroHallBadge { border:1px solid #343a66; border-radius:8px; background:#101326aa; padding:5px 7px; font-size:10px; color:#dfe4ff; }
+  .heroHallBadge.on { border-color:#ffd866; color:#fff; box-shadow:0 0 10px #ffd86622; }
+  .heroHallActions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin-top:8px; }
+  .heroHallActions .btn { width:100%; min-width:0; padding:7px 6px; font-size:11px; white-space:nowrap; }
+  .heroHallItemTop { display:flex; align-items:center; gap:8px; min-width:0; flex:1; }
+  .charHeroItem .heroMeta .heroTags { margin-top:4px; display:flex; gap:4px; flex-wrap:wrap; }
+  .charHeroItem .miniTag { border:1px solid #343a66; border-radius:7px; padding:2px 5px; font-size:9px; color:#dfe4ff; background:#101326aa; }
+  .charHeroItem.selected { border-color:#ffd866; box-shadow:0 0 12px #ffd86633; }
+  #panel .charHeroItem.petListItem { padding:8px; margin-bottom:7px; }
+  #panel .charHeroItem.petListItem .heroFace { width:48px; height:48px; flex:0 0 48px; }
+  #panel .charHeroItem.petListItem .heroMeta { min-width:0; }
+  #panel .charHeroItem.petListItem .heroName { font-size:11px; }
+  #panel .charHeroItem.petListItem .heroPower { font-size:9.5px; line-height:1.35; }
+  #panel .charHeroItem.petListItem button { min-width:58px; padding:6px 6px; font-size:10px; }
   @keyframes floaty { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-8px); } }
   .growGrid { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:8px; }
   .growPill { background:#11142a; border:1px solid #343a66; border-radius:9px; padding:7px; font-size:11px; color:#c9cdf0; }
@@ -506,6 +556,65 @@
   #screenHeader .hRes { background:#0f1020; padding:5px 11px; border-radius:20px; font-size:12px; border:1px solid #343a66; }
   #screenHeader .hRes b { color:#ffd866; }
   #screenBody { flex:1; overflow-y:auto; padding:12px; }
+  .bagWrap, .settingsWrap { position:relative; min-height:100%; padding-bottom:4px; }
+  .bagWrap::before, .settingsWrap::before { content:''; position:fixed; inset:48px max(0px,calc((100vw - 480px)/2)) 0;
+    max-width:480px; margin:0 auto; pointer-events:none; opacity:.72;
+    background:
+      radial-gradient(circle at 18% 8%, #ffd86622 0 10%, transparent 28%),
+      radial-gradient(circle at 90% 18%, #72d6ff20 0 9%, transparent 26%),
+      linear-gradient(180deg,#11142a00 0%,#07081544 100%); }
+  .bagBanner, .settingsBanner { position:relative; overflow:hidden; border-radius:14px; padding:14px 13px; margin-bottom:10px;
+    background:
+      linear-gradient(135deg,#30386d 0%,#1a1c38 48%,#111326 100%);
+    border:1px solid #5862a8; box-shadow:0 8px 22px #0007, inset 0 1px 0 #ffffff20; }
+  .bagBanner::after, .settingsBanner::after { content:''; position:absolute; width:130px; height:130px; right:-42px; top:-52px;
+    border-radius:50%; background:radial-gradient(circle,#ffd86644 0 12%,#8fd9ff20 28%,transparent 64%); }
+  .bagTitle, .settingsTitle { position:relative; display:flex; align-items:center; gap:10px; z-index:1; }
+  .bagTitleIcon, .settingsTitleIcon { flex:0 0 46px; width:46px; height:46px; display:flex; align-items:center; justify-content:center;
+    border-radius:13px; font-size:27px; background:linear-gradient(160deg,#111326,#282d5c); border:1px solid #ffffff24;
+    box-shadow:inset 0 1px 0 #ffffff22, 0 5px 12px #0007; }
+  .bagTitle h3, .settingsTitle h3 { margin:0; font-size:17px; color:#fff; line-height:1.15; }
+  .bagTitle p, .settingsTitle p { margin-top:4px; font-size:11px; color:#cfd5ff; line-height:1.35; }
+  .bagHero { position:relative; z-index:1; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin-top:12px; }
+  .bagStat { min-width:0; position:relative; overflow:hidden; background:linear-gradient(160deg,#171a34,#0e1024); border:1px solid #3e4784; border-radius:12px;
+    padding:9px 8px; box-shadow:0 3px 10px #0006, inset 0 1px 0 #ffffff13; }
+  .bagStat::before { content:''; position:absolute; inset:0; opacity:.45; background:linear-gradient(115deg,#ffffff15,transparent 45%); }
+  .bagStat .label { position:relative; font-size:10px; color:#aeb6ef; font-weight:800; line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bagStat .value { position:relative; margin-top:4px; font-size:16px; font-weight:900; color:#fff; line-height:1.2; overflow-wrap:anywhere; text-shadow:0 1px 4px #000; }
+  .bagStat.hot { border-color:#ffd866aa; background:linear-gradient(160deg,#3a2d49,#15172e); box-shadow:0 0 16px #ffd86622, inset 0 1px 0 #ffffff18; }
+  .bagStat.hot .value { color:#ffd866; }
+  .bagSection { position:relative; margin-top:12px; padding:10px; border-radius:14px; background:#101326a8; border:1px solid #323967; box-shadow:0 5px 14px #0005; }
+  .bagSectionHead { display:flex; align-items:flex-end; justify-content:space-between; gap:8px; margin:0 0 8px; }
+  .bagSectionHead h3 { margin:0; font-size:14px; color:#f4f5ff; }
+  .bagSectionHead .small { white-space:nowrap; color:#b9c1fa; }
+  .bagGrid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+  .bagItem { min-width:0; position:relative; display:grid; grid-template-columns:42px minmax(0,1fr) auto; gap:8px; align-items:center; padding:9px; border-radius:12px;
+    background:linear-gradient(155deg,#252957,#171a34); border:1px solid #424b88; box-shadow:0 4px 12px #0005, inset 0 1px 0 #ffffff12; overflow:hidden; }
+  .bagItem::before { content:''; position:absolute; inset:0; opacity:.6; background:linear-gradient(115deg,#ffffff12,transparent 38%); pointer-events:none; }
+  .bagItem.hot { border-color:#ffd866aa; box-shadow:0 0 16px #ffd86622,0 4px 12px #0005; }
+  .bagItem.empty { opacity:.62; background:linear-gradient(155deg,#191c38,#101224); }
+  .bagIcon { position:relative; flex:0 0 42px; width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    font-size:25px; background:radial-gradient(circle at 35% 26%,#ffffff2e,#15182f 46%,#0b0d1c 100%); border:1px solid #ffffff25; box-shadow:inset 0 1px 0 #ffffff22; }
+  .bagMeta { position:relative; min-width:0; text-align:left; }
+  .bagName { font-size:12px; font-weight:900; color:#fff; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bagDesc { margin-top:3px; font-size:10px; color:#aeb6ef; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .bagQty { position:relative; flex:0 0 auto; min-width:40px; padding:5px 7px; text-align:center; border-radius:999px;
+    background:#080a18cc; border:1px solid #5761a2; font-size:13px; font-weight:900; color:#ffd866; box-shadow:inset 0 1px 0 #ffffff16; }
+  .bagActions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin-top:10px; }
+  .bagActions .btn { min-width:0; white-space:normal; line-height:1.25; padding:8px 6px; border:1px solid #ffffff1c; }
+  .bagHint { margin-top:10px; text-align:left; border-color:#4e5796; background:linear-gradient(160deg,#1d2145,#111326); }
+  .settingsPanel { position:relative; border-radius:14px; padding:10px; margin-bottom:10px; background:#101326a8; border:1px solid #323967; box-shadow:0 5px 14px #0005; }
+  .settingsSectionTitle { margin:0 0 8px; font-size:14px; color:#f4f5ff; }
+  .settingCard { margin-bottom:8px; border-radius:12px; border-color:#424b88; background:linear-gradient(155deg,#252957,#171a34); }
+  .settingCard .row { align-items:center; }
+  .settingIcon { flex:0 0 42px; width:42px; height:42px; display:flex; align-items:center; justify-content:center; border-radius:12px;
+    font-size:23px; background:radial-gradient(circle at 35% 26%,#ffffff2e,#15182f 48%,#0b0d1c 100%); border:1px solid #ffffff25; }
+  .settingRange { width:100%; height:6px; accent-color:#ffd866; }
+  .settingActions { display:grid; grid-template-columns:1fr; gap:8px; }
+  @media (orientation: portrait){
+    .bagHero { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .bagGrid { grid-template-columns:1fr; }
+  }
 
   /* ===== 화려한 전투 연출 ===== */
   #comboBox { position:absolute; top:54px; right:14px; z-index:7; text-align:center; opacity:0;
@@ -522,11 +631,29 @@
   @keyframes flashAnim { 0%{opacity:0;} 25%{opacity:.85;} 100%{opacity:0;} }
   #monster.boss { filter:drop-shadow(0 10px 10px #000) drop-shadow(0 0 18px #ff2d55); }
   #monName.bossName { color:#ff5e7a; text-shadow:0 0 10px #ff2d55,0 1px 3px #000; }
+  .dunBossPreview { width:78px; height:88px; flex:0 0 78px; display:flex; align-items:center; justify-content:center;
+    border-radius:12px; border:1px solid #8b6fd666; background:radial-gradient(circle at 50% 40%, #ffffff22, #101326 68%);
+    box-shadow:inset 0 1px 0 #ffffff18, 0 4px 12px #0007; overflow:hidden; }
+  .dunBossPreview img { width:112%; height:112%; object-fit:contain; filter:drop-shadow(0 8px 8px #0009); }
+  .dunBossPreview .fallback { font-size:36px; }
   .coin { position:absolute; font-size:18px; pointer-events:none; z-index:7; }
   .lvring { position:absolute; left:60px; bottom:120px; width:60px; height:60px; border:4px solid #ffd866; border-radius:50%;
     z-index:7; pointer-events:none; animation:lvringExp .7s ease-out forwards; }
   @keyframes lvringExp { from{opacity:1; transform:scale(.4);} to{opacity:0; transform:scale(3);} }
   #skillToast.big { font-size:30px; }
+  #huntIntel { position:absolute; left:10px; top:54px; z-index:6; display:flex; flex-direction:column; gap:5px;
+    pointer-events:none; max-width:210px; }
+  .huntPill { display:flex; align-items:center; gap:6px; width:max-content; max-width:100%;
+    padding:5px 9px; border-radius:999px; border:1px solid #ffffff24;
+    background:linear-gradient(160deg,#171a34d8,#0c0e20c8); box-shadow:0 3px 10px #0007;
+    font-size:11px; color:#e8e8f0; text-shadow:0 1px 2px #000; }
+  .huntPill b { color:#ffd866; }
+  .huntPill.field { border-color:#ffd86666; }
+  .huntPill.chest.ready { border-color:#3be38b88; box-shadow:0 0 14px #3be38b44, 0 3px 10px #0007; }
+  .huntPanelGrid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; margin-bottom:9px; }
+  .huntInfoCell { min-width:0; background:#10132699; border:1px solid #343a66; border-radius:10px; padding:8px; }
+  .huntInfoCell .label { font-size:10px; color:#9aa0d0; font-weight:800; }
+  .huntInfoCell .value { margin-top:3px; font-size:13px; font-weight:900; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
   /* ===== 가로 전용: 세로일 때 회전 안내 ===== */
   #rotateNotice { position:fixed; inset:0; z-index:200; display:none; flex-direction:column;
@@ -641,8 +768,12 @@
       <div id="dunTimerWrap"><div id="dunTimerFill2"></div></div>
       <div id="dunBannerBot"><span id="dunTimerText2"></span><button id="dunQuitBtn" onclick="quitDunRaid()">⬅ 포기</button></div>
     </div>
-    <div id="stageLabel">스테이지 <span id="stage">1</span> - <span id="kills">0</span>/10</div>
+    <div id="stageLabel">스테이지 <span id="stage">1</span> - <span id="kills">0</span>/<span id="killGoal">10</span></div>
     <div id="powerBadge">⚔️ 전투력 <b id="cp">0</b></div>
+    <div id="huntIntel">
+      <div class="huntPill field" id="fieldBadge">사냥터 Lv.1</div>
+      <div class="huntPill" id="bossBadge">보스까지 10마리</div>
+    </div>
     <div id="comboBox"><span id="comboNum">0</span><small>COMBO</small></div>
     <div id="vignette"></div>
     <div id="flashFx"></div>
@@ -708,6 +839,8 @@
 <div id="summonShopView">
   <div id="summonShopBg"></div>
   <div id="summonShopPanel"></div>
+  <div id="summonShopWallet"></div>
+  <div id="summonShopCounters"></div>
   <button class="summonHit summonBackHit" onclick="closeSummonShopView()" title="돌아가기"></button>
   <button class="summonHit summonHero1" onclick="summonHero(1)" title="영웅 1회 소환"></button>
   <button class="summonHit summonHero11" onclick="summonHero(11)" title="영웅 11회 소환"></button>
@@ -807,8 +940,8 @@
 <script src="assets/data/pets.js?v=10"></script>
 <script src="assets/logic/pet-helpers.js?v=10"></script>
 <script src="assets/logic/stats.js?v=10"></script>
-<script src="assets/ui/char-hall.js?v=10"></script>
-<script src="assets/ui/sound.js?v=10"></script>
+<script src="assets/ui/char-hall.js?v=11"></script>
+<script src="assets/ui/sound.js?v=14"></script>
 <script>
 // ===== 게임 상태 =====
 const G = {
@@ -822,11 +955,15 @@ const G = {
   tapPower: 1, autoPower: 1, autoSpeed: 1,  // 사냥 업그레이드 단계
   critChance: 1, critDmgPower: 1, bossPower: 1, attrPower: 1,
   sfxOn: true,                 // 효과음 켜기
+  bgmOn: true,                 // 배경음악 켜기
+  sfxVol: 0.5,                 // 효과음 볼륨
+  bgmVol: 0.28,                // 배경음악 볼륨
   firstPayDone: false,
   adPass: false,               // 광고 스킵 패스(월 구독) 활성 여부
   adCd: { gold:0, gem:0, pull:0 }, // 보상형 광고 쿨다운(다시 가능 시각 ms)
   pity: 0,                     // 영웅 소환 선택권 진행도(구버전 호환)
   totalPulls: 0,              // 누적 소환 횟수
+  summonTotal: { hero:0, gear:0, pet:0 }, // 소환 종류별 총 누적 횟수
   summonPity: { hero:0, gear:0, pet:0 }, // 1000회마다 UR 선택소환권
   selectTickets: { hero:0, gear:0, pet:0 },
   hero: 'lin',                 // 착용 영웅
@@ -835,7 +972,7 @@ const G = {
   mats: {},                    // 요일던전 재료 (id: 개수) — 나중에 무기 초월에 사용
   heroDust: 0,                 // 영웅 분해 재료
   petDust: 0,                  // 펫 분해 재료
-  dungeon: { date:'', left:3 },// 요일던전 일일 입장 횟수
+  dungeon: { date:'', left:2, clearedToday:[], best:{} },// 요일던전 일일 입장 횟수/클리어 기록
   mail: [                      // 우편함 (패키지/공지)
     { id:'welcome', title:'🎁 환영 패키지', body:'게임 시작을 환영합니다! 보석과 골드를 받으세요.', reward:{gem:300, gold:1000}, claimed:false },
     { id:'notice1', title:'📢 오픈 공지', body:'방치형 RPG 오픈! 매일 요일던전에서 상급 재료를 모으세요. 재료는 나중에 무기 초월에 쓰여요.', reward:{}, claimed:false },
@@ -853,10 +990,11 @@ const G = {
   pets: [],                    // 보유 펫
   petCatalogVer: '20260615',    // 펫 목록 버전
   activePet: -1,               // 착용 펫 인덱스
-  guild: { joined:false, coin:0, lastCheck:'' }, // 길드
+  guild: { joined:false, coin:0, lastCheck:'', exp:0, researchAtk:0, researchGold:0, bossDate:'', bossDamage:0, shopBought:{}, quests:{} }, // 길드
   heroHp: {},                  // 전투 중 영웅 체력 {uid: hp}
   wipeCount: 0,                // 전멸 횟수
   wallStage: 0,                // 최근 막힌 스테이지
+  huntStreak: 0,               // 일반 사냥 연속 처치
 };
 // 7일 출석 보상 (순환)
 const ATTEND_REWARDS = [
@@ -866,23 +1004,27 @@ const todayStr = ()=> new Date().toISOString().slice(0,10);
 // 요일던전 재료
 const MATERIALS = {
   chaos:{name:'혼돈의 핵', emoji:'🌀'}, steel:{name:'강철 조각', emoji:'⚙️'},
+  nature:{name:'자연의 씨앗', emoji:'🌿'},
   fire:{name:'불꽃 정수', emoji:'🔥'},  water:{name:'물의 결정', emoji:'💧'},
   wind:{name:'바람 깃털', emoji:'🌪️'}, light:{name:'빛의 파편', emoji:'✨'},
   dark:{name:'어둠 파편', emoji:'🌑'},
 };
-// 요일별 던전 (getDay: 0=일 ~ 6=토)
+const DUNGEON_DAILY_LIMIT = 2;
+// 8속성 로테이션: 하루 2개 던전 개방, 4일마다 한 바퀴
 const WEEKDAY_DUNGEON = [
-  {day:'일요일', mat:'chaos'}, {day:'월요일', mat:'steel'}, {day:'화요일', mat:'fire'},
-  {day:'수요일', mat:'water'}, {day:'목요일', mat:'wind'}, {day:'금요일', mat:'light'}, {day:'토요일', mat:'dark'},
+  {name:'화염/자연', mats:['fire','nature']},
+  {name:'물/번개', mats:['water','chaos']},
+  {name:'바람/빛', mats:['wind','light']},
+  {name:'암흑/대지', mats:['dark','steel']},
 ];
 // 던전 난이도 (스테이지로 해금, 높을수록 재료·골드↑ + 보너스 드롭). 입장권 3회는 난이도 공용
 const DUNGEON_TIERS = [
   { id:'normal', name:'일반', emoji:'🟢', stage:1,  matMul:1, goldMul:1, bonus:null,
-    color:'#7be38b', desc:'기본 재료 획득' },
+    color:'#7be38b', desc:'기본 재료 획득', first:{mat:2} },
   { id:'elite',  name:'정예', emoji:'🟡', stage:15, matMul:3, goldMul:3, bonus:{gemChance:0.5, gem:15},
-    color:'#ffd866', desc:'재료 3배 + 보석 확률' },
+    color:'#ffd866', desc:'재료 3배 + 보석 확률', first:{mat:5, gem:20} },
   { id:'hell',   name:'지옥', emoji:'🔴', stage:40, matMul:6, goldMul:6, bonus:{gemChance:0.6, gem:40, dust:6},
-    color:'#ff7a95', desc:'재료 6배 + 영웅 결정 확정 + 보석 고확률' },
+    color:'#ff7a95', desc:'재료 6배 + 영웅 결정 확정 + 보석 고확률', first:{mat:10, gem:50, heroDust:4} },
 ];
 function dungeonTier(id){ return DUNGEON_TIERS.find(t=>t.id===id) || DUNGEON_TIERS[0]; }
 // 업적 정의
@@ -1186,6 +1328,7 @@ function normalizeHeroCatalog(){
     h.atk = h.atk || base.atk || 50;
     h.level = Math.max(1, Math.min(HERO_MAX_LEVEL, h.level||1));
     h.cap = Math.max(10, Math.min(HERO_MAX_LEVEL, h.cap||10));
+    h.count = itemCount(h);
     if(h.level > h.cap) h.level = h.cap;
     if(!h.equip) h.equip = {무기:0,방어구:0,장신구:0};
   });
@@ -1291,11 +1434,113 @@ const GRADES = [
   {g:"UR", rate:0.001, atk:520},
 ];
 const MONSTERS = ["🟢","👹","🦂","🕷️","🐗","🦇","🐍","👻","🧟","🐲"];
-const MON_NAMES = ["슬라임","고블린","전갈","독거미","멧돼지","박쥐","독사","유령","좀비","드래곤"];
+const MONSTER_TIERS = [
+  { id:'low',  label:'하위종', stage:1,  prefix:'떠도는',  folder:'assets/monster/hunt/low/monster_low_',
+    names:['물방울 슬라임','숲 고블린','해골 전사','들개 마수','어둠 박쥐','홉고블린 전사','화염 임프','바위 정령','해골 궁수','그림자 거미'] },
+  { id:'mid',  label:'중위종', stage:30, prefix:'균열의',  folder:'assets/monster/hunt/mid/monster_mid_',
+    names:['얼음 망령','돌주먹 골렘','사령술사','화염 갑주병','바람 정령','암흑 마녀','황금 그리폰','붉은 오우거','빙결 늑대','숲의 사슴령'] },
+  { id:'high', label:'상위종', stage:80, prefix:'심연의',  folder:'assets/monster/hunt/high/monster_high_',
+    names:['암흑 리치','용암 골렘','보랏빛 해파리','백사자 수호수','고대 거인','맹독 히드라','황금 성기사','공허의 눈','그림자 야수','해일 거신'] },
+];
+function monsterTier(stage=G.stage){
+  let tier = MONSTER_TIERS[0];
+  for(const t of MONSTER_TIERS){ if(stage>=t.stage) tier=t; }
+  return tier;
+}
+function monsterData(stage=G.stage){
+  const tier = monsterTier(stage);
+  const idx = (stage-1) % tier.names.length;
+  const no = String(idx+1).padStart(2,'0');
+  return {
+    idx, tier,
+    fallback:MONSTERS[idx],
+    name:`${tier.prefix} ${tier.names[idx]}`,
+    img:`${tier.folder}${no}.png`,
+  };
+}
+function renderMonsterArt(el, mon){
+  if(!el || !mon) return;
+  el.innerHTML = `<img src="${mon.img}" alt="${mon.name}" onerror="this.replaceWith(document.createTextNode('${mon.fallback}'))">`;
+}
 const MON_ATTACK_TYPES = ['melee','melee','melee','ranged','melee','ranged','melee','ranged','melee','ranged'];
 const MON_ATTRIBUTES = ['자연','대지','암흑','자연','대지','바람','물/얼음','암흑','화염','번개'];
 function monsterAttackType(){ return MON_ATTACK_TYPES[(G.stage-1) % MON_ATTACK_TYPES.length] || 'melee'; }
 function monsterAttribute(){ if(typeof dunMode!=='undefined' && dunMode) return dunMode.attr; return MON_ATTRIBUTES[(G.stage-1) % MON_ATTRIBUTES.length] || '대지'; }
+const HUNT_FIELDS = [
+  {name:'별빛 평원', icon:'🌿', color:'#7ee787', stage:1, gold:.00, hp:1.00, atk:1.00, exp:1.00, goal:'전투 적응'},
+  {name:'루멘 외곽', icon:'🏕️', color:'#9fe9ff', stage:5, gold:.05, hp:1.20, atk:1.10, exp:1.08, goal:'1장 해금'},
+  {name:'붉은 협곡', icon:'🔥', color:'#ff8a3b', stage:10, gold:.12, hp:1.55, atk:1.28, exp:1.18, goal:'2장 해금'},
+  {name:'성벽 방어선', icon:'🛡️', color:'#ffd866', stage:20, gold:.20, hp:2.10, atk:1.58, exp:1.30, goal:'3장 해금'},
+  {name:'검의 유적', icon:'⚔️', color:'#c084fc', stage:30, gold:.30, hp:2.85, atk:1.95, exp:1.42, goal:'4장 해금'},
+  {name:'꺼지지 않는 화로', icon:'🌋', color:'#ff7a95', stage:45, gold:.42, hp:3.85, atk:2.42, exp:1.58, goal:'5장 해금'},
+  {name:'세계수 뿌리길', icon:'🌳', color:'#3be38b', stage:60, gold:.55, hp:5.10, atk:3.02, exp:1.74, goal:'6장 해금'},
+  {name:'그림자 칼끝', icon:'🌙', color:'#8b6fd6', stage:80, gold:.70, hp:6.85, atk:3.82, exp:1.95, goal:'7장 해금'},
+  {name:'푸른 검 성역', icon:'💎', color:'#7fd0ff', stage:100, gold:.88, hp:9.10, atk:4.86, exp:2.18, goal:'8장 해금'},
+  {name:'잠식 전장', icon:'☄️', color:'#ff5e7a', stage:130, gold:1.10, hp:12.80, atk:6.40, exp:2.55, goal:'9장 해금'},
+  {name:'여명 관문', icon:'🌅', color:'#ffc23a', stage:160, gold:1.38, hp:17.50, atk:8.35, exp:2.95, goal:'10장 해금'},
+  {name:'무한 심연', icon:'🌌', color:'#ff8df0', stage:200, gold:1.75, hp:24.00, atk:11.00, exp:3.40, goal:'무한 성장'},
+];
+const STAGE_KILLS_REQUIRED = 10;
+function huntFieldInfo(stage=G.stage){
+  let cur = HUNT_FIELDS[0];
+  for(const f of HUNT_FIELDS){ if(stage>=f.stage) cur=f; }
+  const idx = HUNT_FIELDS.indexOf(cur);
+  const next = HUNT_FIELDS[idx+1] || null;
+  const local = Math.max(0, stage - cur.stage);
+  return { ...cur, level:idx+1, next, local };
+}
+function huntGoldMult(){
+  const field = huntFieldInfo();
+  const streak = Math.min(.30, Math.floor((G.huntStreak||0)/10) * .05);
+  const guild = (typeof guildGoldBonus === 'function') ? guildGoldBonus() : 0;
+  return 1 + field.gold + streak + guild;
+}
+function stageBossEvery(stage=G.stage){
+  if(stage >= 160) return 5;
+  if(stage >= 80) return 8;
+  return 10;
+}
+function isBossStage(stage=G.stage){ return stage % stageBossEvery(stage) === 0; }
+function stageKillGoal(stage=G.stage){ return STAGE_KILLS_REQUIRED; }
+function stageGrowth(stage=G.stage){
+  const field = huntFieldInfo(stage);
+  return Math.pow(1.105, stage-1) * (1 + field.local*0.018);
+}
+function stageHpMax(stage=G.stage, kills=G.kills, boss=isBossStage(stage)){
+  const field = huntFieldInfo(stage);
+  const killRamp = 1 + kills*0.065;
+  const bossMult = boss ? (stage>=160 ? 7.5 : stage>=80 ? 8.5 : 9.5) : 1;
+  return Math.floor(78 * stageGrowth(stage) * field.hp * killRamp * bossMult);
+}
+function stageAtkValue(stage=G.stage, kills=G.kills, boss=isBossStage(stage)){
+  const field = huntFieldInfo(stage);
+  const killRamp = 1 + kills*0.035;
+  const bossMult = boss ? (stage>=160 ? 2.55 : stage>=80 ? 2.75 : 3.0) : 1;
+  return Math.floor((24 + Math.pow(stage, 1.08) * 7) * field.atk * killRamp * bossMult);
+}
+function stageGoldBase(stage=G.stage, boss=isBossStage(stage)){
+  const field = huntFieldInfo(stage);
+  return Math.floor((8 + stage*3.2 + Math.pow(stage, 1.35)) * (1 + field.gold) * (boss?8:1));
+}
+function stageExpReward(stage=G.stage, boss=isBossStage(stage)){
+  const field = huntFieldInfo(stage);
+  return Math.max(1, Math.floor(stage * field.exp * (boss ? 4.5 : 1)));
+}
+function updateHuntIntel(){
+  const field = huntFieldInfo();
+  const fieldEl = document.getElementById('fieldBadge');
+  const bossEl = document.getElementById('bossBadge');
+  if(fieldEl){
+    fieldEl.innerHTML = `<span>${field.icon}</span><b>${field.name}</b> 골드 +${Math.round(field.gold*100)}%`;
+    fieldEl.style.borderColor = field.color + '88';
+  }
+  if(bossEl){
+    const every = stageBossEvery();
+    const stageLeft = isBoss ? 0 : (every - (G.stage % every || every));
+    const killLeft = stageLeft * stageKillGoal() + Math.max(0, stageKillGoal() - (G.kills||0));
+    bossEl.innerHTML = `${isBoss?'👑 보스전 진행 중':`👑 보스까지 <b>${killLeft}</b>마리`}`;
+  }
+}
 
 let monHpMax = 0, monHp = 0;
 
@@ -1305,21 +1550,23 @@ let monHpMax = 0, monHp = 0;
 // ===== 몬스터 =====
 let isBoss = false;
 function monsterAtk(){
-  return Math.floor((32 + 8 * Math.pow(G.stage, 1.16)) * (1 + G.kills*0.04) * (isBoss?2.8:1));
+  return stageAtkValue(G.stage, G.kills, isBoss);
 }
 function spawnMonster(){
-  const idx = (G.stage-1) % MONSTERS.length;
-  isBoss = (G.stage % 10 === 0);  // 10층마다 보스
-  monHpMax = Math.floor(70 * Math.pow(1.30, G.stage-1) * (1 + G.kills*0.07) * (isBoss?8:1));
+  isBoss = isBossStage(G.stage);
+  monHpMax = stageHpMax(G.stage, G.kills, isBoss);
   monHp = monHpMax;
   partyHeroes().forEach(ensureHeroHp);
   const mEl = document.getElementById('monster'), nEl = document.getElementById('monName');
-  mEl.textContent = MONSTERS[idx];
+  const field = huntFieldInfo();
+  const mon = monsterData();
+  renderMonsterArt(mEl, mon);
   mEl.classList.toggle('boss', isBoss);
   nEl.classList.toggle('bossName', isBoss);
-  nEl.textContent = (isBoss?'👑 BOSS ':'') + MON_NAMES[idx] + ` · ${monsterAttribute()} · ${monsterAttackType()==='ranged'?'원거리':'근거리'}` + (G.stage>10? " +"+Math.floor(G.stage/10):"");
+  nEl.textContent = (isBoss?'👑 BOSS ':'') + mon.name + ` · ${field.name} · ${monsterAttribute()} · ${monsterAttackType()==='ranged'?'원거리':'근거리'}` + (G.stage>10? " +"+Math.floor(G.stage/10):"");
   if(isBoss) showToast('⚠️ BOSS 등장!', '#ff5e7a', true);
   updateHp();
+  updateHuntIntel();
   renderHeroRow();
 }
 function updateHp(){
@@ -1349,15 +1596,66 @@ function flashTier(){
   return Math.min(4, gr + wl);
 }
 const GRADE_COLOR = {N:'#9ca3af',R:'#60a5fa',SR:'#c084fc',SSR:'#ffc23a',UR:'#ff8df0'};
+const HERO_ATTACK_FX = {
+  '린':'lin_wind_bullet.png',
+  '루비아':'rubia_fire_orb.png',
+  '실비아':'silvia_holy_burst.png',
+  '사피라':'sapphira_aqua_slash.png',
+  '카엘':'kael_flame_slash.png',
+  '에메리아':'emeria_leaf_prayer.png',
+  '카이라':'kaira_shadow_fang.png',
+  '카이론':'kairon_ice_crescent.png'
+};
+function heroAttackFx(hero){
+  const file = hero && HERO_ATTACK_FX[hero.name];
+  return file ? `assets/effects/attack/${file}` : '';
+}
+function spawnAttackSprite(hero, x, y, color, projectile=false, delay=0){
+  const src = heroAttackFx(hero);
+  if(!src) return false;
+  setTimeout(()=>{
+    const b = document.getElementById('battle');
+    const img = document.createElement('img');
+    img.className = 'attackSprite' + (projectile ? ' projectile' : '');
+    img.src = src + AV;
+    img.alt = '';
+    img.style.color = color || '#ffd866';
+    if(projectile){
+      img.style.left = '24%';
+      img.style.top = '50%';
+      img.style.transform = 'translate(-50%,-50%) rotate(-16deg) scale(.72)';
+      b.appendChild(img);
+      img.animate([
+        {left:'24%', top:'50%', opacity:.35, transform:'translate(-50%,-50%) rotate(-16deg) scale(.72)'},
+        {left:x+'%', top:y+'%', opacity:1, transform:'translate(-50%,-50%) rotate(-16deg) scale(1.1)'},
+        {left:(x+4)+'%', top:(y-2)+'%', opacity:0, transform:'translate(-50%,-50%) rotate(8deg) scale(.35)'}
+      ], {duration:260, easing:'cubic-bezier(.2,.8,.2,1)'});
+      setTimeout(()=>img.remove(),280);
+    } else {
+      const rot = -18 + Math.random()*36;
+      img.style.left = x+'%';
+      img.style.top = y+'%';
+      b.appendChild(img);
+      img.animate([
+        {opacity:0, transform:`translate(-50%,-50%) rotate(${rot-18}deg) scale(.45)`},
+        {opacity:1, transform:`translate(-50%,-50%) rotate(${rot}deg) scale(1.12)`},
+        {opacity:0, transform:`translate(-50%,-50%) rotate(${rot+22}deg) scale(1.42)`}
+      ], {duration:420, easing:'ease-out'});
+      setTimeout(()=>img.remove(),440);
+    }
+  }, delay);
+  return true;
+}
 // 직업별 + 장비등급별 타격 이펙트 (베기/마법/총격)
-function hitEffects(crit, cls){
+function hitEffects(crit, cls, hero){
   const b = document.getElementById('battle');
   const x = 66 + Math.random()*8, y = 32 + Math.random()*6;
   const tier = flashTier();
-  const bh = bestHero();
+  const bh = hero || bestHero();
   const gradeCol = bh ? GRADE_COLOR[bh.grade] : '#9ca3af';
+  const hasSprite = spawnAttackSprite(bh, x, y+5, cls.color, cls.name === "총기류");
   // 총기류는 플레이어 → 몬스터로 탄환이 날아감
-  if(cls.name === "총기류"){
+  if(cls.name === "총기류" && !hasSprite){
     const bl = document.createElement('div'); bl.className='bullet'; bl.textContent='•';
     bl.style.left='22%'; bl.style.top='44%'; bl.style.color=cls.spark;
     bl.style.textShadow = `0 0 ${4+tier*3}px ${cls.spark}`;
@@ -1366,13 +1664,15 @@ function hitEffects(crit, cls){
     setTimeout(()=>bl.remove(),170);
   }
   // 베기/타격 본체 (등급 높을수록 크고 빛남)
-  const s = document.createElement('div'); s.className='slash';
-  s.textContent = crit ? cls.crit : cls.hit;
-  s.style.left = x+'%'; s.style.top = y+'%';
-  s.style.fontSize = (40 + tier*7) + 'px';
-  s.style.textShadow = `0 0 ${6+tier*5}px ${gradeCol}, 0 0 ${tier*8}px ${cls.color}`;
-  b.appendChild(s);
-  setTimeout(()=>s.remove(), 350);
+  if(!hasSprite){
+    const s = document.createElement('div'); s.className='slash';
+    s.textContent = crit ? cls.crit : cls.hit;
+    s.style.left = x+'%'; s.style.top = y+'%';
+    s.style.fontSize = (40 + tier*7) + 'px';
+    s.style.textShadow = `0 0 ${6+tier*5}px ${gradeCol}, 0 0 ${tier*8}px ${cls.color}`;
+    b.appendChild(s);
+    setTimeout(()=>s.remove(), 350);
+  }
   // 고등급(tier>=3): 충격 링 + 화면 흔들림
   if(tier>=3 || crit){
     const ring = document.createElement('div'); ring.className='hitring';
@@ -1400,6 +1700,14 @@ function hitEffects(crit, cls){
 // ===== 전투 =====
 function bestHero(){ return G.heroes.length ? G.heroes.reduce((a,b)=>heroEffAtk(b)>heroEffAtk(a)?b:a) : null; }
 function activeCls(){ const b=bestHero(); return b?heroCls(b):CLASSES.sword; }
+const combatSfxAt = {};
+function combatSfx(name, gap=0, key=name){
+  if(!battleVisible() || typeof sfx!=='function') return;
+  const now = Date.now();
+  if(gap && now - (combatSfxAt[key]||0) < gap) return;
+  combatSfxAt[key] = now;
+  sfx(name);
+}
 
 // isManual=true → 클릭 타격 (풀 데미지), false → 자동사냥 (자동 배수 적용)
 function attack(isManual){
@@ -1411,7 +1719,9 @@ function attack(isManual){
   const pl = document.getElementById('player');
   pl.classList.add('atk'); setTimeout(()=>pl.classList.remove('atk'),130);
   heroAttackMotion();
-  hitEffects(crit, activeCls());
+  const bh = bestHero();
+  hitEffects(crit, bh ? heroCls(bh) : activeCls(), bh);
+  combatSfx(crit ? 'crit' : 'hit', isManual ? 0 : 260, isManual ? 'manualAttack' : 'autoAttack');
 }
 function dealDamage(dmg, crit){
   if(livingPartyHeroes().length===0) return;
@@ -1457,6 +1767,7 @@ function monsterAttack(){
 function partyWipe(){
   G.wipeCount = (G.wipeCount||0) + 1;
   G.wallStage = G.stage;
+  G.huntStreak = 0;
   const prev = Math.max(1, G.stage-1);
   if(G.stage>1){ G.stage = prev; G.kills = 0; }
   showToast(`전멸! 스테이지 ${G.stage} 반복 사냥`, '#ff8aa0', true);
@@ -1613,18 +1924,22 @@ function castHeroSkill(h){
   st.readyAt = Date.now() + heroSkillCooldown(h, sk);
   const crit = Math.random() < heroCritRate(h);
   const critMult = crit ? heroCritDmg(h) : 1;
-  castSkill(`${crit?'CRIT ':''}${h.name} · ${sk.name}`, pack.color, sk.fx, sk.mult, false, heroSkillPower(h) * critMult);
+  combatSfx(crit ? 'crit' : 'skill', 180, 'heroSkill');
+  castSkill(`${crit?'CRIT ':''}${h.name} · ${sk.name}`, pack.color, sk.fx, sk.mult, false, heroSkillPower(h) * critMult, h);
 }
-function castSkill(name, color, fx, mult, multiHit, basePower){
+function castSkill(name, color, fx, mult, multiHit, basePower, hero){
   const b = document.getElementById('battle');
   const pl = document.getElementById('player');
   // 컷씬: 암전 + 캐릭터 줌 + 섬광 + 스킬명
   vignette(true); pl.classList.add('cast'); screenFlash(color); showToast(name, color, true);
   for(let k=0;k<5;k++) setTimeout(()=>{
-    const f=document.createElement('div'); f.className='slash'; f.style.fontSize=(54+k*6)+'px';
-    f.style.textShadow=`0 0 16px ${color}`;
-    f.textContent=fx; f.style.left=(56+Math.random()*26)+'%'; f.style.top=(20+Math.random()*22)+'%';
-    b.appendChild(f); setTimeout(()=>f.remove(),360);
+    const sx = 56+Math.random()*26, sy = 20+Math.random()*22;
+    if(!spawnAttackSprite(hero, sx, sy, color, false, 0)){
+      const f=document.createElement('div'); f.className='slash'; f.style.fontSize=(54+k*6)+'px';
+      f.style.textShadow=`0 0 16px ${color}`;
+      f.textContent=fx; f.style.left=sx+'%'; f.style.top=sy+'%';
+      b.appendChild(f); setTimeout(()=>f.remove(),360);
+    }
   }, k*70);
   const total = (basePower || totalAtk()) * mult * huntDamageMult();
   if(multiHit){ for(let i=0;i<6;i++) setTimeout(()=>dealDamage(total/6, true), i*60); }
@@ -1634,9 +1949,14 @@ function castSkill(name, color, fx, mult, multiHit, basePower){
 function killMonster(){
   if(dunMode){ dunRaidEnd(true); return; }   // 던전 보스 처치 → 던전 클리어 처리(스테이지 진행 안 함)
   dailyInc('kill',1);
-  const reward = Math.floor(5 * Math.pow(1.2, G.stage-1)) * (isBoss?10:1) * petGoldMult();
+  G.huntStreak = (G.huntStreak||0) + 1;
+  const reward = Math.floor(stageGoldBase(G.stage, isBoss) * petGoldMult() * huntGoldMult());
   G.gold += reward;
-  G.exp += G.stage * (isBoss?5:1);
+  if(isBoss){
+    G.gem += 5;
+    if(battleVisible()) showToast('👑 보스 보상 💎+5', '#ff8ab4', true);
+  }
+  G.exp += stageExpReward(G.stage, isBoss);
   // 처치 연출 (전투 화면을 보고 있을 때만 소리 — 홈/메뉴에선 자동전투 소리 누수 방지)
   if(battleVisible()) sfx(isBoss?'boss':'kill');
   monsterExplode();
@@ -1653,11 +1973,13 @@ function killMonster(){
   }
   G.kills++;
   partyHeroes().forEach(h=>{ G.heroHp[h.uid] = Math.min(heroMaxHp(h), ensureHeroHp(h) + heroMaxHp(h)*0.14); });
-  if(G.kills >= 10){
+  if(G.kills >= stageKillGoal()){
     G.kills = 0;
     G.stage++;
     healPartyFull();
-    if(G.stage%10!==1) showToast('STAGE '+G.stage, '#7fd0ff');
+    const field = huntFieldInfo();
+    if(field.stage === G.stage) showToast(`${field.icon} ${field.name} 진입`, field.color, true);
+    else if(!isBossStage(G.stage)) showToast('STAGE '+G.stage, '#7fd0ff');
   }
   spawnMonster();
   refreshTop();
@@ -1674,20 +1996,24 @@ const SR_GRADE = GRADES.find(g=>g.g==='SR');
 const UR_GRADE = GRADES.find(g=>g.g==='UR');
 // 천장 적용 등급 뽑기
 function rollHeroGrade(){
-  G.totalPulls++;
   return rollGrade();
 }
 function ensureSummonState(){
   if(!G.summonPity) G.summonPity = {hero:G.pity||0, gear:0, pet:0};
   if(!G.selectTickets) G.selectTickets = {hero:0, gear:0, pet:0};
+  if(!G.summonTotal) G.summonTotal = {hero:G.totalPulls||0, gear:0, pet:0};
   ['hero','gear','pet'].forEach(k=>{
     if(G.summonPity[k]==null) G.summonPity[k]=0;
     if(G.selectTickets[k]==null) G.selectTickets[k]=0;
+    if(G.summonTotal[k]==null) G.summonTotal[k]=0;
   });
+  if((G.summonTotal.hero||0) < (G.totalPulls||0)) G.summonTotal.hero = G.totalPulls||0;
+  G.totalPulls = G.summonTotal.hero;
   G.pity = G.summonPity.hero;
 }
 function addSummonPity(kind, count){
   ensureSummonState();
+  G.summonTotal[kind] += count;
   G.summonPity[kind] += count;
   let gained = 0;
   while(G.summonPity[kind] >= PITY_MAX){
@@ -1696,6 +2022,8 @@ function addSummonPity(kind, count){
     gained++;
   }
   G.pity = G.summonPity.hero;
+  G.totalPulls = G.summonTotal.hero;
+  if(typeof refreshSummonShopCounters === 'function') refreshSummonShopCounters();
   return gained;
 }
 function pityLabel(kind){
@@ -1703,12 +2031,98 @@ function pityLabel(kind){
   const name = {hero:'영웅', gear:'장비', pet:'펫'}[kind];
   return `${name} 선택소환 ${G.summonPity[kind]}/${PITY_MAX} · 선택권 ${G.selectTickets[kind]}장`;
 }
+function summonTotalLabel(kind){
+  ensureSummonState();
+  return (G.summonTotal[kind]||0).toLocaleString();
+}
+function playSummonSfx(count=1){
+  if(typeof sfx!=='function') return;
+  sfx('gacha');
+  if(count>=11) setTimeout(()=>sfx('reward'), 300);
+}
 function makeHeroFromGrade(grade){
   const base = HERO_POOL[Math.floor(Math.random()*HERO_POOL.length)];
-  return { uid:newHeroUid(), name:base.name, emoji:base.emoji, cls:base.cls, grade:grade.g, atk:grade.atk||base.atk||50, level:1, cap:10, equip:{무기:0,방어구:0,장신구:0} };
+  return { uid:newHeroUid(), name:base.name, emoji:base.emoji, cls:base.cls, grade:grade.g, atk:grade.atk||base.atk||50, level:1, cap:10, count:1, equip:{무기:0,방어구:0,장신구:0} };
+}
+function itemCount(x){ return Math.max(1, Math.floor(Number(x?.count)||1)); }
+function stackBadge(n){ return n>1 ? `<span style="display:inline-flex;align-items:center;justify-content:center;min-width:24px;padding:2px 7px;margin-left:4px;border-radius:999px;background:#0f1020;border:1px solid #ffd86688;color:#ffd866;font-size:11px;font-weight:900">x${n}</span>` : ''; }
+function heroStackKey(h){
+  const e = h?.equip || {};
+  if(!h || heroLevel(h)!==1 || heroCap(h)!==10 || (e.무기||0) || (e.방어구||0) || (e.장신구||0)) return '';
+  return `${h.name}|${h.grade}|${h.cls}|${h.atk||50}`;
+}
+function petStackKey(p){
+  if(!p || petLevel(p)!==1 || petCap(p)!==10) return '';
+  return `${p.name}|${p.grade}|${p.buff}|${p.img||''}`;
+}
+function totalHeroCopies(){ return G.heroes.reduce((s,h)=>s+itemCount(h),0); }
+function totalPetCopies(){ return G.pets.reduce((s,p)=>s+itemCount(p),0); }
+function normalizeStacks(){
+  const heroSeen = new Map();
+  const heroUidMap = new Map();
+  const mergedHeroes = [];
+  (G.heroes||[]).forEach(h=>{
+    h.count = itemCount(h);
+    const key = heroStackKey(h);
+    if(key && heroSeen.has(key)){
+      const keep = heroSeen.get(key);
+      keep.count = itemCount(keep) + itemCount(h);
+      heroUidMap.set(h.uid, keep.uid);
+      if(G.heroHp && G.heroHp[h.uid]!=null) delete G.heroHp[h.uid];
+    } else {
+      if(key) heroSeen.set(key, h);
+      mergedHeroes.push(h);
+    }
+  });
+  G.heroes = mergedHeroes;
+  if(Array.isArray(G.party)){
+    const used = new Set();
+    G.party = G.party.slice(0,5).map(id=>{
+      const mapped = heroUidMap.get(id) || id;
+      if(!mapped || used.has(mapped)) return null;
+      used.add(mapped);
+      return G.heroes.some(h=>h.uid===mapped) ? mapped : null;
+    });
+    while(G.party.length<5) G.party.push(null);
+  }
+  const petSeen = new Map();
+  const mergedPets = [];
+  let activePetObj = G.pets?.[G.activePet] || null;
+  (G.pets||[]).forEach(p=>{
+    p.count = itemCount(p);
+    const key = petStackKey(p);
+    if(key && petSeen.has(key)){
+      const keep = petSeen.get(key);
+      keep.count = itemCount(keep) + itemCount(p);
+      if(activePetObj === p) activePetObj = keep;
+    } else {
+      if(key) petSeen.set(key, p);
+      mergedPets.push(p);
+    }
+  });
+  G.pets = mergedPets;
+  G.activePet = activePetObj ? G.pets.indexOf(activePetObj) : (G.pets.length ? Math.min(Math.max(G.activePet||0,0), G.pets.length-1) : -1);
+}
+function addPet(pet){
+  pet.count = itemCount(pet);
+  const key = petStackKey(pet);
+  const existing = key ? G.pets.find(p=>petStackKey(p)===key) : null;
+  if(existing){
+    existing.count = itemCount(existing) + itemCount(pet);
+    return existing;
+  }
+  G.pets.push(pet);
+  return pet;
 }
 function addHero(hero){
   if(!hero.uid) hero.uid = newHeroUid();
+  hero.count = itemCount(hero);
+  const key = heroStackKey(hero);
+  const existing = key ? G.heroes.find(h=>heroStackKey(h)===key) : null;
+  if(existing){
+    existing.count = itemCount(existing) + itemCount(hero);
+    return existing;
+  }
   ensureHeroHp(hero);
   G.heroes.push(hero);
   G.heroes.sort((a,b)=>heroEffAtk(b)-heroEffAtk(a)); // 강한 순 정렬(상위 5명이 파티)
@@ -1716,13 +2130,40 @@ function addHero(hero){
   while(G.party.length<5) G.party.push(null);
   const emptySlot = G.party.findIndex(id=>!id);
   if(emptySlot>=0) G.party[emptySlot] = hero.uid;
+  return hero;
+}
+function clonePlain(obj){ return JSON.parse(JSON.stringify(obj)); }
+function splitHeroStack(i){
+  const hero = G.heroes[i];
+  if(!hero || itemCount(hero)<=1) return i;
+  hero.count = itemCount(hero) - 1;
+  const one = clonePlain(hero);
+  one.uid = newHeroUid();
+  one.count = 1;
+  G.heroes.splice(i+1, 0, one);
+  ensureHeroHp(one);
+  if(heroDetailIdx===i) heroDetailIdx = i+1;
+  if(selectedCharHeroIdx===i) selectedCharHeroIdx = i+1;
+  return i+1;
+}
+function splitPetStack(i){
+  const pet = G.pets[i];
+  if(!pet || itemCount(pet)<=1) return i;
+  pet.count = itemCount(pet) - 1;
+  const one = clonePlain(pet);
+  one.count = 1;
+  G.pets.splice(i+1, 0, one);
+  if(G.activePet===i) G.activePet = i+1;
+  else if(G.activePet>i) G.activePet++;
+  if(selectedCharPetIdx===i) selectedCharPetIdx = i+1;
+  return i+1;
 }
 // 소환 실행 (count=1 또는 11)
 function summonHero(count){
   const cost = count===11 ? 3000 : 300;
   if(G.gem < cost){ alert('💎 보석이 부족해요!\n상점에서 광고/충전으로 보석을 모아보세요.'); return; }
   G.gem -= cost;
-  sfx('gacha');
+  playSummonSfx(count);
   const results = [];
   dailyInc('summon', count);
   for(let i=0;i<count;i++) results.push(makeHeroFromGrade(rollHeroGrade()));
@@ -1738,6 +2179,7 @@ function summonHero(count){
 }
 // 광고 무료 1회 소환
 function freePullHero(){
+  playSummonSfx(1);
   const hero = makeHeroFromGrade(rollHeroGrade());
   addSummonPity('hero', 1);
   addHero(hero);
@@ -1786,21 +2228,24 @@ function claimSelectSummon(kind, index){
   ensureSummonState();
   if((G.selectTickets[kind]||0)<=0) return;
   G.selectTickets[kind]--;
+  const refreshSelectTicketViews = ()=>{
+    if(typeof refreshSummonShopCounters === 'function') refreshSummonShopCounters();
+    if(typeof refreshSummonShopWallet === 'function') refreshSummonShopWallet();
+  };
   if(kind==='hero'){
     const base = HERO_POOL[index] || HERO_POOL[0];
-    const hero = {uid:newHeroUid(), name:base.name, emoji:base.emoji, cls:base.cls, grade:'UR', atk:UR_GRADE.atk, level:1, cap:10, equip:{무기:0,방어구:0,장신구:0}};
-    addHero(hero); closePopup(); refreshTop(); renderHeroRow(); renderPanel(); showSummonAnim([hero]);
+    const hero = addHero({uid:newHeroUid(), name:base.name, emoji:base.emoji, cls:base.cls, grade:'UR', atk:UR_GRADE.atk, level:1, cap:10, count:1, equip:{무기:0,방어구:0,장신구:0}});
+    closePopup(); refreshTop(); refreshSelectTicketViews(); renderHeroRow(); renderPanel(); showSummonAnim([hero]);
   } else if(kind==='gear'){
     const slot = ['무기','방어구','악세'][index] || '무기';
     G.gear[slot] = (G.gear[slot]||0) + 40;
-    closePopup(); refreshTop(); renderPanel();
+    closePopup(); refreshTop(); refreshSelectTicketViews(); renderPanel();
     popReward('⚔️ UR 장비 선택 완료', `<div style="font-size:42px">🏆</div><b>${slot} +40</b>`);
   } else {
     const base = PET_POOL.filter(p=>p.grade==='UR')[index] || PET_POOL.find(p=>p.grade==='UR');
-    const pet = makePetFromBase(base, 'UR');
-    G.pets.push(pet);
+    const pet = addPet(makePetFromBase(base, 'UR'));
     if(G.activePet<0) G.activePet=G.pets.length-1;
-    closePopup(); refreshTop(); updatePet(); if(currentScreen) renderScreen(); else renderPanel();
+    closePopup(); refreshTop(); refreshSelectTicketViews(); updatePet(); if(currentScreen) renderScreen(); else renderPanel();
     popReward('🐾 UR 펫 선택 완료', `${petRewardHtml(pet)}<div class="small">${petBuffText(pet)}</div>`);
   }
 }
@@ -2107,6 +2552,8 @@ function rewardText(r){
   if(r.gold) parts.push('<span class="goldIcon"></span>'+r.gold.toLocaleString());
   if(r.gem)  parts.push('💎'+r.gem.toLocaleString());
   if(r.mat)  for(const k in r.mat) parts.push((MATERIALS[k]?.emoji||'')+r.mat[k]);
+  if(r.heroDust) parts.push(HERO_DUST_ICON+r.heroDust.toLocaleString());
+  if(r.petDust) parts.push(PET_DUST_ICON+r.petDust.toLocaleString());
   return parts.join(' ') || '없음';
 }
 function popReward(title, body){
@@ -2148,8 +2595,9 @@ function openScreen(name){
   renderScreen();
   document.getElementById('screen').style.display='flex';
   updateTabsVisibility();
+  if(window.bgm) bgm(name==='dungeon' ? 'battle' : 'home');
 }
-function closeScreen(){ document.getElementById('screen').style.display='none'; currentScreen=null; updateTabsVisibility(); }
+function closeScreen(){ document.getElementById('screen').style.display='none'; currentScreen=null; updateTabsVisibility(); if(window.bgm) bgm('home'); }
 function renderScreen(){
   if(!currentScreen) return;
   const b = document.getElementById('screenBody');
@@ -2171,38 +2619,187 @@ function renderScreen(){
 }
 
 // ===== 요일던전 =====
-function dungeonReset(){ if(G.dungeon.date!==todayStr()){ G.dungeon.date=todayStr(); G.dungeon.left=3; } }
+function normalizeDungeonState(){
+  if(!G.dungeon) G.dungeon = { date:'', left:DUNGEON_DAILY_LIMIT, clearedToday:[], best:{} };
+  if(!Array.isArray(G.dungeon.clearedToday)) G.dungeon.clearedToday = [];
+  if(!G.dungeon.best) G.dungeon.best = {};
+  G.dungeon.left = Math.min(DUNGEON_DAILY_LIMIT, Math.max(0, G.dungeon.left ?? DUNGEON_DAILY_LIMIT));
+}
+function dungeonReset(){
+  normalizeDungeonState();
+  if(G.dungeon.date!==todayStr()){
+    G.dungeon.date=todayStr();
+    G.dungeon.left=DUNGEON_DAILY_LIMIT;
+    G.dungeon.clearedToday=[];
+  }
+}
 function dungeonBaseAmt(){ return 5 + Math.floor(G.stage/3); }
+function dungeonRotationIndex(){
+  const start = new Date(new Date().getFullYear(), 0, 1);
+  const now = new Date();
+  const dayNo = Math.floor((new Date(now.getFullYear(), now.getMonth(), now.getDate()) - start) / 86400000);
+  return ((dayNo % WEEKDAY_DUNGEON.length) + WEEKDAY_DUNGEON.length) % WEEKDAY_DUNGEON.length;
+}
+function dungeonToday(){ return WEEKDAY_DUNGEON[dungeonRotationIndex()]; }
+function dungeonGoldBase(){ return Math.floor(stageGoldBase(G.stage, false) * 8); }
+function dungeonElemOf(mat){ return DUN_ELEMENT[mat] || '대지'; }
+function dungeonRunKey(tierId, mat){ return `${tierId}:${mat}`; }
+function dungeonFirstClearReady(tierId, mat){ dungeonReset(); return !G.dungeon.clearedToday.includes(dungeonRunKey(tierId, mat)); }
+function dungeonCanSweep(tierId, mat){ normalizeDungeonState(); return !!G.dungeon.best[dungeonRunKey(tierId, mat)]; }
+function markDungeonClear(tierId, mat){
+  dungeonReset();
+  const key = dungeonRunKey(tierId, mat);
+  if(!G.dungeon.clearedToday.includes(key)) G.dungeon.clearedToday.push(key);
+  G.dungeon.best[key] = { date:todayStr(), stage:G.stage, power:totalAtk() };
+}
+function dunMatchupMultForAttr(elem){
+  let mult = 1;
+  partyHeroes().forEach(h=>{
+    const a = (heroAttributes(h)[0]) || '대지';
+    if(ATTRIBUTE_ADVANTAGE[a] === elem) mult += 0.15;
+    else if(ATTRIBUTE_ADVANTAGE[elem] === a) mult -= 0.10;
+  });
+  return Math.max(0.4, mult);
+}
+function dunMatchupInfoForAttr(elem){
+  const strong=[], weak=[];
+  partyHeroes().forEach(h=>{
+    const a = (heroAttributes(h)[0]) || '대지';
+    if(ATTRIBUTE_ADVANTAGE[a] === elem) strong.push(h.name);
+    else if(ATTRIBUTE_ADVANTAGE[elem] === a) weak.push(h.name);
+  });
+  return { mult:dunMatchupMultForAttr(elem), strong, weak };
+}
+function dungeonBossHpForTier(t){
+  const cfg = DUN_CFG[t.id] || DUN_CFG.normal;
+  const hitPerSec = 1000 / autoInterval();
+  const baseDps = Math.max(1, totalAtk()) * autoMult() * hitPerSec;
+  return Math.max(200, Math.round(baseDps * cfg.hpSec));
+}
+function dungeonForecast(t, mat){
+  const cfg = DUN_CFG[t.id] || DUN_CFG.normal;
+  const elem = dungeonElemOf(mat);
+  const hp = dungeonBossHpForTier(t);
+  const hitPerSec = 1000 / autoInterval();
+  const damage = totalAtk() * autoMult() * hitPerSec * cfg.sec * dunMatchupMultForAttr(elem);
+  const ratio = damage / Math.max(1, hp);
+  const label = ratio>=1.35 ? '여유' : ratio>=1 ? '도전 가능' : ratio>=0.75 ? '아슬아슬' : '위험';
+  const color = ratio>=1.35 ? '#7be38b' : ratio>=1 ? '#ffd866' : ratio>=0.75 ? '#ffb74d' : '#ff7a95';
+  return { hp, ratio, label, color };
+}
+function dungeonRewardPreview(t, mat, includeFirst){
+  const base = dungeonBaseAmt();
+  const gold = dungeonGoldBase()*t.goldMul;
+  let matAmt = base*t.matMul;
+  let first = '';
+  if(includeFirst && t.first){
+    matAmt += t.first.mat || 0;
+    const bits = [];
+    if(t.first.mat) bits.push(`${MATERIALS[mat].emoji}+${t.first.mat}`);
+    if(t.first.gem) bits.push(`💎+${t.first.gem}`);
+    if(t.first.heroDust) bits.push(`${HERO_DUST_ICON}+${t.first.heroDust}`);
+    first = bits.length ? ` · 첫 클리어 ${bits.join(' ')}` : '';
+  }
+  let drops = `${MATERIALS[mat].emoji} ${MATERIALS[mat].name} +${matAmt} · <span class="goldIcon"></span>${gold.toLocaleString()}`;
+  if(t.bonus){
+    if(t.bonus.dust) drops += ` · ${HERO_DUST_ICON}영웅결정 +${t.bonus.dust}`;
+    if(t.bonus.gem) drops += ` · 💎${t.bonus.gem} (${Math.round(t.bonus.gemChance*100)}%)`;
+  }
+  return drops + first;
+}
+function rollDungeonReward(t, mat, includeFirst){
+  const reward = { mat:{[mat]:dungeonBaseAmt()*t.matMul}, gold:dungeonGoldBase()*t.goldMul };
+  const result = { gotGem:false, gotDust:false, first:includeFirst };
+  if(includeFirst && t.first){
+    if(t.first.mat) reward.mat[mat] += t.first.mat;
+    if(t.first.gem){ reward.gem = (reward.gem||0) + t.first.gem; result.gotGem = true; }
+    if(t.first.heroDust){ reward.heroDust = (reward.heroDust||0) + t.first.heroDust; result.gotDust = true; }
+  }
+  if(t.bonus){
+    if(t.bonus.dust){ reward.heroDust = (reward.heroDust||0) + t.bonus.dust; result.gotDust = true; }
+    if(t.bonus.gem && Math.random()<t.bonus.gemChance){ reward.gem = (reward.gem||0) + t.bonus.gem; result.gotGem = true; }
+  }
+  return { reward, result };
+}
+function dungeonRewardPopupBody(t, mat, reward, result, title){
+  let body = `<div style="font-size:46px">${MATERIALS[mat].emoji}</div>
+    <div style="font-weight:bold;margin-top:6px;color:${t.color}">${title}</div>
+    <div style="margin-top:6px">${MATERIALS[mat].name} <b>+${reward.mat[mat]}</b></div>
+    <div class="small"><span class="goldIcon"></span>${reward.gold.toLocaleString()}</div>`;
+  if(reward.heroDust) body += `<div style="margin-top:4px">${HERO_DUST_ICON} 영웅 결정 <b>+${reward.heroDust}</b></div>`;
+  if(reward.gem) body += `<div style="margin-top:4px;color:#ff8ab4">💎 보석 <b>+${reward.gem}</b>${result.first?' 첫 클리어!':' ✨보너스!'}</div>`;
+  else if(t.bonus && t.bonus.gem) body += `<div class="small" style="margin-top:4px;color:#9aa0d0">💎 보너스 획득 실패… 다음 기회에!</div>`;
+  return body;
+}
+function dungeonBossArt(mat){
+  const m = MATERIALS[mat] || MATERIALS.chaos;
+  return {
+    img: `assets/monster/dungeon/boss_${mat}.png${AV}`,
+    name: `${m.name} 던전 보스`,
+    fallback: m.emoji,
+  };
+}
+function dungeonBossPreviewHtml(mat){
+  const art = dungeonBossArt(mat);
+  return `<div class="dunBossPreview">
+    <img src="${art.img}" alt="${art.name}" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'fallback',textContent:'${art.fallback}'}))">
+  </div>`;
+}
 function viewDungeon(){
   dungeonReset();
-  const d = WEEKDAY_DUNGEON[new Date().getDay()];
-  const mat = MATERIALS[d.mat];
-  const base = dungeonBaseAmt();
-  const goldBase = Math.floor(50*Math.pow(1.15,G.stage-1));
+  const d = dungeonToday();
+  const todayMats = d.mats || [d.mat];
+  const todayNames = todayMats.map(k=>`${MATERIALS[k].emoji} ${MATERIALS[k].name}`).join(' · ');
+  const todayElems = todayMats.map(k=>dungeonElemOf(k)).join(' / ');
   let h = `<div class="card" style="text-align:center;border-color:#ffb74d">
-      <div style="font-size:46px">${mat.emoji}</div>
-      <div style="font-weight:bold;font-size:16px">오늘은 <span class="txt-SSR">${d.day}</span> 던전</div>
-      <div class="small">오늘의 상급 재료: <b>${mat.name}</b></div>
-      <div class="small" style="margin-top:4px">남은 입장 <b class="txt-SSR">${G.dungeon.left}</b> / 3 (매일 초기화 · 난이도 공용)</div>
+      <div style="font-size:42px">${todayMats.map(k=>MATERIALS[k].emoji).join(' ')}</div>
+      <div style="font-weight:bold;font-size:16px">오늘의 2속성 던전</div>
+      <div class="small">개방 재료: <b>${todayNames}</b></div>
+      <div class="small">속성: <b style="color:#ffd866">${todayElems}</b></div>
+      <div class="small" style="margin-top:4px">남은 입장 <b class="txt-SSR">${G.dungeon.left}</b> / ${DUNGEON_DAILY_LIMIT} (매일 초기화 · 던전 공용)</div>
     </div>
-    <h3 style="margin-top:6px">난이도 선택</h3>`;
-  DUNGEON_TIERS.forEach(t=>{
-    const unlocked = G.stage>=t.stage, canEnter = unlocked && G.dungeon.left>0;
-    const matAmt = base*t.matMul, gold = goldBase*t.goldMul;
-    let drops = `${mat.emoji} ${mat.name} +${matAmt} · <span class="goldIcon"></span>${gold.toLocaleString()}`;
-    if(t.bonus){
-      if(t.bonus.dust) drops += ` · ${HERO_DUST_ICON}영웅결정 +${t.bonus.dust}`;
-      if(t.bonus.gem) drops += ` · 💎${t.bonus.gem} (${Math.round(t.bonus.gemChance*100)}%)`;
-    }
-    h += `<div class="card" style="text-align:left;margin-bottom:8px;border-color:${t.color}55;${unlocked?'':'opacity:.55'}">
-      <div class="row" style="align-items:center">
-        <div style="font-size:22px">${t.emoji}</div>
-        <div style="flex:1">
-          <div style="font-weight:bold;color:${t.color}">${t.name} 던전 <span class="small" style="color:#9aa0d0">· ${t.desc}</span></div>
-          <div class="small" style="margin-top:3px">${unlocked? drops : `🔒 스테이지 <b>${t.stage}</b> 도달 시 해금`}</div>
+    <div class="card small" style="text-align:left">
+      <b>4일 로테이션</b>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:8px;text-align:center">
+        ${WEEKDAY_DUNGEON.map((w,i)=>`<div style="padding:6px 3px;border-radius:8px;border:1px solid ${i===dungeonRotationIndex()?'#ffd866':'#343a66'};background:${i===dungeonRotationIndex()?'#3a2b18':'#15162c'}">
+          <div>${w.mats.map(k=>MATERIALS[k].emoji).join('')}</div><div style="font-size:10px;color:#cfc8f5">${i+1}일차</div>
+        </div>`).join('')}
+      </div>
+    </div>
+    <h3 style="margin-top:6px">오늘의 던전 선택</h3>`;
+  todayMats.forEach(matKey=>{
+    const mat = MATERIALS[matKey], elem = dungeonElemOf(matKey), match = dunMatchupInfoForAttr(elem);
+    const pct = Math.round((match.mult-1)*100);
+    const matchTxt = match.strong.length ? `<span style="color:#7be38b">우세 +${pct}%</span> ${match.strong.join(', ')}`
+      : match.weak.length ? `<span style="color:#ff7a95">불리 ${pct}%</span> ${match.weak.join(', ')}`
+      : `<span style="color:#9aa0d0">상성 영향 없음</span>`;
+    h += `<div class="card" style="border-color:#8b6fd655;text-align:left">
+      <div class="row" style="align-items:center;margin-bottom:6px">
+        ${dungeonBossPreviewHtml(matKey)}
+        <div style="flex:1"><b>${mat.name} 던전</b><div class="small">속성 ${elem} · 파티 상성: ${matchTxt}</div></div>
+      </div>`;
+    DUNGEON_TIERS.forEach(t=>{
+      const unlocked = G.stage>=t.stage, canEnter = unlocked && G.dungeon.left>0;
+      const first = dungeonFirstClearReady(t.id, matKey);
+      const forecast = dungeonForecast(t, matKey);
+      const drops = dungeonRewardPreview(t, matKey, first);
+      const canSweep = unlocked && G.dungeon.left>0 && dungeonCanSweep(t.id, matKey);
+      h += `<div style="padding:8px 0;border-top:1px solid #343a66">
+        <div class="row" style="align-items:center">
+          <div style="font-size:22px">${t.emoji}</div>
+          <div style="flex:1">
+            <div style="font-weight:bold;color:${t.color}">${t.name} <span class="small" style="color:#9aa0d0">· ${t.desc}</span></div>
+            <div class="small" style="margin-top:3px">${unlocked? drops : `🔒 스테이지 <b>${t.stage}</b> 도달 시 해금`}</div>
+            ${unlocked?`<div class="small" style="margin-top:3px">보스 HP ${forecast.hp.toLocaleString()} · 예상 <b style="color:${forecast.color}">${forecast.label}</b>${first?' · 오늘 첫 클리어 보너스 대기':''}</div>`:''}
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <button class="btn ${t.id==='normal'?'gold':'gem'}" onclick="enterDungeon('${t.id}','${matKey}')" ${canEnter?'':'disabled'}>${unlocked?'⚔️ 입장':'잠금'}</button>
+            <button class="btn" onclick="sweepDungeon('${t.id}','${matKey}')" ${canSweep?'':'disabled'}>⏩ 소탕</button>
+          </div>
         </div>
-        <button class="btn ${t.id==='normal'?'gold':'gem'}" onclick="enterDungeon('${t.id}')" ${canEnter?'':'disabled'}>${unlocked?'⚔️ 입장':'잠금'}</button>
-      </div></div>`;
+      </div>`;
+    });
+    h += `</div>`;
   });
   if(G.dungeon.left<=0) h += `<div class="card small">오늘 입장 횟수를 모두 썼어요. 내일 다시 도전해 보세요!</div>`;
   h += `<div class="card small">💡 재료는 영웅 속성별 <b>10레벨 초월</b>과 <b>등급업</b>에 사용돼요. 보유 재료는 🎒가방에서 확인!</div>`;
@@ -2210,62 +2807,149 @@ function viewDungeon(){
 }
 // ===== 가방 — 보유 재료/소환권 한눈에 =====
 function viewBag(){
-  const dayOf={}; WEEKDAY_DUNGEON.forEach(w=>dayOf[w.mat]=w.day);
-  let h=`<h3>🧪 초월 재료</h3>
-  <div class="card"><div class="row"><div style="font-size:24px">${HERO_DUST_ICON}</div>
-    <div style="flex:1;text-align:left"><b>영웅 결정</b><div class="small">영웅 분해로 획득 · 영웅 초월/등급업에 사용</div></div>
-    <b style="font-size:16px">${(G.heroDust||0).toLocaleString()}</b></div></div>
-  <div class="card"><div class="row"><div style="font-size:24px">${PET_DUST_ICON}</div>
-    <div style="flex:1;text-align:left"><b>펫 결정</b><div class="small">펫 분해로 획득 · 펫 초월/등급업에 사용</div></div>
-    <b style="font-size:16px">${(G.petDust||0).toLocaleString()}</b></div></div>`;
-  for(const k in MATERIALS){
-    const m=MATERIALS[k], n=G.mats[k]||0;
-    h+=`<div class="card" style="${n>0?'':'opacity:.55'}"><div class="row">
-      <div style="font-size:24px">${m.emoji}</div>
-      <div style="flex:1;text-align:left"><b>${m.name}</b><div class="small">${dayOf[k]||''} 던전에서 획득 · 해당 속성 영웅 초월에 사용</div></div>
-      <b style="font-size:16px">${n}</b></div></div>`;
-  }
-  h+=`<h3 style="margin-top:12px">🎟 소환권</h3>`;
+  const dayOf={}; WEEKDAY_DUNGEON.forEach((w,i)=>w.mats.forEach(mat=>dayOf[mat]=`${i+1}일차 로테이션`));
   const tk=G.selectTickets||{};
+  const matKeys = Object.keys(MATERIALS);
+  const matOwned = matKeys.reduce((sum,k)=>sum+(G.mats[k]||0),0);
+  const ticketOwned = ['hero','gear','pet'].reduce((sum,k)=>sum+(tk[k]||0),0);
+  const itemCard = (icon, name, desc, qty, hot=false) => `<div class="bagItem ${qty>0?'':'empty'} ${hot?'hot':''}">
+    <div class="bagIcon">${icon}</div>
+    <div class="bagMeta"><div class="bagName">${name}</div><div class="bagDesc">${desc}</div></div>
+    <div class="bagQty">${Number(qty||0).toLocaleString()}</div>
+  </div>`;
+  let h=`<div class="bagWrap">
+  <div class="bagBanner">
+    <div class="bagTitle">
+      <div class="bagTitleIcon">🎒</div>
+      <div><h3>가방</h3><p>성장 재료와 선택권을 한눈에 확인해요.</p></div>
+    </div>
+    <div class="bagHero">
+      <div class="bagStat hot"><div class="label">영웅 결정</div><div class="value">${(G.heroDust||0).toLocaleString()}</div></div>
+      <div class="bagStat"><div class="label">재료 합계</div><div class="value">${matOwned.toLocaleString()}</div></div>
+      <div class="bagStat"><div class="label">선택권</div><div class="value">${ticketOwned.toLocaleString()}</div></div>
+    </div>
+  </div>
+  <div class="bagActions">
+    <button class="btn gold" onclick="openScreen('dungeon')">🗓️ 던전</button>
+    <button class="btn gem" onclick="openSummonShopView()">✨ 소환</button>
+    <button class="btn" onclick="openFromHome('hero')">🦸 영웅</button>
+  </div>
+
+  <div class="bagSection">
+    <div class="bagSectionHead"><h3>🧪 성장 재료</h3><div class="small">보유 ${matOwned.toLocaleString()}</div></div>
+    <div class="bagGrid">
+      ${itemCard(HERO_DUST_ICON,'영웅 결정','영웅 분해 · 영웅 초월/등급업',G.heroDust||0,true)}
+      ${itemCard(PET_DUST_ICON,'펫 결정','펫 분해 · 펫 초월/등급업',G.petDust||0)}
+    </div>
+  </div>
+
+  <div class="bagSection">
+    <div class="bagSectionHead"><h3>🌈 속성 재료</h3><div class="small">${matKeys.filter(k=>(G.mats[k]||0)>0).length}/${matKeys.length}종 보유</div></div>
+    <div class="bagGrid">`;
+  matKeys.forEach(k=>{
+    const m=MATERIALS[k], n=G.mats[k]||0;
+    h+=itemCard(m.emoji, m.name, `${dayOf[k]||'요일'} 던전 · 해당 속성 영웅 초월`, n);
+  });
+  h+=`</div></div>
+
+  <div class="bagSection">
+    <div class="bagSectionHead"><h3>🎟 소환권</h3><div class="small">총 ${ticketOwned.toLocaleString()}장</div></div>
+    <div class="bagGrid">`;
   [['hero','🦸','영웅 UR 선택소환권'],['gear','⚔️','장비 UR 선택소환권'],['pet','🐾','펫 UR 선택소환권']].forEach(([k,ic,nm])=>{
     const n=tk[k]||0;
-    h+=`<div class="card" style="${n>0?'':'opacity:.55'}"><div class="row"><div style="font-size:24px">${ic}</div>
-      <div style="flex:1;text-align:left"><b>${nm}</b><div class="small">소환 1000회마다 1장 · 원하는 UR을 골라서 획득</div></div>
-      <b style="font-size:16px">${n}</b></div></div>`;
+    h+=itemCard(ic,nm,'소환 1000회마다 1장 · 원하는 UR 선택',n,n>0);
   });
-  h+=`<h3 style="margin-top:12px">🪙 기타</h3>
-  <div class="card"><div class="row"><div style="font-size:24px">🪙</div>
-    <div style="flex:1;text-align:left"><b>길드 코인</b><div class="small">길드 출석으로 획득</div></div>
-    <b style="font-size:16px">${(G.guild&&G.guild.coin)||0}</b></div></div>
-  <div class="card small">💡 부족할 때: 재료=🗓️요일던전 · 영웅 결정=영웅 분해 · 소환권=소환 누적</div>`;
+  h+=`</div></div>
+
+  <div class="bagSection">
+    <div class="bagSectionHead"><h3>🪙 기타</h3><div class="small">재화</div></div>
+    <div class="bagGrid">
+      ${itemCard('🪙','길드 코인','길드 출석으로 획득',(G.guild&&G.guild.coin)||0)}
+    </div>
+  </div>
+  <div class="card small bagHint">부족한 재료는 요일던전, 영웅 결정은 영웅 분해, 선택소환권은 소환 누적으로 채울 수 있어요.</div>
+  </div>`;
   return h;
 }
 // ===== 설정 — 효과음 토글 + 세이브 백업 =====
 function viewSettings(){
   const on = G.sfxOn !== false;
-  return `
-    <h3>🔊 사운드</h3>
-    <div class="card"><div class="row" style="align-items:center">
+  const bgmOn = G.bgmOn !== false;
+  const sfxPct = Math.round(((G.sfxVol ?? 0.5) * 100));
+  const bgmPct = Math.round(((G.bgmVol ?? 0.28) * 100));
+  return `<div class="settingsWrap">
+    <div class="settingsBanner">
+      <div class="settingsTitle">
+        <div class="settingsTitleIcon">⚙️</div>
+        <div><h3>설정</h3><p>사운드와 저장 데이터를 관리해요.</p></div>
+      </div>
+    </div>
+
+    <div class="settingsPanel">
+    <h3 class="settingsSectionTitle">🔊 사운드</h3>
+    <div class="card settingCard"><div class="row">
+      <div class="settingIcon">🎵</div>
+      <div style="flex:1;text-align:left"><b>배경음악</b><div class="small">마을·사냥터 분위기 음악</div></div>
+      <button class="btn ${bgmOn?'gem':''}" onclick="toggleBgm()">${bgmOn?'🎵 켜짐':'🔇 꺼짐'}</button>
+    </div>
+    <div class="row" style="margin-top:9px;gap:10px;align-items:center">
+      <input class="settingRange" type="range" min="0" max="100" value="${bgmPct}" oninput="setBgmVolume(this.value)" style="flex:1;accent-color:#ff8ab4">
+      <b id="bgmVolLabel" style="width:42px;text-align:right">${bgmPct}%</b>
+    </div></div>
+    <div class="card settingCard"><div class="row">
+      <div class="settingIcon">🔊</div>
       <div style="flex:1;text-align:left"><b>효과음</b><div class="small">타격·처치·보상·가챠 효과음</div></div>
       <button class="btn ${on?'gem':''}" onclick="toggleSfx()">${on?'🔊 켜짐':'🔇 꺼짐'}</button>
-    </div></div>
-
-    <h3 style="margin-top:12px">💾 데이터 백업</h3>
-    <div class="card small" style="text-align:left">진행 데이터는 이 기기에만 저장돼요. 기기를 바꾸거나 브라우저 정리 전에 <b>백업 코드</b>를 복사해 두면 복구할 수 있어요.</div>
-    <div class="card">
-      <button class="btn gold" style="width:100%" onclick="showBackupCode()">📤 백업 코드 만들기</button>
-      <button class="btn" style="width:100%;margin-top:8px" onclick="showRestoreBox()">📥 백업 코드로 복구</button>
     </div>
-    <div id="backupArea"></div>
+    <div class="row" style="margin-top:9px;gap:10px;align-items:center">
+      <input class="settingRange" type="range" min="0" max="100" value="${sfxPct}" oninput="setSfxVolume(this.value)" style="flex:1;accent-color:#ffd866">
+      <b id="sfxVolLabel" style="width:42px;text-align:right">${sfxPct}%</b>
+    </div></div></div>
 
-    <h3 style="margin-top:12px">ℹ️ 정보</h3>
-    <div class="card small" style="text-align:left">방치형 RPG · 모험가 ${vnEsc(pName())} · Lv.${G.plv} · 스테이지 ${G.stage}</div>`;
+    <div class="settingsPanel">
+    <h3 class="settingsSectionTitle">💾 데이터 백업</h3>
+    <div class="card small settingCard" style="text-align:left">진행 데이터는 이 기기에만 저장돼요. 기기를 바꾸거나 브라우저 정리 전에 <b>백업 코드</b>를 복사해 두면 복구할 수 있어요.</div>
+    <div class="card settingCard">
+      <div class="settingActions">
+        <button class="btn gold" onclick="showBackupCode()">📤 백업 코드 만들기</button>
+        <button class="btn" onclick="showRestoreBox()">📥 백업 코드로 복구</button>
+      </div>
+    </div>
+    <div id="backupArea"></div></div>
+
+    <div class="settingsPanel">
+    <h3 class="settingsSectionTitle">ℹ️ 정보</h3>
+    <div class="card small settingCard" style="text-align:left">방치형 RPG · 모험가 ${vnEsc(pName())} · Lv.${G.plv} · 스테이지 ${G.stage}</div>
+    </div>
+  </div>`;
 }
 function toggleSfx(){
   G.sfxOn = (G.sfxOn === false);
   saveGame();
   if(G.sfxOn) sfx('click');
   if(currentScreen==='settings') renderScreen();
+}
+function toggleBgm(){
+  G.bgmOn = (G.bgmOn === false);
+  saveGame();
+  if(window.bgmRefresh) bgmRefresh();
+  if(currentScreen==='settings') renderScreen();
+}
+function setSfxVolume(v){
+  const pct = Math.max(0, Math.min(100, Number(v)||0));
+  G.sfxVol = pct / 100;
+  const label = document.getElementById('sfxVolLabel');
+  if(label) label.textContent = `${pct}%`;
+  if(window.sfxSetVolume) sfxSetVolume();
+  saveGame();
+}
+function setBgmVolume(v){
+  const pct = Math.max(0, Math.min(100, Number(v)||0));
+  G.bgmVol = pct / 100;
+  const label = document.getElementById('bgmVolLabel');
+  if(label) label.textContent = `${pct}%`;
+  if(window.bgmSetVolume) bgmSetVolume();
+  saveGame();
 }
 function makeBackupCode(){ try{ return btoa(unescape(encodeURIComponent(JSON.stringify(G)))); }catch(e){ return ''; } }
 function showBackupCode(){
@@ -2296,50 +2980,55 @@ function restoreBackup(){
   localStorage.setItem('idleRPG', JSON.stringify(data));
   location.reload();
 }
-function enterDungeon(tierId){
+function enterDungeon(tierId, matKey){
   dungeonReset();
   if(G.dungeon.left<=0) return;
   const t = dungeonTier(tierId);
+  const todayMats = dungeonToday().mats || [dungeonToday().mat];
+  if(!todayMats.includes(matKey)) return;
   if(G.stage < t.stage) return;   // 미해금 난이도 차단
   if(livingPartyHeroes().length===0){ alert('전투할 동료가 없어요! 파티를 편성해 주세요.'); return; }
   G.dungeon.left--; dailyInc('dungeon',1); saveGame();
   closePopup();
-  startDunRaid(t);
+  startDunRaid(t, matKey);
+}
+function sweepDungeon(tierId, matKey){
+  dungeonReset();
+  if(G.dungeon.left<=0) return;
+  const t = dungeonTier(tierId);
+  const todayMats = dungeonToday().mats || [dungeonToday().mat];
+  if(!todayMats.includes(matKey)) return;
+  if(G.stage < t.stage || !dungeonCanSweep(tierId, matKey)) return;
+  const first = dungeonFirstClearReady(t.id, matKey);
+  G.dungeon.left--;
+  dailyInc('dungeon',1);
+  markDungeonClear(t.id, matKey);
+  const rolled = rollDungeonReward(t, matKey, first);
+  grantReward(rolled.reward);
+  saveGame();
+  if(currentScreen==='dungeon') renderScreen();
+  popReward('⏩ 던전 소탕 완료', dungeonRewardPopupBody(t, matKey, rolled.reward, rolled.result, `${MATERIALS[matKey].emoji} ${t.name} 던전 소탕 완료!`));
 }
 // ===== 요일던전 전투 — 실제 사냥터 화면에서 파티가 싸운다 + 속성 상성 가중치 =====
 // 던전 속성 vs 파티 속성: 내 캐릭이 던전 속성을 상성으로 누르면 데미지↑, 반대면↓ (dunMatchupMult → huntDamageMult)
-const DUN_ELEMENT = { chaos:'번개', steel:'대지', fire:'화염', water:'물/얼음', wind:'바람', light:'빛', dark:'암흑' };
+const DUN_ELEMENT = { chaos:'번개', steel:'대지', nature:'자연', fire:'화염', water:'물/얼음', wind:'바람', light:'빛', dark:'암흑' };
 const DUN_CFG = { normal:{sec:14, hpSec:6}, elite:{sec:16, hpSec:11}, hell:{sec:18, hpSec:16} };
 let dunMode = null, dunTimer = null;
 // 던전 속성 가중치: 파티원이 던전 속성을 상성으로 누르면 +, 던전 속성에 약하면 -
 function dunMatchupMult(){
   if(!dunMode) return 1;
-  const elem = dunMode.attr; let mult = 1;
-  partyHeroes().forEach(h=>{
-    const a = (heroAttributes(h)[0]) || '대지';
-    if(ATTRIBUTE_ADVANTAGE[a] === elem) mult += 0.15;        // 내 캐릭이 던전 속성에 강함
-    else if(ATTRIBUTE_ADVANTAGE[elem] === a) mult -= 0.10;   // 던전 속성이 내 캐릭에 강함(약점)
-  });
-  return Math.max(0.4, mult);
+  return dunMatchupMultForAttr(dunMode.attr);
 }
 function dunMatchupInfo(){
   if(!dunMode) return {mult:1, strong:[], weak:[]};
-  const elem = dunMode.attr, strong=[], weak=[];
-  partyHeroes().forEach(h=>{
-    const a = (heroAttributes(h)[0]) || '대지';
-    if(ATTRIBUTE_ADVANTAGE[a] === elem) strong.push(h.name);
-    else if(ATTRIBUTE_ADVANTAGE[elem] === a) weak.push(h.name);
-  });
-  return { mult:dunMatchupMult(), strong, weak };
+  return dunMatchupInfoForAttr(dunMode.attr);
 }
-function startDunRaid(t){
-  const d = WEEKDAY_DUNGEON[new Date().getDay()];
+function startDunRaid(t, matKey){
   const cfg = DUN_CFG[t.id] || DUN_CFG.normal;
-  const elem = DUN_ELEMENT[d.mat] || '대지';
+  const elem = dungeonElemOf(matKey);
   // 보스 체력: 자동 공격 기준 처치목표 시간만큼 (상성에 따라 실제 처치속도가 달라져 클리어/실패가 갈림)
-  const dps = Math.max(1, totalAtk()) * autoMult();
-  const hpMax = Math.max(200, Math.round(dps * cfg.hpSec * 10));  // 10틱/초 가정
-  dunMode = { tier:t, mat:d.mat, attr:elem, time:cfg.sec, total:cfg.sec, ended:false };
+  const hpMax = dungeonBossHpForTier(t);
+  dunMode = { tier:t, mat:matKey, attr:elem, time:cfg.sec, total:cfg.sec, ended:false };
   enterHunt();              // 실제 사냥터 화면으로 전환
   healPartyFull();
   spawnDunBoss(hpMax, elem, t);
@@ -2350,7 +3039,7 @@ function startDunRaid(t){
 function spawnDunBoss(hpMax, elem, t){
   monHpMax = hpMax; monHp = hpMax; isBoss = true;
   const mEl = document.getElementById('monster'), nEl = document.getElementById('monName');
-  mEl.textContent = (typeof MONSTERS!=='undefined' && MONSTERS.length) ? MONSTERS[(G.stage-1)%MONSTERS.length] : '👾';
+  renderMonsterArt(mEl, dungeonBossArt(dunMode?.mat || 'chaos'));
   mEl.classList.add('boss'); nEl.classList.add('bossName');
   nEl.textContent = `${t.emoji} ${t.name} 던전 보스 · ${elem}`;
   updateHp(); renderHeroRow();
@@ -2390,23 +3079,12 @@ function dunRaidEnd(win){
   openScreen('dungeon');    // 요일던전 화면으로 복귀
   if(win){
     sfx(t.id==='hell'?'boss':'kill');
-    const amt = dungeonBaseAmt()*t.matMul;
-    const gold = Math.floor(50*Math.pow(1.15,G.stage-1))*t.goldMul;
-    const reward = { mat:{[mat]:amt}, gold };
-    let gotGem=false, gotDust=false;
-    if(t.bonus){
-      if(t.bonus.dust){ reward.heroDust=t.bonus.dust; gotDust=true; }
-      if(t.bonus.gem && Math.random()<t.bonus.gemChance){ reward.gem=t.bonus.gem; gotGem=true; }
-    }
-    grantReward(reward); saveGame();
+    const first = dungeonFirstClearReady(t.id, mat);
+    markDungeonClear(t.id, mat);
+    const rolled = rollDungeonReward(t, mat, first);
+    grantReward(rolled.reward); saveGame();
     if(currentScreen==='dungeon') renderScreen();
-    let body = `<div style="font-size:46px">${MATERIALS[mat].emoji}</div>
-      <div style="font-weight:bold;margin-top:6px;color:${t.color}">${t.emoji} ${t.name} 던전 클리어!</div>
-      <div style="margin-top:6px">${MATERIALS[mat].name} <b>+${amt}</b></div>
-      <div class="small"><span class="goldIcon"></span>${gold.toLocaleString()}</div>`;
-    if(gotDust) body += `<div style="margin-top:4px">${HERO_DUST_ICON} 영웅 결정 <b>+${t.bonus.dust}</b></div>`;
-    if(gotGem) body += `<div style="margin-top:4px;color:#ff8ab4">💎 보석 <b>+${t.bonus.gem}</b> ✨보너스!</div>`;
-    else if(t.bonus && t.bonus.gem) body += `<div class="small" style="margin-top:4px;color:#9aa0d0">💎 보너스 획득 실패… 다음 기회에!</div>`;
+    const body = dungeonRewardPopupBody(t, mat, rolled.reward, rolled.result, `${t.emoji} ${t.name} 던전 클리어!`);
     popReward('🗓️ 던전 클리어!', body);
   } else {
     if(currentScreen==='dungeon') renderScreen();
@@ -2509,7 +3187,7 @@ function offlineRewardCheck(){
   const elapsed = Math.min(43200, Math.floor((Date.now()-G.lastSeen)/1000)); // 최대 12시간
   if(elapsed < 60) return;                         // 1분 미만이면 스킵
   const kills = Math.floor(elapsed/3);             // 약 3초당 1처치 가정
-  const gold = Math.floor((Math.floor(5*Math.pow(1.2,G.stage-1)) * kills) / 50);
+  const gold = Math.floor(stageGoldBase(G.stage, false) * huntGoldMult() * petGoldMult() * kills * 0.35);
   pendingOffline = { elapsed, gold };
 }
 function fmtDur(sec){ const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60); return (h?h+'시간 ':'')+m+'분'; }
@@ -2861,7 +3539,7 @@ function randomPetByGrade(grade){
 function makePetFromBase(base, grade){
   return {
     name:base.name, emoji:base.emoji, buff:base.buff, grade:grade||base.grade||'N',
-    img:base.img||'', stats:base.stats||'', skill:base.skill||'', level:1, cap:10
+    img:base.img||'', stats:base.stats||'', skill:base.skill||'', level:1, cap:10, count:1
   };
 }
 function petLevel(p){ return Math.max(1, Math.min(HERO_MAX_LEVEL, p.level||1)); }
@@ -2920,11 +3598,12 @@ function petGrowthHtml(i, mode='panel'){
 function petDismantleHtml(i, mode='panel'){
   const p = G.pets[i]; if(!p) return '';
   const reward = petDismantleReward(p);
+  const count = itemCount(p);
   return `<div class="card" style="border-color:#ff9f43">
     <div class="row">
       <div style="flex:1">
         <div style="font-weight:bold;color:#ffcf8a">펫 분해</div>
-        <div class="small">분해 시 ${PET_DUST_ICON}펫 결정 <b>${reward}</b>개 획득 · 펫 초월 필요 재료로 사용</div>
+        <div class="small">분해 시 ${PET_DUST_ICON}펫 결정 <b>${reward}</b>개 획득 · ${count>1?`보유 ${count}개 중 1개 분해`:'펫 초월 필요 재료로 사용'}</div>
       </div>
       <button class="btn" style="background:linear-gradient(135deg,#ffb74d,#9a4b00)" onclick="dismantlePet(${i},'${mode}')">분해</button>
     </div>
@@ -2947,11 +3626,12 @@ function summonPet(){
   const cost=200;
   if(G.gem<cost){ alert('💎 보석이 부족해요!'); return; }
   G.gem-=cost;
+  playSummonSfx(1);
   const grade=rollGrade();
   const pet=makePetFromBase(randomPetByGrade(grade.g), grade.g);
   addSummonPity('pet', 1);
-  G.pets.push(pet);
-  if(G.activePet<0) G.activePet=G.pets.length-1; // 첫 펫 자동 장착
+  const added = addPet(pet);
+  if(G.activePet<0) G.activePet=G.pets.indexOf(added); // 첫 펫 자동 장착
   refreshTop(); currentScreen ? renderScreen() : renderPanel(); updatePet();
   showSummonAnim([pet], 'pet');
   showPityToast('pet');
@@ -2960,17 +3640,19 @@ function summonPetShop(count=1){
   const cost = count===11 ? 2000 : 200;
   if(G.gem<cost){ alert('💎 보석이 부족해요!'); return; }
   G.gem-=cost;
+  playSummonSfx(count);
   const got=[];
   for(let i=0;i<count;i++){
     const grade=rollGrade();
     const pet=makePetFromBase(randomPetByGrade(grade.g), grade.g);
-    G.pets.push(pet); got.push(pet);
+    got.push(pet);
   }
   if(count===11 && !got.some(p=>GRADE_RANK[p.grade]>=GRADE_RANK.SR)){
     const idx = Math.floor(Math.random()*got.length);
     const pet = makePetFromBase(randomPetByGrade('SR'), 'SR');
-    G.pets[G.pets.length-got.length+idx] = pet; got[idx] = pet;
+    got[idx] = pet;
   }
+  got.forEach(addPet);
   addSummonPity('pet', count);
   if(G.activePet<0) G.activePet=0;
   refreshTop(); updatePet();
@@ -2991,8 +3673,10 @@ function upPetLevel(i, mode='panel'){
   if(lv>=cap) return;
   const cost = petLevelCost(p);
   if(G.gold<cost) return;
+  i = splitPetStack(i);
+  const target = G.pets[i]; if(!target) return;
   G.gold -= cost;
-  p.level = lv + 1;
+  target.level = lv + 1;
   refreshPetViews(mode);
 }
 function transcendPet(i, mode='panel'){
@@ -3001,49 +3685,56 @@ function transcendPet(i, mode='panel'){
   if(lv < cap) return;
   const tr = petTransCost(p);
   if((G.petDust||0) < tr.dust || G.gold < tr.gold) return;
+  i = splitPetStack(i);
+  const target = G.pets[i]; if(!target) return;
   G.petDust -= tr.dust;
   G.gold -= tr.gold;
-  if(cap >= HERO_MAX_LEVEL && p.grade !== 'UR'){
-    p.grade = p.grade === 'SR' ? 'SSR' : p.grade === 'SSR' ? 'UR' : p.grade === 'R' ? 'SR' : 'R';
-    p.level = 1;
-    p.cap = 10;
+  if(cap >= HERO_MAX_LEVEL && target.grade !== 'UR'){
+    target.grade = target.grade === 'SR' ? 'SSR' : target.grade === 'SSR' ? 'UR' : target.grade === 'R' ? 'SR' : 'R';
+    target.level = 1;
+    target.cap = 10;
   } else {
-    p.cap = Math.min(HERO_MAX_LEVEL, cap + 10);
+    target.cap = Math.min(HERO_MAX_LEVEL, cap + 10);
   }
   refreshPetViews(mode);
 }
 function dismantlePet(i, mode='panel'){
   const p = G.pets[i]; if(!p) return;
   const reward = petDismantleReward(p);
-  if(!confirm(`[${p.grade}] ${p.name} 펫을 분해할까요?\n\n획득: ${PET_DUST_ICON} 펫 결정 ${reward}개\n분해한 펫은 사라집니다.`)) return;
+  const count = itemCount(p);
+  if(!confirm(`[${p.grade}] ${p.name} 펫 1개를 분해할까요?\n\n보유: ${count}개\n획득: ${PET_DUST_ICON} 펫 결정 ${reward}개`)) return;
   G.petDust = (G.petDust||0) + reward;
-  G.pets.splice(i,1);
-  if(G.activePet === i) G.activePet = G.pets.length ? 0 : -1;
-  else if(G.activePet > i) G.activePet--;
+  if(count>1){
+    p.count = count - 1;
+  } else {
+    G.pets.splice(i,1);
+    if(G.activePet === i) G.activePet = G.pets.length ? 0 : -1;
+    else if(G.activePet > i) G.activePet--;
+  }
   selectedCharPetIdx = Math.max(0, Math.min(selectedCharPetIdx, G.pets.length-1));
   refreshPetViews(mode);
   popReward('🐾 펫 분해 완료', `<div style="font-size:42px">${PET_DUST_ICON}</div><div style="font-weight:bold">펫 결정 +${reward}</div>`);
 }
 function viewPet(){
   let h=`<div class="card" style="border-color:#ffb74d"><div class="row">
-      <div style="flex:1"><b>🐾 펫 소환</b><div class="small">N 54.9% · R 30% · SR 12% · SSR 3% · UR 0.1%<br>${pityLabel('pet')}</div></div>
+      <div style="flex:1"><b>🐾 펫 소환</b><div class="small">누적 ${summonTotalLabel('pet')}회 · N 54.9% · R 30% · SR 12% · SSR 3% · UR 0.1%<br>${pityLabel('pet')}</div></div>
       <button class="btn gem" onclick="summonPet()" ${G.gem<200?'disabled':''}>💎 200</button>
       <button class="btn" onclick="openSelectSummon('pet')" ${G.selectTickets?.pet>0?'':'disabled'}>UR 선택</button>
     </div></div>
     <div class="card small">${PET_DUST_ICON} 펫 결정 <b>${(G.petDust||0).toLocaleString()}</b> · 펫 분해로 획득, 초월에 사용</div>
-    <h3>보유 펫 (${G.pets.length})</h3>`;
+    <h3>보유 펫 (${G.pets.length}종 / ${totalPetCopies()}개)</h3>`;
   if(G.pets.length===0) h+=`<div class="card small">아직 펫이 없어요. 소환해보세요!</div>`;
   orderedPetEntries().forEach(({pet:p,i})=>{
     const active=G.activePet===i;
-    h+=`<div class="card" style="${active?'border-color:'+gradeColorOf(p.grade):''}"><div class="row">
-      <div class="hp-card g-bg-${p.grade}" style="width:50px;height:50px;border-color:${gradeColorOf(p.grade)}">
-        <div class="hp-grade txt-${p.grade}" style="font-size:9px">${p.grade}</div>
-        ${petVisual(p)}</div>
-      <div style="flex:1"><div style="font-weight:bold">[${p.grade}] ${p.name} Lv.${petLevel(p)}/${petCap(p)} ${active?'<span style="font-size:10px;color:#3be38b">●장착</span>':''}</div>
-        <div class="small">${petBuffText(p)}</div>
-        ${p.skill?`<div class="small">스킬: ${p.skill}</div>`:''}</div>
+    h+=`<div class="charHeroItem petListItem" style="${active?'border-color:'+gradeColorOf(p.grade)+';box-shadow:0 0 10px '+gradeColorOf(p.grade)+'33':''}">
+      <div class="heroFace g-bg-${p.grade}" style="border-color:${gradeColorOf(p.grade)}">${petVisual(p,'heroListImg')}</div>
+      <div class="heroMeta">
+        <div class="heroName txt-${p.grade}">[${p.grade}] ${p.name} Lv.${petLevel(p)} ${stackBadge(itemCount(p))} ${active?'<span style="font-size:10px;color:#3be38b">●장착</span>':''}</div>
+        <div class="heroPower">전투력 ${petPower(p).toLocaleString()} · ${petBuffText(p)}</div>
+        ${p.skill?`<div class="heroPower">스킬: ${p.skill}</div>`:''}
+      </div>
       <button class="btn ${active?'':'gem'}" onclick="equipPet(${i})" ${active?'disabled':''}>${active?'장착중':'장착'}</button>
-    </div></div>${petGrowthHtml(i,'panel')}${petDismantleHtml(i,'panel')}`;
+    </div>`;
   });
   return h;
 }
@@ -3056,41 +3747,215 @@ function updatePet(){
 }
 // ===== 길드소 =====
 const GUILD_MEMBERS = ['검은매','아이언울프','루나','세라핀','카이젤','미스트','발할라','은빛여우'];
+const GUILD_QUESTS = [
+  { id:'hunt', icon:'⚔️', title:'사냥터 정찰', desc:'현재 스테이지 기준으로 길드 정찰 보상을 받아요.', need:1 },
+  { id:'donate', icon:'🤝', title:'길드 보급', desc:'골드를 기부해 길드 경험치와 코인을 얻어요.', need:1 },
+  { id:'boss', icon:'👑', title:'토벌 지원', desc:'오늘 길드 보스에게 피해를 누적하면 완료됩니다.', need:1 },
+];
+const GUILD_SHOP = [
+  { id:'gem_pack', icon:'💎', title:'보석 주머니', desc:'보석 120개', cost:60, reward:{gem:120} },
+  { id:'gold_box', icon:'📦', title:'전투 보급 상자', desc:'현재 사냥터 기준 골드 보상', cost:45, reward:()=>({gold:Math.floor(stageGoldBase(G.stage, false) * 70)}) },
+  { id:'hero_dust', icon:HERO_DUST_ICON, title:'영웅 결정 묶음', desc:'영웅 결정 25개', cost:90, reward:{heroDust:25} },
+  { id:'pet_dust', icon:PET_DUST_ICON, title:'펫 결정 묶음', desc:'펫 결정 25개', cost:90, reward:{petDust:25} },
+];
+function ensureGuildState(){
+  if(!G.guild) G.guild = {};
+  const g = G.guild;
+  if(g.joined==null) g.joined = false;
+  if(g.coin==null) g.coin = 0;
+  if(!g.lastCheck) g.lastCheck = '';
+  if(g.exp==null) g.exp = 0;
+  if(g.researchAtk==null) g.researchAtk = 0;
+  if(g.researchGold==null) g.researchGold = 0;
+  if(!g.bossDate) g.bossDate = '';
+  if(g.bossDamage==null) g.bossDamage = 0;
+  if(!g.shopBought || typeof g.shopBought !== 'object') g.shopBought = {};
+  if(!g.quests || typeof g.quests !== 'object') g.quests = {};
+  if(g.questDate !== todayStr()){
+    g.questDate = todayStr();
+    g.quests = {};
+    g.shopBought = {};
+  }
+}
+function guildLevel(){ ensureGuildState(); return Math.max(1, Math.floor(Math.sqrt((G.guild.exp||0) / 100)) + 1); }
+function guildLevelNeed(lv=guildLevel()){ return lv * lv * 100; }
+function guildGoldBonus(){ ensureGuildState(); return Math.max(0, G.guild.researchGold||0) * 0.03; }
+function guildBossHp(){
+  const lv = guildLevel();
+  return Math.max(8000, Math.floor(stageHpMax(G.stage, G.kills, true) * (8 + lv * 1.6)));
+}
+function guildBossRewardReady(){
+  ensureGuildState();
+  return G.guild.bossDate === todayStr() && G.guild.bossDamage >= guildBossHp() && G.guild.bossClaimed !== todayStr();
+}
+function guildQuestDone(id){ ensureGuildState(); return !!G.guild.quests[id]; }
+function guildQuestCard(q){
+  const done = guildQuestDone(q.id);
+  return `<div class="card"><div class="row">
+    <div style="font-size:26px">${q.icon}</div>
+    <div style="flex:1;min-width:0">
+      <b>${q.title}</b>
+      <div class="small">${q.desc}</div>
+    </div>
+    <button class="btn ${done?'':'gem'}" onclick="claimGuildQuest('${q.id}')" ${done?'disabled':''}>${done?'완료':'수행'}</button>
+  </div></div>`;
+}
 function viewGuild(){
+  ensureGuildState();
   const g = G.guild;
   if(!g.joined){
     return `<div class="card" style="text-align:center;border-color:#ffb74d">
         <div style="font-size:48px">🏛️</div>
         <div style="font-weight:bold;font-size:16px">여명의 동맹</div>
-        <div class="small">길드에 가입하면 <b>공격력 +10%</b> 영구 버프 + 가입 보상!</div>
+        <div class="small">길드에 가입하면 <b>공격력 +10%</b> 영구 버프, 길드 출석, 연구, 보스 토벌을 이용할 수 있어요.</div>
         <button class="btn gem" style="width:100%;margin-top:10px" onclick="joinGuild()">길드 가입 (가입 보상 💎500)</button>
       </div>
-      <div class="card small">⚔️ 길드전 · 길드 보스 · 길드 상점은 준비 중이에요. 곧 추가됩니다!</div>`;
+      <div class="card small">가입 후 길드 코인을 모아 보석, 결정, 골드 보급품을 교환할 수 있습니다.</div>`;
   }
   const canCheck = g.lastCheck !== todayStr();
+  const lv = guildLevel();
+  const nextNeed = guildLevelNeed(lv);
+  const prevNeed = guildLevelNeed(lv-1);
+  const expNow = Math.max(0, g.exp - prevNeed);
+  const expNeed = Math.max(1, nextNeed - prevNeed);
+  const bossHp = guildBossHp();
+  const bossPct = Math.min(100, Math.floor((g.bossDamage||0) / bossHp * 100));
   let h = `<div class="card" style="border-color:#7c3bff">
-      <div style="font-weight:bold">🏛️ 여명의 동맹 <span class="small">· 가입됨</span></div>
-      <div class="small">길드 버프: <b class="txt-SR">공격력 +10%</b> 적용 중 · 길드코인 🛡️${g.coin}</div>
+      <div style="font-weight:bold">🏛️ 여명의 동맹 Lv.${lv} <span class="small">· ${pName()} 소속</span></div>
+      <div class="small">길드코인 🛡️${g.coin.toLocaleString()} · 공격력 +${Math.round(guildAtkBonus()*100)}% · 골드 +${Math.round(guildGoldBonus()*100)}%</div>
+      <div style="height:8px;background:#15172c;border-radius:999px;overflow:hidden;margin-top:8px;border:1px solid #343a66"><div style="height:100%;width:${Math.min(100,Math.floor(expNow/expNeed*100))}%;background:linear-gradient(90deg,#7c3bff,#ffd866)"></div></div>
+      <div class="small" style="margin-top:4px">길드 경험치 ${expNow.toLocaleString()} / ${expNeed.toLocaleString()}</div>
       <button class="btn ${canCheck?'gem':''}" style="width:100%;margin-top:8px" onclick="guildCheck()" ${canCheck?'':'disabled'}>${canCheck?'📅 길드 출석 (코인+골드)':'오늘 출석 완료'}</button>
     </div>
-    <h3>길드원</h3>`;
-  GUILD_MEMBERS.forEach(n=>{
-    h += `<div class="card"><div class="row"><div style="font-size:22px">🛡️</div><div style="flex:1">${n}</div><div class="small">전투력 ${(Math.floor(Math.random()*9)+1)},${String(Math.floor(Math.random()*900)+100)}</div></div></div>`;
+    <h3>길드 연구</h3>
+    <div class="card"><div class="row">
+      <div style="font-size:26px">⚔️</div><div style="flex:1"><b>전투 연구 Lv.${g.researchAtk}</b><div class="small">길드 공격력 +${Math.round(guildAtkBonus()*100)}% · 다음 연구마다 +2%</div></div>
+      <button class="btn gem" onclick="upgradeGuildResearch('atk')" ${(g.coin||0)<guildResearchCost('atk')?'disabled':''}>🛡️${guildResearchCost('atk')}</button>
+    </div></div>
+    <div class="card"><div class="row">
+      <div style="font-size:26px">💰</div><div style="flex:1"><b>수익 연구 Lv.${g.researchGold}</b><div class="small">길드 골드 보너스 +${Math.round(guildGoldBonus()*100)}%</div></div>
+      <button class="btn gem" onclick="upgradeGuildResearch('gold')" ${(g.coin||0)<guildResearchCost('gold')?'disabled':''}>🛡️${guildResearchCost('gold')}</button>
+    </div></div>
+    <h3>오늘의 의뢰</h3>
+    ${GUILD_QUESTS.map(guildQuestCard).join('')}
+    <h3>길드 보스</h3>
+    <div class="card" style="border-color:#ff5e7a;background:linear-gradient(160deg,#35172d,#15172c)">
+      <div class="row">
+        <div style="font-size:38px">👑</div>
+        <div style="flex:1">
+          <b>균열의 수문장</b>
+          <div class="small">오늘 누적 피해 ${(g.bossDamage||0).toLocaleString()} / ${bossHp.toLocaleString()}</div>
+        </div>
+        <button class="btn gold" onclick="attackGuildBoss()">토벌</button>
+      </div>
+      <div style="height:10px;background:#15172c;border-radius:999px;overflow:hidden;margin-top:8px;border:1px solid #59334b"><div style="height:100%;width:${bossPct}%;background:linear-gradient(90deg,#ff5e7a,#ffd866)"></div></div>
+      <button class="btn gem" style="width:100%;margin-top:8px" onclick="claimGuildBossReward()" ${guildBossRewardReady()?'':'disabled'}>${guildBossRewardReady()?'토벌 보상 받기':'토벌 보상 대기'}</button>
+    </div>
+    <h3>길드 상점</h3>`;
+  GUILD_SHOP.forEach(item=>{
+    const bought = !!g.shopBought[item.id];
+    h += `<div class="card"><div class="row">
+      <div style="font-size:26px">${item.icon}</div>
+      <div style="flex:1"><b>${item.title}</b><div class="small">${item.desc} · 오늘 1회</div></div>
+      <button class="btn ${bought?'':'gem'}" onclick="buyGuildShop('${item.id}')" ${(bought || (g.coin||0)<item.cost)?'disabled':''}>${bought?'구매완료':'🛡️'+item.cost}</button>
+    </div></div>`;
   });
-  h += `<div class="card small">⚔️ 길드전 · 길드 보스 준비 중!</div>`;
+  h += `<h3>길드원</h3>`;
+  GUILD_MEMBERS.forEach((n,i)=>{
+    const cp = Math.floor(totalAtk() * (0.55 + (i+1)*0.09));
+    h += `<div class="card"><div class="row"><div style="font-size:22px">🛡️</div><div style="flex:1">${n}</div><div class="small">전투력 ${cp.toLocaleString()}</div></div></div>`;
+  });
   return h;
 }
 function joinGuild(){
+  ensureGuildState();
   if(G.guild.joined) return;
-  G.guild.joined = true; grantReward({gem:500}); renderScreen();
+  G.guild.joined = true; G.guild.exp += 100; grantReward({gem:500}); renderScreen();
   popReward('🏛️ 길드 가입 완료!', `<div style="font-weight:bold">여명의 동맹에 합류했어요!</div><div class="small">공격력 +10% · 💎 500</div>`);
 }
 function guildCheck(){
+  ensureGuildState();
   if(G.guild.lastCheck===todayStr()) return;
-  G.guild.lastCheck=todayStr(); G.guild.coin+=10;
-  grantReward({gold:Math.floor(2000*Math.pow(1.1,G.stage-1))});
+  G.guild.lastCheck=todayStr(); G.guild.coin+=20; G.guild.exp+=60;
+  grantReward({gold:Math.floor(stageGoldBase(G.stage, false) * (22 + Math.round(guildGoldBonus()*100)))});
   renderScreen();
-  popReward('🏛️ 길드 출석', `<div style="font-weight:bold">🛡️ 길드코인 +10</div>`);
+  popReward('🏛️ 길드 출석', `<div style="font-weight:bold">🛡️ 길드코인 +20</div><div class="small">길드 경험치 +60</div>`);
+}
+function guildResearchCost(type){
+  ensureGuildState();
+  const lv = type==='gold' ? G.guild.researchGold : G.guild.researchAtk;
+  return 80 + lv * 45;
+}
+function upgradeGuildResearch(type){
+  ensureGuildState();
+  const cost = guildResearchCost(type);
+  if(G.guild.coin < cost) return;
+  G.guild.coin -= cost;
+  if(type==='gold') G.guild.researchGold++;
+  else G.guild.researchAtk++;
+  G.guild.exp += 80;
+  refreshTop(); renderScreen();
+}
+function claimGuildQuest(id){
+  ensureGuildState();
+  if(!G.guild.joined || G.guild.quests[id]) return;
+  if(id==='hunt'){
+    G.guild.quests[id] = true;
+    G.guild.coin += 18;
+    G.guild.exp += 50;
+    grantReward({gold:Math.floor(stageGoldBase(G.stage, false) * 18)});
+  } else if(id==='donate'){
+    const cost = Math.floor(stageGoldBase(G.stage, false) * 16);
+    if(G.gold < cost){ alert('골드가 부족해요.'); return; }
+    G.gold -= cost;
+    G.guild.quests[id] = true;
+    G.guild.coin += 30;
+    G.guild.exp += 120;
+    refreshTop();
+  } else if(id==='boss'){
+    if((G.guild.bossDamage||0) <= 0){ alert('먼저 길드 보스를 한 번 토벌해보세요.'); return; }
+    G.guild.quests[id] = true;
+    G.guild.coin += 24;
+    G.guild.exp += 70;
+    refreshTop();
+  }
+  renderScreen();
+  popReward('📜 길드 의뢰 완료', `<div style="font-weight:bold">🛡️ 길드코인을 획득했어요</div>`);
+}
+function attackGuildBoss(){
+  ensureGuildState();
+  if(!G.guild.joined) return;
+  if(G.guild.bossDate !== todayStr()){
+    G.guild.bossDate = todayStr();
+    G.guild.bossDamage = 0;
+  }
+  const dmg = Math.max(1, Math.floor(totalAtk() * (8 + guildLevel() * 0.8)));
+  G.guild.bossDamage = Math.min(guildBossHp(), (G.guild.bossDamage||0) + dmg);
+  G.guild.exp += 20;
+  if(typeof sfx==='function') sfx('boss');
+  refreshTop(); renderScreen();
+  showToast(`길드 보스 피해 ${dmg.toLocaleString()}`, '#ffd866', true);
+}
+function claimGuildBossReward(){
+  ensureGuildState();
+  if(!guildBossRewardReady() || G.guild.bossClaimed === todayStr()) return;
+  G.guild.bossClaimed = todayStr();
+  G.guild.coin += 70;
+  G.guild.exp += 160;
+  grantReward({gem:80, gold:Math.floor(stageGoldBase(G.stage, true) * 55)});
+  renderScreen();
+  popReward('👑 길드 보스 토벌', `<div style="font-weight:bold">💎80 · 🛡️70 획득</div><div class="small">길드 경험치 +160</div>`);
+}
+function buyGuildShop(id){
+  ensureGuildState();
+  const item = GUILD_SHOP.find(x=>x.id===id);
+  if(!item || G.guild.shopBought[id] || G.guild.coin < item.cost) return;
+  G.guild.coin -= item.cost;
+  G.guild.shopBought[id] = true;
+  const reward = typeof item.reward === 'function' ? item.reward() : item.reward;
+  grantReward(reward);
+  renderScreen();
+  popReward('🛡️ 길드 상점', `<div style="font-weight:bold">${item.title} 구매 완료</div><div class="small">${rewardText(reward)}</div>`);
 }
 function petAttack(){
   const p=activePet(); if(!p) return;
@@ -3125,7 +3990,9 @@ function updateHomeRes(){
 
 // ===== 충전(가짜 결제) =====
 document.getElementById('buyGem').onclick = ()=>{
-  currentTab='shop'; setTab('shop');
+  enterGame();
+  setTab('shop');
+  document.getElementById('tabs').style.display='flex';
 };
 
 // ===== 패널/탭 =====
@@ -3139,6 +4006,7 @@ function setTab(name){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
   renderPanel();
   updateTabsVisibility();
+  if(window.bgm) bgm(name==='hunt' ? 'battle' : 'home');
 }
 function updateTabsVisibility(){
   const tabs = document.getElementById('tabs');
@@ -3186,6 +4054,17 @@ function viewHunt(){
   const coin = '<span class="goldIcon"></span>';
   const gem = '💎';
   const pct = v => Math.round(v*100);
+  const field = huntFieldInfo();
+  const nextField = field.next;
+  const bossStageLeft = isBoss ? 0 : (stageBossEvery() - (G.stage % stageBossEvery() || stageBossEvery()));
+  const bossLeft = bossStageLeft * stageKillGoal() + Math.max(0, stageKillGoal() - (G.kills||0));
+  const streakBonus = Math.min(30, Math.floor((G.huntStreak||0)/10) * 5);
+  const fieldBrief = nextField
+    ? `${nextField.name}까지 스테이지 ${nextField.stage - G.stage} 남음`
+    : '최종 사냥터 도달';
+  const curHp = stageHpMax(G.stage, G.kills, isBossStage());
+  const curAtk = stageAtkValue(G.stage, G.kills, isBossStage());
+  const clearGold = Math.floor(stageGoldBase(G.stage, isBossStage()) * huntGoldMult() * petGoldMult());
   const specialCard = (type, icon, title, lv, maxed, one, ten, nowText, nextText) => `
     <div class="card upgradeCard specialUpgradeCard"><div class="row">
       <div style="font-size:26px">${icon}</div>
@@ -3202,7 +4081,25 @@ function viewHunt(){
       <div style="font-weight:900;color:#ffd866">스테이지 ${G.wallStage}에서 전멸했어요</div>
       <div class="small" style="margin-top:4px">현재는 이전 스테이지를 반복 클리어합니다. 공격력/자동공격을 강화하거나 소환상점에서 영웅을 늘려 다시 도전하세요.</div>
     </div>` : '';
-  return `<h3>⚔️ 일반 사냥터 강화</h3>
+  return `<h3>⚔️ 일반 사냥터</h3>
+    <div class="card" style="border-color:${field.color}88;background:linear-gradient(160deg,#22284a,#151829)">
+      <div class="row">
+        <div style="font-size:30px">${field.icon}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:900;color:#fff">${field.name} · 사냥터 Lv.${field.level}</div>
+          <div class="small">${field.goal} · ${fieldBrief}</div>
+        </div>
+      </div>
+      <div class="huntPanelGrid" style="margin-top:8px">
+        <div class="huntInfoCell"><div class="label">골드 보너스</div><div class="value">+${Math.round((huntGoldMult()-1)*100)}%</div></div>
+        <div class="huntInfoCell"><div class="label">연속 처치</div><div class="value">${(G.huntStreak||0).toLocaleString()}회</div></div>
+        <div class="huntInfoCell"><div class="label">다음 보스</div><div class="value">${bossLeft}마리</div></div>
+        <div class="huntInfoCell"><div class="label">보스 보석</div><div class="value">💎 +5</div></div>
+        <div class="huntInfoCell"><div class="label">몬스터 체력</div><div class="value">${curHp.toLocaleString()}</div></div>
+        <div class="huntInfoCell"><div class="label">예상 처치 골드</div><div class="value">${clearGold.toLocaleString()}</div></div>
+      </div>
+      <div class="small">보스 주기 ${stageBossEvery()}스테이지 · 몬스터 공격력 ${curAtk.toLocaleString()} · 연속 처치 10회마다 골드 +5%, 최대 +30% · 현재 연속 보너스 +${streakBonus}%</div>
+    </div>
     <div class="card small">전투 화면 아무 곳이나 <b>터치</b>하면 몬스터를 공격해요. 터치공격과 자동공격은 Lv.${HUNT_MAX_LEVEL}, 자동 공격속도는 Lv.${SPEED_MAX_LEVEL}까지 강화할 수 있어요.</div>
     ${wallTip}
     <div class="card upgradeCard huntPowerCard" style="border-color:#ffb74d"><div class="row">
@@ -3350,26 +4247,32 @@ function heroGrowthHtml(i, mode='panel'){
 function heroDismantleHtml(i){
   const hero = G.heroes[i]; if(!hero) return '';
   const reward = heroDismantleReward(hero);
-  const disabled = G.heroes.length<=1 ? 'disabled' : '';
+  const disabled = totalHeroCopies()<=1 ? 'disabled' : '';
+  const count = itemCount(hero);
   return `<div class="card" style="border-color:#ff5e7a">
     <div class="row">
       <div style="flex:1">
         <div style="font-weight:bold;color:#ff9aad">영웅 분해</div>
-        <div class="small">분해 시 ${HERO_DUST_ICON}영웅 결정 <b>${reward}</b>개 획득 · 초월 필요 재료로 사용</div>
+        <div class="small">분해 시 ${HERO_DUST_ICON}영웅 결정 <b>${reward}</b>개 획득 · ${count>1?`보유 ${count}개 중 1개 분해`:'초월 필요 재료로 사용'}</div>
       </div>
       <button class="btn" style="background:linear-gradient(135deg,#ff5e7a,#8b1e3f)" onclick="dismantleHero(${i})" ${disabled}>분해</button>
     </div>
-    ${G.heroes.length<=1?'<div class="small" style="margin-top:5px">마지막 영웅은 분해할 수 없어요.</div>':''}
+    ${totalHeroCopies()<=1?'<div class="small" style="margin-top:5px">마지막 영웅은 분해할 수 없어요.</div>':''}
   </div>`;
 }
 function dismantleHero(i){
-  const hero = G.heroes[i]; if(!hero || G.heroes.length<=1) return;
+  const hero = G.heroes[i]; if(!hero || totalHeroCopies()<=1) return;
   const reward = heroDismantleReward(hero);
-  if(!confirm(`[${hero.grade}] ${hero.name} 영웅을 분해할까요?\n\n획득: ${HERO_DUST_ICON} 영웅 결정 ${reward}개\n분해한 영웅은 사라집니다.`)) return;
+  const count = itemCount(hero);
+  if(!confirm(`[${hero.grade}] ${hero.name} 영웅 1개를 분해할까요?\n\n보유: ${count}개\n획득: ${HERO_DUST_ICON} 영웅 결정 ${reward}개`)) return;
   G.heroDust = (G.heroDust||0) + reward;
-  if(Array.isArray(G.party)) G.party = G.party.map(id=>id===hero.uid ? null : id);
-  if(G.heroHp) delete G.heroHp[hero.uid];
-  G.heroes.splice(i,1);
+  if(count>1){
+    hero.count = count - 1;
+  } else {
+    if(Array.isArray(G.party)) G.party = G.party.map(id=>id===hero.uid ? null : id);
+    if(G.heroHp) delete G.heroHp[hero.uid];
+    G.heroes.splice(i,1);
+  }
   selectedCharHeroIdx = null;
   heroDetailIdx = null;
   partyPickUid = null;
@@ -3390,9 +4293,11 @@ function upHeroLevel(i, mode='panel'){
   if(lv>=cap) return;
   const cost = heroLevelCost(hero);
   if(G.gold<cost) return;
+  i = splitHeroStack(i);
+  const target = G.heroes[i]; if(!target) return;
   G.gold -= cost;
-  hero.level = lv + 1;
-  G.heroHp[hero.uid] = heroMaxHp(hero);
+  target.level = lv + 1;
+  G.heroHp[target.uid] = heroMaxHp(target);
   refreshHeroViews(mode);
 }
 function transcendHero(i, mode='panel'){
@@ -3401,24 +4306,26 @@ function transcendHero(i, mode='panel'){
   if(lv < cap) return;
   const matKey = heroMatKey(hero), tr = heroTransCost(hero);
   if((G.mats[matKey]||0) < tr.mat || (G.heroDust||0) < tr.dust || G.gold < tr.gold) return;
+  i = splitHeroStack(i);
+  const target = G.heroes[i]; if(!target) return;
   G.mats[matKey] -= tr.mat;
   G.heroDust -= tr.dust;
   G.gold -= tr.gold;
-  if(cap >= HERO_MAX_LEVEL && hero.grade !== 'UR'){
-    hero.grade = hero.grade === 'SR' ? 'SSR' : 'UR';
-    hero.level = 1;
-    hero.cap = 10;
+  if(cap >= HERO_MAX_LEVEL && target.grade !== 'UR'){
+    target.grade = target.grade === 'SR' ? 'SSR' : 'UR';
+    target.level = 1;
+    target.cap = 10;
   } else {
-    hero.cap = Math.min(HERO_MAX_LEVEL, cap + 10);
+    target.cap = Math.min(HERO_MAX_LEVEL, cap + 10);
   }
-  G.heroHp[hero.uid] = heroMaxHp(hero);
+  G.heroHp[target.uid] = heroMaxHp(target);
   refreshHeroViews(mode);
 }
 function viewHero(){
   if(heroDetailIdx!=null && G.heroes[heroDetailIdx]) return viewHeroDetail(heroDetailIdx);
   const slots = partySlots();
   const party = new Set(slots.filter(Boolean));
-  let h = `<h3>보유 영웅 (${G.heroes.length}) · <span class="small">배치 버튼으로 1~5번 자리를 선택</span></h3>`;
+  let h = `<h3>보유 영웅 (${G.heroes.length}종 / ${totalHeroCopies()}개) · <span class="small">배치 버튼으로 1~5번 자리를 선택</span></h3>`;
   if(G.heroes.length===0) h += `<div class="card small">아직 영웅이 없어요. '소환' 탭에서 영웅을 뽑아보세요!</div>`;
   orderedBattleHeroList().forEach(({hero,i})=>{
     const inParty = party.has(hero);
@@ -3429,7 +4336,7 @@ function viewHero(){
         ${heroSdVisual(hero)}
       </div>
       <div style="flex:1">
-        <div class="txt-${hero.grade}" style="font-weight:bold">[${hero.grade}] ${hero.name} Lv.${heroLevel(hero)} ${inParty?`<span style="font-size:10px;color:#3be38b">●${slotNo}번 배치</span>`:''}</div>
+        <div class="txt-${hero.grade}" style="font-weight:bold">[${hero.grade}] ${hero.name} Lv.${heroLevel(hero)} ${stackBadge(itemCount(hero))} ${inParty?`<span style="font-size:10px;color:#3be38b">●${slotNo}번 배치</span>`:''}</div>
         <div class="small"><span style="color:${heroCls(hero).color}">${heroCls(hero).hit}${heroCls(hero).name}</span> · 전투력 ${heroEffAtk(hero)} · HP ${heroMaxHp(hero).toLocaleString()} · DEF ${heroDef(hero).toLocaleString()}</div>
       </div>
       <button class="btn gem" style="padding:7px 10px" onclick="event.stopPropagation();openPartyPicker('${hero.uid}')">배치</button>
@@ -3451,7 +4358,7 @@ function viewHeroDetail(i){
   const slots = [["무기","🗡️"],["방어구","🛡️"],["장신구","💍"]];
   let h = `<div class="row" style="margin-bottom:8px">
       <button class="btn" style="padding:6px 10px" onclick="closeHero()">◂ 뒤로</button>
-      <h3 style="margin:0">${hero.emoji} <span class="txt-${hero.grade}">[${hero.grade}] ${hero.name}</span></h3>
+      <h3 style="margin:0">${hero.emoji} <span class="txt-${hero.grade}">[${hero.grade}] ${hero.name}</span> ${stackBadge(itemCount(hero))}</h3>
     </div>
     <div class="card">
       <div><span style="color:${heroCls(hero).color};font-weight:bold">${heroCls(hero).hit} ${heroCls(hero).name}</span> · ${data.title}</div>
@@ -3560,6 +4467,7 @@ function summonGear(count=1){
   const cost = count===11 ? 2000 : 200;
   if(G.gem<cost){ alert('💎 보석이 부족해요!'); return; }
   G.gem-=cost;
+  playSummonSfx(count);
   const got = [];
   for(let i=0;i<count;i++) got.push(rollSummonGear());
   if(count===11 && !got.some(x=>GRADE_RANK[x.grade]>=GRADE_RANK.SR)){
@@ -3578,6 +4486,7 @@ function summonGearShop(count=1){
   const cost = count===11 ? 2000 : 200;
   if(G.gem<cost){ alert('💎 보석이 부족해요!'); return; }
   G.gem-=cost;
+  playSummonSfx(count);
   const got = [];
   for(let i=0;i<count;i++) got.push(rollSummonGear());
   if(count===11 && !got.some(x=>GRADE_RANK[x.grade]>=GRADE_RANK.SR)){
@@ -3602,7 +4511,7 @@ function viewGacha(){
   if(summonView==='gear'){
     h += `<div class="card summonHeroBanner">
       <h3>⚔️ 장비소환</h3>
-      <div class="small">N 54.9% · R 30% · SR 12% · SSR 3% · UR 0.1%<br>${pityLabel('gear')}</div>
+      <div class="small">누적 ${summonTotalLabel('gear')}회 · N 54.9% · R 30% · SR 12% · SSR 3% · UR 0.1%<br>${pityLabel('gear')}</div>
     </div>
     <div class="card upgradeCard"><div class="row">
       <div style="font-size:28px">🧰</div>
@@ -3672,7 +4581,7 @@ function adRemain(type){ return Math.max(0, Math.ceil(((G.adCd[type]||0)-Date.no
 function watchAd(type){
   if(!adReady(type)) return;
   const grant = ()=>{
-    if(type==='gold'){ const amt=Math.floor(5*Math.pow(1.2,G.stage-1))*30; G.gold+=amt; adResult(`<span class="goldIcon"></span> 골드 +${amt.toLocaleString()}`); }
+    if(type==='gold'){ const amt=Math.floor(stageGoldBase(G.stage, false) * huntGoldMult() * 30); G.gold+=amt; adResult(`<span class="goldIcon"></span> 골드 +${amt.toLocaleString()}`); }
     else if(type==='gem'){ G.gem+=30; adResult('💎 보석 +30'); }
     else if(type==='pull'){ freePullHero(); }  // 무료 소환(자체 연출)
     if(!G.adPass){ const cd={gold:30,gem:60,pull:90}[type]; G.adCd[type]=Date.now()+cd*1000; }
@@ -3729,8 +4638,8 @@ function viewShop(){
     </div></div>`;
   });
   h+=`<h3>💎 보석 충전</h3>
-    <div class="card"><div class="row"><div style="flex:1"><b>보석 1000</b><div class="small">실제 출시 땐 구글 플레이 결제</div></div>
-    <button class="btn gem" onclick="G.gem+=1000;refreshTop();renderPanel()">₩9,900 (테스트:무료)</button></div></div>`;
+    <div class="card"><div class="row"><div style="flex:1"><b>테스트 보석 20,000</b><div class="small">테스트용 무료 충전 · 실제 출시 땐 구글 플레이 결제</div></div>
+    <button class="btn gem" onclick="G.gem+=20000;saveGame();refreshTop();renderPanel()">💎 20,000 받기</button></div></div>`;
   return h;
 }
 function viewStat(){
@@ -3775,7 +4684,7 @@ function viewStat(){
       ${statCard('펫', pet ? `${pet.name} · ${petBuffText(pet)}` : '착용 없음', '', true)}
       ${statCard('장비', `무기 +${gearAtkTotal().toLocaleString()} / 방어구 +${gearDefTotal().toLocaleString()} / 악세 치명타 x${gearCritDmgMult().toFixed(2)}`, '', true)}
       ${statCard('특수강화', `치확 +${percent(huntCritBonus())}% · 치피 x${critDmgUpgradeMult().toFixed(2)} · 보스 +${percent(bossPowerBonus())}% · 속성 +${percent(attrDmgMult()-1)}%`, '', true)}
-      ${statCard('코스튬/시너지/길드', `코스튬 +${percent(skinMult()-1)}% · 시너지 +${percent(syn.bonus)}% · 길드 ${G.guild?.joined?'+10%':'없음'}`, syn.bonus>0 ? `${CLASSES[syn.cls]?.name||'직업'} ${syn.count}명 시너지` : '같은 직업 3명부터 시너지 적용', true)}
+      ${statCard('코스튬/시너지/길드', `코스튬 +${percent(skinMult()-1)}% · 시너지 +${percent(syn.bonus)}% · 길드 ${G.guild?.joined?'+'+percent(guildAtkBonus())+'%':'없음'}`, syn.bonus>0 ? `${CLASSES[syn.cls]?.name||'직업'} ${syn.count}명 시너지` : '같은 직업 3명부터 시너지 적용', true)}
       ${statCard('속성 상성표', attrAdvText, '', true)}
       ${statCard('좋은 속성 조합', attrPairText, '', true)}
     </div>
@@ -3790,8 +4699,12 @@ function refreshTop(){
   document.getElementById('plv').textContent = G.plv;
   document.getElementById('stage').textContent = G.stage;
   document.getElementById('kills').textContent = G.kills;
+  document.getElementById('killGoal').textContent = stageKillGoal();
   updatePlayer();
+  updateHuntIntel();
   updateHomeRes();
+  if(typeof refreshSummonShopWallet === 'function') refreshSummonShopWallet();
+  if(typeof refreshSummonShopCounters === 'function') refreshSummonShopCounters();
   saveGame();
 }
 
@@ -3802,7 +4715,7 @@ function makeStarterHero(name){
   const base = HERO_POOL.find(h=>h.name===name) || HERO_POOL[0];
   return {
     uid:newHeroUid(), name:base.name, emoji:base.emoji, cls:base.cls,
-    grade:'N', atk:18, level:1, cap:10,
+    grade:'N', atk:18, level:1, cap:10, count:1,
     equip:{무기:0,방어구:0,장신구:0}
   };
 }
@@ -3827,9 +4740,16 @@ function loadGame(){
       if(!G.adCd) G.adCd = { gold:0, gem:0, pull:0 };
       if(G.pity==null) G.pity = 0;
       if(G.totalPulls==null) G.totalPulls = 0;
+      if(!G.summonTotal) G.summonTotal = { hero:G.totalPulls||0, gear:0, pet:0 };
       if(!G.summonPity) G.summonPity = { hero:G.pity||0, gear:0, pet:0 };
       if(!G.selectTickets) G.selectTickets = { hero:0, gear:0, pet:0 };
-      ['hero','gear','pet'].forEach(k=>{ if(G.summonPity[k]==null) G.summonPity[k]=0; if(G.selectTickets[k]==null) G.selectTickets[k]=0; });
+      ['hero','gear','pet'].forEach(k=>{
+        if(G.summonTotal[k]==null) G.summonTotal[k]=0;
+        if(G.summonPity[k]==null) G.summonPity[k]=0;
+        if(G.selectTickets[k]==null) G.selectTickets[k]=0;
+      });
+      if((G.summonTotal.hero||0) < (G.totalPulls||0)) G.summonTotal.hero = G.totalPulls||0;
+      G.totalPulls = G.summonTotal.hero;
       G.pity = G.summonPity.hero;
       if(!G.hero) G.hero = 'lin';
       if(!G.heroCostume) G.heroCostume = {};
@@ -3840,7 +4760,10 @@ function loadGame(){
       if(!G.mats) G.mats = {};
       if(G.heroDust==null) G.heroDust = 0;
       if(G.petDust==null) G.petDust = 0;
-      if(!G.dungeon) G.dungeon = { date:'', left:3 };
+      if(!G.dungeon) G.dungeon = { date:'', left:DUNGEON_DAILY_LIMIT };
+      if(!Array.isArray(G.dungeon.clearedToday)) G.dungeon.clearedToday = [];
+      if(!G.dungeon.best) G.dungeon.best = {};
+      G.dungeon.left = Math.min(DUNGEON_DAILY_LIMIT, Math.max(0, G.dungeon.left ?? DUNGEON_DAILY_LIMIT));
       if(!G.mail) G.mail = [];
       if(!G.questClaimed) G.questClaimed = [];
       if(!G.achClaimed) G.achClaimed = [];
@@ -3849,6 +4772,11 @@ function loadGame(){
       if(!G.affinity) G.affinity = {};
       if(G.playerName==null) G.playerName = '';
       if(G.sfxOn==null) G.sfxOn = true;
+      if(G.bgmOn==null) G.bgmOn = true;
+      if(G.sfxVol==null) G.sfxVol = 0.5;
+      if(G.bgmVol==null) G.bgmVol = 0.28;
+      G.sfxVol = Math.max(0, Math.min(1, Number(G.sfxVol)||0));
+      G.bgmVol = Math.max(0, Math.min(1, Number(G.bgmVol)||0));
       if(!G.storyDone) G.storyDone = [];
       if(!G.epDone) G.epDone = [];
       if(!G.talkDate) G.talkDate = {};
@@ -3866,6 +4794,7 @@ function loadGame(){
         G.petCatalogVer = PET_CATALOG_VERSION;
       }
       G.pets.forEach(p=>{
+        p.count = itemCount(p);
         if(!p.grade) p.grade = 'N';
         if(!p.level) p.level = 1;
         if(!p.cap) p.cap = 10;
@@ -3882,10 +4811,11 @@ function loadGame(){
         }
       });
       if(G.activePet==null) G.activePet = -1;
-      if(!G.guild) G.guild = { joined:false, coin:0, lastCheck:'' };
+      ensureGuildState();
       if(!G.heroHp) G.heroHp = {};
       if(!G.wipeCount) G.wipeCount = 0;
       if(!G.wallStage) G.wallStage = 0;
+      if(G.huntStreak==null) G.huntStreak = 0;
       if(!G.tapPower) G.tapPower = 1;
       if(!G.autoPower) G.autoPower = 1;
       if(!G.autoSpeed) G.autoSpeed = 1;
@@ -3905,6 +4835,7 @@ function loadGame(){
       if(!hadParty || !Array.isArray(G.party)) G.party = G.heroes.slice(0,5).map(h=>h.uid);
       while(G.party.length<5) G.party.push(null);
       G.party = G.party.slice(0,5).map(id=>G.heroes.some(h=>h.uid===id) ? id : null);
+      normalizeStacks();
     }
   }catch(e){}
 }
@@ -3912,6 +4843,8 @@ function loadGame(){
 // ===== 시작 =====
 loadGame();
 ensureStarterHeroes();
+normalizeHeroCatalog();
+normalizeStacks();
 offlineRewardCheck();  // 접속 전 방치 보상 계산(refreshTop이 lastSeen 덮어쓰기 전에)
 spawnMonster();
 renderHeroRow();
@@ -3946,11 +4879,12 @@ function showTapHitMotion(e){
 }
 // 전투 화면을 실제로 보고 있는가 (홈/캐릭터/서브화면/대화 중이면 false)
 function battleVisible(){
+  const dunBattle = document.getElementById('dunBattle');
   return document.getElementById('home').style.display!=='flex'
     && document.getElementById('charView').style.display!=='block'
     && document.getElementById('screen').style.display!=='flex'
     && document.getElementById('vn').style.display!=='flex'
-    && !document.getElementById('dunBattle').classList.contains('show');
+    && (!dunBattle || !dunBattle.classList.contains('show'));
 }
 function manualTap(e){
   if(e&&e.cancelable) e.preventDefault();

@@ -136,11 +136,15 @@ function synergyInfo(){
 }
 function synergyMult(){ return 1 + synergyInfo().bonus; }
 function attrSynergyMult(){ return 1 + attrSynergyInfo().bonus; }
-function guildMult(){ return (G.guild && G.guild.joined) ? 1.10 : 1; }  // 길드 가입 시 공격력 +10%
+function guildAtkBonus(){
+  if(!G.guild || !G.guild.joined) return 0;
+  return 0.10 + Math.max(0, (G.guild.researchAtk||0)) * 0.02;
+}
+function guildMult(){ return 1 + guildAtkBonus(); }
 function totalAtk(){ return Math.round((G.atk + heroAtkTotal() + gearAtkTotal()) * skinMult() * synergyMult() * attrSynergyMult() * petAtkMult() * guildMult()); }
 const HUNT_MAX_LEVEL = 1000;
 const SPEED_MAX_LEVEL = 100;
-const SPECIAL_MAX_LEVEL = 50;
+const SPECIAL_MAX_LEVEL = 100;
 function huntCost(base, level){ return Math.floor(base + Math.pow(level, 2) * base * 0.08); }
 function huntCostMany(base, level, maxLevel, amount){
   let total = 0, n = 0;
@@ -150,7 +154,7 @@ function huntCostMany(base, level, maxLevel, amount){
   }
   return {total, n};
 }
-function specialCost(level){ return Math.floor(25 + Math.pow(level, 1.7) * 8); }
+function specialCost(level){ return 50 + Math.max(0, level-1) * 5; }
 function specialCostMany(level, maxLevel, amount){
   let total = 0, n = 0;
   while(n < amount && level + n < maxLevel){

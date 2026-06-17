@@ -4,18 +4,24 @@
 // 음소거: G.sfxOn === false 면 무음 (기본 켜짐).
 (function(){
   let ctx = null, master = null, lp = null;
+  function clamp01(v, fallback){
+    v = Number(v);
+    return Number.isFinite(v) ? Math.max(0, Math.min(1, v)) : fallback;
+  }
+  function sfxVolume(){ return typeof G === 'undefined' ? 0.5 : clamp01(G.sfxVol, 0.5); }
+  function bgmVolume(){ return typeof G === 'undefined' ? 0.28 : clamp01(G.bgmVol, 0.28); }
   function ensure(){
     if(ctx) return ctx;
     try{
       const AC = window.AudioContext || window.webkitAudioContext;
       ctx = new AC();
-      master = ctx.createGain(); master.gain.value = 0.5;
+      master = ctx.createGain(); master.gain.value = sfxVolume();
       lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2600; lp.Q.value = 0.5;
       lp.connect(master); master.connect(ctx.destination);
     }catch(e){ ctx = null; }
     return ctx;
   }
-  function enabled(){ return !window.G || G.sfxOn !== false; }
+  function enabled(){ return typeof G === 'undefined' || G.sfxOn !== false; }
   // 부드러운 단음: attack/decay 엔벨로프, 사인/삼각 위주, 약한 디튠 레이어 옵션
   function tone(o){
     if(!enabled()) return;
@@ -64,22 +70,67 @@
   const lib = {
     // 가볍고 둔탁하지 않은 "톡" — 짧고 낮은 사인 + 약한 저역 임팩트
     tap:     () => { tone({type:'sine', f0:430, f1:230, dur:0.09, vol:0.16, glide:'lin'}); },
-    crit:    () => { tone({type:'triangle', f0:620, f1:880, dur:0.13, vol:0.22, detune:true}); thump(0.08, 0.12, 1400); },
-    hit:     () => tone({type:'sine', f0:260, f1:150, dur:0.08, vol:0.13, glide:'lin'}),
+    crit:    () => { thump(0.13, 0.28, 780); tone({type:'square', f0:180, f1:78, dur:0.11, vol:0.12, glide:'lin'}); tone({type:'triangle', f0:760, f1:1180, dur:0.12, vol:0.12, detune:true}); },
+    hit:     () => { thump(0.09, 0.18, 620); tone({type:'square', f0:135, f1:72, dur:0.07, vol:0.07, glide:'lin'}); },
     // 처치 — 묵직한 저역 임팩트 + 짧은 하강음
     kill:    () => { thump(0.16, 0.22, 700); tone({type:'triangle', f0:300, f1:150, dur:0.16, vol:0.18}); },
     boss:    () => { thump(0.34, 0.3, 460); tone({type:'sine', f0:150, f1:60, dur:0.4, vol:0.26}); },
+    skill:   () => { tone({type:'triangle', f0:360, f1:920, dur:0.32, vol:0.18, detune:true}); setTimeout(()=>thump(0.12, 0.16, 1200), 120); },
     // 레벨업 — 부드러운 상승 아르페지오(메이저 코드)
     levelup: () => chord([523, 659, 784, 1047], 'triangle', 0.085, 0.26, 0.2),
     // 보상 — 맑은 종소리 느낌
     reward:  () => chord([784, 988, 1319], 'sine', 0.08, 0.3, 0.22),
-    gacha:   () => { tone({type:'sine', f0:330, f1:1320, dur:0.6, vol:0.24, detune:true}); },
+    gacha:   () => { tone({type:'sine', f0:260, f1:1200, dur:0.48, vol:0.18, detune:true}); setTimeout(()=>chord([659, 880, 1175], 'triangle', 0.055, 0.24, 0.15), 230); },
     click:   () => tone({type:'sine', f0:520, dur:0.05, vol:0.12}),
     heart:   () => chord([784, 988], 'sine', 0.1, 0.2, 0.2)
   };
   window.sfx = function(name){ try{ (lib[name] || lib.click)(); }catch(e){} };
   window.sfxResume = function(){ const c = ensure(); if(c && c.state === 'suspended') c.resume(); };
-  function unlock(){ window.sfxResume(); document.removeEventListener('pointerdown', unlock); document.removeEventListener('touchstart', unlock); }
+  window.sfxSetVolume = function(){ try{ if(master) master.gain.value = sfxVolume(); }catch(e){} };
+  const bgmTracks = {
+    home: 'assets/audio/town_theme.mp3',
+    battle: 'assets/audio/battle_theme.mp3'
+  };
+  let bgmAudio = null, bgmTrack = '', bgmWanted = 'home', bgmUnlocked = false;
+  function bgmEnabled(){ return typeof G === 'undefined' || G.bgmOn !== false; }
+  function ensureBgm(){
+    if(bgmAudio) return bgmAudio;
+    bgmAudio = new Audio();
+    bgmAudio.loop = true;
+    bgmAudio.preload = 'auto';
+    bgmAudio.volume = bgmVolume();
+    return bgmAudio;
+  }
+  function playBgm(kind){
+    bgmWanted = kind || bgmWanted || 'home';
+    const audio = ensureBgm();
+    audio.volume = bgmVolume();
+    if(!bgmEnabled()){ audio.pause(); return; }
+    const src = bgmTracks[bgmWanted] || bgmTracks.home;
+    if(bgmTrack !== src){
+      bgmTrack = src;
+      audio.src = src;
+      audio.currentTime = 0;
+    }
+    if(bgmUnlocked) audio.play().catch(()=>{});
+  }
+  window.bgm = function(kind){ try{ playBgm(kind); }catch(e){} };
+  window.bgmStop = function(){ try{ if(bgmAudio) bgmAudio.pause(); }catch(e){} };
+  window.bgmSetVolume = function(){ try{ ensureBgm().volume = bgmVolume(); }catch(e){} };
+  window.bgmRefresh = function(){
+    try{
+      if(!bgmEnabled()){ window.bgmStop(); return; }
+      if(bgmAudio) bgmAudio.volume = bgmVolume();
+      playBgm(bgmWanted || 'home');
+    }catch(e){}
+  };
+  function unlock(){
+    bgmUnlocked = true;
+    window.sfxResume();
+    window.bgmRefresh();
+    document.removeEventListener('pointerdown', unlock);
+    document.removeEventListener('touchstart', unlock);
+  }
   document.addEventListener('pointerdown', unlock, {once:true});
   document.addEventListener('touchstart', unlock, {once:true});
 })();

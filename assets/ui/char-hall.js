@@ -139,7 +139,7 @@ function renderCharPetLeft(){
 function renderCharPetList(){
   const box = document.getElementById('charHeroList');
   if(!box) return;
-  let h = `<h3>펫 목록</h3><div class="card small">${PET_DUST_ICON} 펫 결정 <b>${(G.petDust||0).toLocaleString()}</b> · 펫 분해로 획득, 초월에 사용</div>`;
+  let h = `<h3>펫 목록 (${G.pets.length}종 / ${totalPetCopies()}개)</h3><div class="card small">${PET_DUST_ICON} 펫 결정 <b>${(G.petDust||0).toLocaleString()}</b> · 펫 분해로 획득, 초월에 사용</div>`;
   if(!G.pets.length){
     h += `<div class="card small">보유한 펫이 없어요. 소환상점에서 펫을 소환해보세요.</div>`;
   } else {
@@ -148,7 +148,7 @@ function renderCharPetList(){
       h += `<div class="charHeroItem petListItem" onclick="openPetFromChar(${i})">
         <div class="heroFace g-bg-${p.grade}" style="border-color:${gradeColorOf(p.grade)}">${petVisual(p,'heroListImg')}</div>
         <div class="heroMeta">
-          <div class="heroName txt-${p.grade}">[${p.grade}] ${p.name} Lv.${petLevel(p)} ${active?'<span style="font-size:10px;color:#3be38b">●장착</span>':''}</div>
+          <div class="heroName txt-${p.grade}">[${p.grade}] ${p.name} Lv.${petLevel(p)} ${stackBadge(itemCount(p))} ${active?'<span style="font-size:10px;color:#3be38b">●장착</span>':''}</div>
           <div class="heroPower">전투력 ${petPower(p).toLocaleString()} · ${petBuffText(p)}</div>
         </div>
         <button class="btn ${active?'':'gem'}" onclick="event.stopPropagation();equipPetFromChar(${i})" ${active?'disabled':''}>${active?'장착중':'장착'}</button>
@@ -180,7 +180,7 @@ function renderCharPetDetail(i){
       <div class="hp-card g-bg-${p.grade}" style="width:86px;height:86px;margin:0 auto 8px;border-color:${gradeColorOf(p.grade)}">
         <div class="hp-shine"></div><div class="hp-grade txt-${p.grade}">${p.grade}</div>${petVisual(p)}
       </div>
-      <div class="txt-${p.grade}" style="font-weight:bold;margin-top:4px">[${p.grade}] ${p.name} Lv.${petLevel(p)}/${petCap(p)}</div>
+      <div class="txt-${p.grade}" style="font-weight:bold;margin-top:4px">[${p.grade}] ${p.name} Lv.${petLevel(p)}/${petCap(p)} ${stackBadge(itemCount(p))}</div>
       <div class="small">${petBuffText(p)}</div>
       <button class="btn ${active?'':'gem'}" style="width:100%;margin-top:8px" onclick="equipPetFromChar(${i})" ${active?'disabled':''}>${active?'장착중':'장착'}</button>
     </div>
@@ -237,10 +237,91 @@ function orderedCharHeroes(){
 function orderedBattleHeroList(){
   return orderedCharHeroes();
 }
+function heroHallSummaryHtml(){
+  const slots = partySlots();
+  const party = slots.filter(Boolean);
+  const best = G.heroes.length ? orderedCharHeroes()[0]?.hero : null;
+  const syn = typeof synergyInfo==='function' ? synergyInfo() : {bonus:0,count:0,cls:''};
+  const attrSyn = typeof attrSynergyInfo==='function' ? attrSynergyInfo() : {bonus:0};
+  const partyPower = party.reduce((sum, hero)=>sum + heroEffAtk(hero), 0);
+  const attrs = typeof partyAttributes==='function' ? partyAttributes() : [];
+  const percent = v=>Math.round((v||0)*100);
+  return `<div class="card">
+    <div style="font-weight:bold;margin-bottom:7px">영웅소 현황</div>
+    <div class="heroHallSummary">
+      <div class="heroHallMetric"><div class="label">보유 영웅</div><div class="value">${G.heroes.length}종 / ${totalHeroCopies()}개</div></div>
+      <div class="heroHallMetric"><div class="label">출전 파티</div><div class="value">${party.length}/5</div></div>
+      <div class="heroHallMetric"><div class="label">파티 전투력</div><div class="value">${partyPower.toLocaleString()}</div></div>
+      <div class="heroHallMetric"><div class="label">최강 영웅</div><div class="value">${best ? best.name+' Lv.'+heroLevel(best) : '없음'}</div></div>
+    </div>
+    <div class="heroHallParty">
+      ${[0,1,2,3,4].map(n=>{
+        const hero = slots[n];
+        return hero ? `<div class="heroHallSlot on" style="border-color:${heroCls(hero).color}">
+          ${heroSdVisual(hero)}
+          <div class="slotName">${n+1}. ${hero.name}</div>
+        </div>` : `<div class="heroHallSlot"><div class="empty">${n+1}번</div><div class="slotName">빈 자리</div></div>`;
+      }).join('')}
+    </div>
+    <div class="heroHallRoleRow">
+      <span class="heroHallBadge ${syn.bonus>0?'on':''}">직업 시너지 +${percent(syn.bonus)}%</span>
+      <span class="heroHallBadge ${attrSyn.bonus>0?'on':''}">속성 시너지 +${percent(attrSyn.bonus)}%</span>
+      <span class="heroHallBadge">속성 ${attrs.length ? attrs.join('/') : '없음'}</span>
+    </div>
+  </div>`;
+}
+function heroHallPartyControlsHtml(hero, i){
+  if(!hero) return '';
+  const slots = partySlots();
+  const slotNo = slots.findIndex(h=>h && h.uid===hero.uid);
+  const inParty = slotNo >= 0;
+  return `<div class="card" style="border-color:${inParty?heroCls(hero).color:'#343a66'}">
+    <div class="row">
+      <div style="flex:1">
+        <div style="font-weight:bold">출전 편성 ${inParty?`<span style="font-size:11px;color:#3be38b">● ${slotNo+1}번 출전중</span>`:''}</div>
+        <div class="small">전투 파티 5칸 중 원하는 위치에 배치할 수 있어요.</div>
+      </div>
+      <button class="btn gem" onclick="openPartyPickerFromChar('${hero.uid}',${i})">배치</button>
+    </div>
+    ${partyPickUid===hero.uid ? `<div class="partyPick">
+      ${[0,1,2,3,4].map(n=>`<button class="btn ${slots[n]&&slots[n].uid===hero.uid?'gold':''}" onclick="assignPartySlotFromChar('${hero.uid}',${n},${i})">${n+1}번${slots[n]&&slots[n].uid!==hero.uid?' 교체':''}</button>`).join('')}
+      ${inParty?`<button class="btn" onclick="removePartyHeroFromChar('${hero.uid}',${i})">해제</button>`:''}
+    </div>`:''}
+  </div>`;
+}
+function refreshCharHeroView(i){
+  renderHeroRow();
+  refreshTop();
+  if(i!=null && G.heroes[i]) renderCharHeroDetail(i);
+  else renderCharHeroList();
+}
+function openPartyPickerFromChar(uid, i){
+  if(!G.heroes.some(h=>h.uid===uid)) return;
+  partyPickUid = partyPickUid===uid ? null : uid;
+  refreshCharHeroView(i);
+}
+function assignPartySlotFromChar(uid, slot, i){
+  const hero = G.heroes.find(h=>h.uid===uid);
+  if(!hero || slot<0 || slot>4) return;
+  if(!Array.isArray(G.party)) G.party = [];
+  while(G.party.length<5) G.party.push(null);
+  G.party = G.party.map(id=>id===uid ? null : id);
+  G.party[slot] = uid;
+  G.heroHp[uid] = heroMaxHp(hero);
+  partyPickUid = null;
+  refreshCharHeroView(i);
+}
+function removePartyHeroFromChar(uid, i){
+  if(!Array.isArray(G.party)) return;
+  G.party = G.party.map(id=>id===uid ? null : id);
+  partyPickUid = null;
+  refreshCharHeroView(i);
+}
 function renderCharHeroList(){
   const box = document.getElementById('charHeroList');
   if(!box) return;
-  let h = `<h3>영웅 목록</h3>`;
+  let h = `<h3>영웅 목록 (${G.heroes.length}종 / ${totalHeroCopies()}개)</h3>`;
+  h += heroHallSummaryHtml();
   h += `<div class="card small">${HERO_DUST_ICON} 영웅 결정 <b>${(G.heroDust||0).toLocaleString()}</b> · 영웅 분해로 획득, 초월에 사용</div>`;
   if(G.heroes.length===0){
     h += `<div class="card small">아직 영웅이 없어요. 소환상점에서 영웅을 소환해보세요.</div>`;
@@ -251,13 +332,23 @@ function renderCharHeroList(){
     ordered.forEach(({hero,i})=>{
       const cls = heroCls(hero);
       const slotNo = partyRank.has(hero.uid) ? partyRank.get(hero.uid)+1 : 0;
-      h += `<div class="charHeroItem" onclick="openHeroFromChar(${i})">
-        <div class="heroFace g-bg-${hero.grade}" style="border-color:${cls.color}">${heroSdVisual(hero,'heroListImg')}</div>
-        <div class="heroMeta">
-          <div class="heroName txt-${hero.grade}">[${hero.grade}] ${hero.name} Lv.${heroLevel(hero)}</div>
-          <div class="heroPower">${cls.hit} ${cls.name} · 전투력 ${heroEffAtk(hero)}${slotNo?` · ${slotNo}번 출전`:''}</div>
+      const active = selectedCharHeroIdx===i;
+      h += `<div class="charHeroItem ${active?'selected':''}" onclick="openHeroFromChar(${i})">
+        <div class="heroHallItemTop">
+          <div class="heroFace g-bg-${hero.grade}" style="border-color:${cls.color}">${heroSdVisual(hero,'heroListImg')}</div>
+          <div class="heroMeta">
+            <div class="heroName txt-${hero.grade}">[${hero.grade}] ${hero.name} Lv.${heroLevel(hero)} ${stackBadge(itemCount(hero))}</div>
+            <div class="heroPower">${cls.hit} ${cls.name} · 전투력 ${heroEffAtk(hero).toLocaleString()}${slotNo?` · ${slotNo}번 출전`:''}</div>
+            <div class="heroTags">
+              <span class="miniTag">${heroAttributes(hero).join('/') || '대지'}</span>
+              <span class="miniTag">${heroAttackType(hero)}</span>
+              <span class="miniTag">HP ${heroMaxHp(hero).toLocaleString()}</span>
+            </div>
+          </div>
         </div>
+        <button class="btn gem" style="padding:6px 8px;font-size:10px" onclick="event.stopPropagation();openPartyPickerFromChar('${hero.uid}',null)">배치</button>
       </div>`;
+      if(partyPickUid===hero.uid) h += heroHallPartyControlsHtml(hero, null);
     });
   }
   box.innerHTML = h;
@@ -299,9 +390,10 @@ function renderCharHeroDetail(i){
   box.innerHTML = `<button class="btn" style="width:100%;margin-bottom:9px" onclick="renderCharHeroList()">◂ 영웅 목록</button>
     <div class="card" style="text-align:center;border-color:${heroCls(hero).color}">
       ${heroSdVisual(hero,'heroListImg')}
-      <div class="txt-${hero.grade}" style="font-weight:bold;margin-top:4px">[${hero.grade}] ${hero.name} Lv.${heroLevel(hero)}/${heroCap(hero)}</div>
+      <div class="txt-${hero.grade}" style="font-weight:bold;margin-top:4px">[${hero.grade}] ${hero.name} Lv.${heroLevel(hero)}/${heroCap(hero)} ${stackBadge(itemCount(hero))}</div>
       <div class="small">${heroCls(hero).hit} ${heroCls(hero).name} · ${data.attr||''}</div>
     </div>
+    ${heroHallPartyControlsHtml(hero, i)}
     ${heroStatDetailHtml(hero)}
     ${heroSkillDetailHtml(hero)}
     ${heroGrowthHtml(i,'char')}
@@ -312,7 +404,7 @@ function renderCharHeroDetail(i){
       <div class="small" style="margin-top:6px;line-height:1.5">${data.profile||''}</div>
     </div>`;
 }
-function goHome(){ renderHome(); document.getElementById('home').style.display='flex'; updateTabsVisibility(); }
+function goHome(){ renderHome(); document.getElementById('home').style.display='flex'; updateTabsVisibility(); if(window.bgm) bgm('home'); }
 function enterGame(){
   document.getElementById('home').style.display='none';
   document.getElementById('charView').style.display='none';
@@ -323,8 +415,9 @@ function enterHunt(){
   enterGame();
   setTab('hunt');
   document.getElementById('tabs').style.display='flex';
+  if(window.bgm) bgm('battle');
 }
-function openFromHome(tab){ enterGame(); setTab(tab); }
+function openFromHome(tab){ enterGame(); setTab(tab); if(window.bgm) bgm(tab==='hunt' ? 'battle' : 'home'); }
 function openSummonShopView(){
   renderHome();
   closeMenu(); closeScreen();
@@ -344,6 +437,8 @@ function setSummonShopMode(mode){
   const panel = document.getElementById('summonShopPanel');
   if(!view || !panel) return;
   view.dataset.mode = mode;
+  refreshSummonShopWallet();
+  refreshSummonShopCounters();
   if(mode==='summon'){
     panel.style.display='none';
     panel.innerHTML='';
@@ -351,6 +446,27 @@ function setSummonShopMode(mode){
   }
   panel.style.display='block';
   panel.innerHTML = mode==='package' ? viewSummonPackageShop() : viewSummonCashShop();
+}
+function refreshSummonShopWallet(){
+  const box = document.getElementById('summonShopWallet');
+  if(!box || typeof G === 'undefined') return;
+  box.innerHTML = `<div class="summonWalletPill"><span class="goldIcon"></span> ${Math.floor(G.gold||0).toLocaleString()}</div>
+    <div class="summonWalletPill">💎 ${(G.gem||0).toLocaleString()}</div>`;
+}
+function refreshSummonShopCounters(){
+  const box = document.getElementById('summonShopCounters');
+  if(!box || typeof ensureSummonState !== 'function') return;
+  ensureSummonState();
+  const rows = ['hero','gear','pet'];
+  box.innerHTML = rows.map((kind)=>{
+    const pity = G.summonPity?.[kind] || 0;
+    const tickets = G.selectTickets?.[kind] || 0;
+    return `<div class="summonCounterCard ${kind}">
+      <div class="count">누적 ${pity.toLocaleString()}회</div>
+      <div class="ticket">${tickets>0 ? `UR 선택권 ${tickets}장` : '1000소환시 UR선택권'}</div>
+      ${tickets>0 ? `<button class="selectBtn" onclick="openSelectSummon('${kind}')">UR 선택</button>` : ''}
+    </div>`;
+  }).join('');
 }
 function viewSummonPackageShop(){
   const first = G.firstPayDone
@@ -383,13 +499,8 @@ function viewSummonCashShop(){
     </div></div>
     <div class="card"><div class="row">
       <div style="font-size:34px">💎</div>
-      <div style="flex:1"><b>보석 1,000</b><div class="small">소환과 강화에 사용하는 보석</div></div>
-      <button class="btn gem" onclick="G.gem+=1000;refreshTop();setSummonShopMode('cash')">₩9,900</button>
-    </div></div>
-    <div class="card"><div class="row">
-      <div style="font-size:34px">💎</div>
-      <div style="flex:1"><b>보석 3,000</b><div class="small">11연 소환용 보석 묶음</div></div>
-      <button class="btn gem" onclick="G.gem+=3000;refreshTop();setSummonShopMode('cash')">₩27,000</button>
+      <div style="flex:1"><b>테스트 보석 20,000</b><div class="small">소환과 강화 테스트용 무료 보석</div></div>
+      <button class="btn gem" onclick="G.gem+=20000;saveGame();refreshTop();setSummonShopMode('cash')">💎 20,000 받기</button>
     </div></div>
     <div class="card"><div class="row">
       <div style="font-size:34px">📺</div>
