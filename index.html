@@ -860,6 +860,16 @@ const WEEKDAY_DUNGEON = [
   {day:'일요일', mat:'chaos'}, {day:'월요일', mat:'steel'}, {day:'화요일', mat:'fire'},
   {day:'수요일', mat:'water'}, {day:'목요일', mat:'wind'}, {day:'금요일', mat:'light'}, {day:'토요일', mat:'dark'},
 ];
+// 던전 난이도 (스테이지로 해금, 높을수록 재료·골드↑ + 보너스 드롭). 입장권 3회는 난이도 공용
+const DUNGEON_TIERS = [
+  { id:'normal', name:'일반', emoji:'🟢', stage:1,  matMul:1, goldMul:1, bonus:null,
+    color:'#7be38b', desc:'기본 재료 획득' },
+  { id:'elite',  name:'정예', emoji:'🟡', stage:15, matMul:3, goldMul:3, bonus:{gemChance:0.5, gem:15},
+    color:'#ffd866', desc:'재료 3배 + 보석 확률' },
+  { id:'hell',   name:'지옥', emoji:'🔴', stage:40, matMul:6, goldMul:6, bonus:{gemChance:0.6, gem:40, dust:6},
+    color:'#ff7a95', desc:'재료 6배 + 영웅 결정 확정 + 보석 고확률' },
+];
+function dungeonTier(id){ return DUNGEON_TIERS.find(t=>t.id===id) || DUNGEON_TIERS[0]; }
 // 업적 정의
 const ACHIEVEMENTS = [
   { id:'hero3',  name:'영웅 3명 수집', check:()=>G.heroes.length>=3,  reward:{gem:100} },
@@ -2067,6 +2077,8 @@ function grantReward(r){
   if(r.gold) G.gold += r.gold;
   if(r.gem)  G.gem  += r.gem;
   if(r.mat)  for(const k in r.mat) G.mats[k] = (G.mats[k]||0) + r.mat[k];
+  if(r.heroDust) G.heroDust = (G.heroDust||0) + r.heroDust;
+  if(r.petDust)  G.petDust  = (G.petDust||0)  + r.petDust;
   refreshTop();
 }
 function rewardText(r){
@@ -2139,23 +2151,40 @@ function renderScreen(){
 
 // ===== 요일던전 =====
 function dungeonReset(){ if(G.dungeon.date!==todayStr()){ G.dungeon.date=todayStr(); G.dungeon.left=3; } }
+function dungeonBaseAmt(){ return 5 + Math.floor(G.stage/3); }
 function viewDungeon(){
   dungeonReset();
   const d = WEEKDAY_DUNGEON[new Date().getDay()];
   const mat = MATERIALS[d.mat];
+  const base = dungeonBaseAmt();
+  const goldBase = Math.floor(50*Math.pow(1.15,G.stage-1));
   let h = `<div class="card" style="text-align:center;border-color:#ffb74d">
       <div style="font-size:46px">${mat.emoji}</div>
       <div style="font-weight:bold;font-size:16px">오늘은 <span class="txt-SSR">${d.day}</span> 던전</div>
       <div class="small">오늘의 상급 재료: <b>${mat.name}</b></div>
-      <div class="small" style="margin-top:4px">남은 입장 <b class="txt-SSR">${G.dungeon.left}</b> / 3 (매일 초기화)</div>
+      <div class="small" style="margin-top:4px">남은 입장 <b class="txt-SSR">${G.dungeon.left}</b> / 3 (매일 초기화 · 난이도 공용)</div>
     </div>
-    <button class="btn gold" style="width:100%;padding:12px" onclick="enterDungeon()" ${G.dungeon.left<=0?'disabled':''}>${G.dungeon.left>0?'⚔️ 던전 입장 (재료 획득)':'오늘 입장 끝 — 내일 다시!'}</button>
-    <h3 style="margin-top:12px">보유 재료</h3>`;
-  let any=false;
-  for(const k in MATERIALS){ const n=G.mats[k]||0; if(n>0){ any=true;
-    h += `<div class="card"><div class="row"><div style="font-size:24px">${MATERIALS[k].emoji}</div><div style="flex:1">${MATERIALS[k].name}</div><b>${n}</b></div></div>`; } }
-  if(!any) h += `<div class="card small">아직 모은 재료가 없어요. 던전에 입장해 보세요!</div>`;
-  h += `<div class="card small">💡 재료는 영웅 속성별 <b>10레벨 초월</b>과 <b>SR → SSR → UR 등급업</b>에 사용돼요.</div>`;
+    <h3 style="margin-top:6px">난이도 선택</h3>`;
+  DUNGEON_TIERS.forEach(t=>{
+    const unlocked = G.stage>=t.stage, canEnter = unlocked && G.dungeon.left>0;
+    const matAmt = base*t.matMul, gold = goldBase*t.goldMul;
+    let drops = `${mat.emoji} ${mat.name} +${matAmt} · <span class="goldIcon"></span>${gold.toLocaleString()}`;
+    if(t.bonus){
+      if(t.bonus.dust) drops += ` · ${HERO_DUST_ICON}영웅결정 +${t.bonus.dust}`;
+      if(t.bonus.gem) drops += ` · 💎${t.bonus.gem} (${Math.round(t.bonus.gemChance*100)}%)`;
+    }
+    h += `<div class="card" style="text-align:left;margin-bottom:8px;border-color:${t.color}55;${unlocked?'':'opacity:.55'}">
+      <div class="row" style="align-items:center">
+        <div style="font-size:22px">${t.emoji}</div>
+        <div style="flex:1">
+          <div style="font-weight:bold;color:${t.color}">${t.name} 던전 <span class="small" style="color:#9aa0d0">· ${t.desc}</span></div>
+          <div class="small" style="margin-top:3px">${unlocked? drops : `🔒 스테이지 <b>${t.stage}</b> 도달 시 해금`}</div>
+        </div>
+        <button class="btn ${t.id==='normal'?'gold':'gem'}" onclick="enterDungeon('${t.id}')" ${canEnter?'':'disabled'}>${unlocked?'⚔️ 입장':'잠금'}</button>
+      </div></div>`;
+  });
+  if(G.dungeon.left<=0) h += `<div class="card small">오늘 입장 횟수를 모두 썼어요. 내일 다시 도전해 보세요!</div>`;
+  h += `<div class="card small">💡 재료는 영웅 속성별 <b>10레벨 초월</b>과 <b>등급업</b>에 사용돼요. 보유 재료는 🎒가방에서 확인!</div>`;
   return h;
 }
 // ===== 가방 — 보유 재료/소환권 한눈에 =====
@@ -2190,16 +2219,31 @@ function viewBag(){
   <div class="card small">💡 부족할 때: 재료=🗓️요일던전 · 영웅 결정=영웅 분해 · 소환권=소환 누적</div>`;
   return h;
 }
-function enterDungeon(){
+function enterDungeon(tierId){
   dungeonReset();
   if(G.dungeon.left<=0) return;
+  const t = dungeonTier(tierId);
+  if(G.stage < t.stage) return;   // 미해금 난이도 차단
   G.dungeon.left--; dailyInc('dungeon',1);
   const d = WEEKDAY_DUNGEON[new Date().getDay()];
-  const amt = 5 + Math.floor(G.stage/3);
-  const gold = Math.floor(50*Math.pow(1.15,G.stage-1));
-  grantReward({ mat:{[d.mat]:amt}, gold });
+  const amt = dungeonBaseAmt()*t.matMul;
+  const gold = Math.floor(50*Math.pow(1.15,G.stage-1))*t.goldMul;
+  const reward = { mat:{[d.mat]:amt}, gold };
+  let gotGem=false, gotDust=false;
+  if(t.bonus){
+    if(t.bonus.dust){ reward.heroDust=t.bonus.dust; gotDust=true; }
+    if(t.bonus.gem && Math.random()<t.bonus.gemChance){ reward.gem=t.bonus.gem; gotGem=true; }
+  }
+  grantReward(reward);
   renderScreen();
-  popReward('🗓️ 던전 클리어!', `<div style="font-size:46px">${MATERIALS[d.mat].emoji}</div><div style="font-weight:bold;margin-top:6px">${MATERIALS[d.mat].name} +${amt}</div><div class="small"><span class="goldIcon"></span>${gold.toLocaleString()}</div>`);
+  let body = `<div style="font-size:46px">${MATERIALS[d.mat].emoji}</div>
+    <div style="font-weight:bold;margin-top:6px;color:${t.color}">${t.emoji} ${t.name} 던전 클리어!</div>
+    <div style="margin-top:6px">${MATERIALS[d.mat].name} <b>+${amt}</b></div>
+    <div class="small"><span class="goldIcon"></span>${gold.toLocaleString()}</div>`;
+  if(gotDust) body += `<div style="margin-top:4px">${HERO_DUST_ICON} 영웅 결정 <b>+${t.bonus.dust}</b></div>`;
+  if(gotGem) body += `<div style="margin-top:4px;color:#ff8ab4">💎 보석 <b>+${t.bonus.gem}</b> ✨보너스!</div>`;
+  else if(t.bonus && t.bonus.gem) body += `<div class="small" style="margin-top:4px;color:#9aa0d0">💎 보너스 획득 실패… 다음 기회에!</div>`;
+  popReward('🗓️ 던전 클리어!', body);
 }
 
 // ===== 우편함 =====
