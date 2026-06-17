@@ -76,7 +76,7 @@
   #player .aura { position:absolute; bottom:54px; left:50%; transform:translateX(-50%);
     width:80px; height:26px; border-radius:50%; filter:blur(7px); opacity:.85; z-index:-1; }
   .lvtag { margin-top:6px; font-size:11px; color:#ffd866; font-weight:bold; text-shadow:0 1px 2px #000; }
-  #petCompanion { position:absolute; left:24.5%; top:47%; width:76px; height:76px; display:flex; align-items:flex-end; justify-content:center;
+  #petCompanion { position:absolute; left:24.5%; top:38%; width:76px; height:76px; display:flex; align-items:flex-end; justify-content:center;
     font-size:58px; z-index:7; pointer-events:none; animation:bob 2s ease-in-out infinite; filter:drop-shadow(0 6px 6px #0008); }
   #petCompanion img { width:104px; height:104px; max-width:none; max-height:none; object-fit:contain; display:block; }
   .petProj { position:absolute; font-size:22px; z-index:6; pointer-events:none; filter:drop-shadow(0 0 6px #ffd86688); }
@@ -440,12 +440,7 @@
   .charHeroItem .heroMeta { min-width:0; flex:1; }
   .charHeroItem .heroName { font-size:12px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .charHeroItem .heroPower { font-size:10px; color:#9aa0d0; margin-top:2px; }
-  .charHeroItem.petListItem { flex-direction:column; align-items:stretch; gap:6px; text-align:center; padding:9px; }
-  .charHeroItem.petListItem .heroFace { width:100%; height:84px; border:0; border-radius:10px; background:transparent !important; }
-  .charHeroItem.petListItem .heroMeta { width:100%; }
-  .charHeroItem.petListItem .heroName { white-space:normal; line-height:1.25; }
-  .charHeroItem.petListItem .heroPower { line-height:1.35; }
-  .charHeroItem.petListItem button { align-self:center; min-width:74px; }
+  .charHeroItem.petListItem button { align-self:center; min-width:64px; padding:6px 8px; }
   #cvTop { position:absolute; top:0; left:0; right:0; z-index:5; display:flex; align-items:center; gap:8px; padding:10px; }
   #cvTop .back { background:linear-gradient(160deg,#2a2d50,#1a1c38); border:1px solid #3a3f70; color:#fff; width:34px; height:34px; border-radius:10px; font-size:16px; }
   #cvTop .hLvl { font-weight:bold; color:#fff; text-shadow:0 1px 3px #000; font-size:13px; }
@@ -455,7 +450,7 @@
   .charHeroItem .heroFace img { width:120%; height:120%; object-fit:contain; filter:drop-shadow(0 3px 4px #0008); }
   #charHeroList .heroListImg { width:100%; max-height:96px; object-fit:contain; filter:drop-shadow(0 4px 5px #0008); }
   #charHeroList .charHeroItem .heroFace .heroListImg { width:120%; height:120%; max-height:none; }
-  #charHeroList .charHeroItem.petListItem .heroFace .heroListImg { width:100%; height:100%; max-height:84px; }
+  #charHeroList .charHeroItem.petListItem .heroFace .heroListImg { width:120%; height:120%; max-height:none; }
   #charHallTabs { position:absolute; left:50%; bottom:14px; transform:translateX(-50%); z-index:7; display:flex; gap:7px;
     width:min(330px,58%); justify-content:center; padding:6px; border:1px solid #343a66; border-radius:14px;
     background:linear-gradient(180deg,#181a30f2,#0b0d20f4); box-shadow:0 8px 24px #0009, inset 0 1px 0 #ffffff14; }
@@ -904,7 +899,7 @@ const ACHIEVEMENTS = [
 // ===== 영웅 → 코스튬 구조 =====
 // 각 영웅(캐릭터)이 자기 코스튬들을 가짐. 코스튬 선택 시 그 영웅의 외형/배경 적용
 // Hero costume catalog data is loaded from assets/data.
-const AV = '?v=10';   // 이미지 캐시 버전 (그림 교체 시 숫자 올리면 새로 로드됨)
+const AV = '?v=11';   // 이미지 캐시 버전 (그림 교체 시 숫자 올리면 새로 로드됨)
 function heroObj(id){ return HEROES.find(h=>h.id===(id||G.hero)) || HEROES[0]; }
 const HERO_NAME_TO_COSTUME_ID = { 린:'lin', 루비아:'rubia', 사피라:'sapphira', 실비아:'silvia', 카엘:'kael', 에메리아:'emeria', 카이라:'kaira', 카이론:'kairon' };
 function costumeHeroIdByName(name){ return HERO_NAME_TO_COSTUME_ID[name] || null; }
@@ -3877,12 +3872,9 @@ function loadGame(){
         p.level = Math.max(1, Math.min(HERO_MAX_LEVEL, p.level));
         p.cap = Math.max(10, Math.min(HERO_MAX_LEVEL, p.cap));
         if(!PET_BUFF[p.buff]) p.buff = 'atk';
-        if(!p.img){
-          const match = PET_POOL.find(x=>x.name===p.name && x.grade===p.grade) || PET_POOL.find(x=>x.buff===p.buff && x.grade===p.grade);
-          if(match) p.img = match.img;
-        }
+        const match = PET_POOL.find(x=>x.name===p.name && x.grade===p.grade) || PET_POOL.find(x=>x.buff===p.buff && x.grade===p.grade);
+        if(match) p.img = match.img;
         if(!p.stats || !p.skill){
-          const match = PET_POOL.find(x=>x.name===p.name && x.grade===p.grade);
           if(match){
             if(!p.stats) p.stats = match.stats || '';
             if(!p.skill) p.skill = match.skill || '';

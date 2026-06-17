@@ -139,22 +139,20 @@ function renderCharPetLeft(){
 function renderCharPetList(){
   const box = document.getElementById('charHeroList');
   if(!box) return;
-  let h = `<h3>펫 목록</h3><div class="card small">${PET_DUST_ICON} 펫 결정 <b>${(G.petDust||0).toLocaleString()}</b> · 펫을 누르면 왼쪽에 크게 보이고, 성장/분해할 수 있어요.</div>`;
+  let h = `<h3>펫 목록</h3><div class="card small">${PET_DUST_ICON} 펫 결정 <b>${(G.petDust||0).toLocaleString()}</b> · 펫 분해로 획득, 초월에 사용</div>`;
   if(!G.pets.length){
     h += `<div class="card small">보유한 펫이 없어요. 소환상점에서 펫을 소환해보세요.</div>`;
   } else {
     orderedPetEntries().forEach(({pet:p,i})=>{
       const active = G.activePet===i;
-      const selected = selectedCharPetIdx===i;
-      h += `<div class="charHeroItem petListItem" onclick="selectCharPet(${i})" style="${selected?'border-color:'+gradeColorOf(p.grade):''}">
+      h += `<div class="charHeroItem petListItem" onclick="openPetFromChar(${i})">
         <div class="heroFace g-bg-${p.grade}" style="border-color:${gradeColorOf(p.grade)}">${petVisual(p,'heroListImg')}</div>
         <div class="heroMeta">
           <div class="heroName txt-${p.grade}">[${p.grade}] ${p.name} Lv.${petLevel(p)} ${active?'<span style="font-size:10px;color:#3be38b">●장착</span>':''}</div>
           <div class="heroPower">전투력 ${petPower(p).toLocaleString()} · ${petBuffText(p)}</div>
         </div>
-        <button class="btn ${active?'':'gem'}" style="padding:6px 9px" onclick="event.stopPropagation();equipPetFromChar(${i})" ${active?'disabled':''}>${active?'장착중':'장착'}</button>
-      </div>
-      ${selected ? petDetailPanelHtml(p) + petGrowthHtml(i,'char') + petDismantleHtml(i,'char') : ''}`;
+        <button class="btn ${active?'':'gem'}" onclick="event.stopPropagation();equipPetFromChar(${i})" ${active?'disabled':''}>${active?'장착중':'장착'}</button>
+      </div>`;
     });
   }
   box.innerHTML = h;
@@ -165,11 +163,36 @@ function selectCharPet(i){
   renderCharPetLeft();
   renderCharPetList();
 }
+function openPetFromChar(i){
+  selectedCharPetIdx = i;
+  renderCharPetLeft();
+  renderCharPetDetail(i);
+}
+function renderCharPetDetail(i){
+  const box = document.getElementById('charHeroList');
+  const p = G.pets[i];
+  if(!box || !p){ renderCharPetList(); return; }
+  selectedCharPetIdx = i;
+  renderCharPetLeft();
+  const active = G.activePet===i;
+  box.innerHTML = `<button class="btn" style="width:100%;margin-bottom:9px" onclick="renderCharPetList()">◂ 펫 목록</button>
+    <div class="card" style="text-align:center;border-color:${gradeColorOf(p.grade)}">
+      <div class="hp-card g-bg-${p.grade}" style="width:86px;height:86px;margin:0 auto 8px;border-color:${gradeColorOf(p.grade)}">
+        <div class="hp-shine"></div><div class="hp-grade txt-${p.grade}">${p.grade}</div>${petVisual(p)}
+      </div>
+      <div class="txt-${p.grade}" style="font-weight:bold;margin-top:4px">[${p.grade}] ${p.name} Lv.${petLevel(p)}/${petCap(p)}</div>
+      <div class="small">${petBuffText(p)}</div>
+      <button class="btn ${active?'':'gem'}" style="width:100%;margin-top:8px" onclick="equipPetFromChar(${i})" ${active?'disabled':''}>${active?'장착중':'장착'}</button>
+    </div>
+    ${petDetailPanelHtml(p)}
+    ${petGrowthHtml(i,'char')}
+    ${petDismantleHtml(i,'char')}`;
+}
 function equipPetFromChar(i){
   selectedCharPetIdx = i;
   G.activePet = i;
   refreshTop(); updatePet();
-  renderCharPet();
+  renderCharPetDetail(i);
 }
 function renderCharPet(){
   charHallTab = 'pet';
