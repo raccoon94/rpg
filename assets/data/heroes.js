@@ -16,7 +16,7 @@ var HEROES = [
       { id:'sapphira_default', name:'기본', img:'assets/char/base/silvia_base.png', sd:'assets/char/sd_custom/sd_linea.png', price:0, desc:'전사 기본 복장' },
       { id:'sapphira_summer_event', name:'아쿠아 블레이드', img:'assets/char/event/sapphira_summer_cutout.png', sd:'assets/char/sd_custom/sd_linea.png', price:1800, aura:'#22d3ee', bonus:0.08, fxEmoji:'🌊', scene:'assets/bg/beach.png', desc:'여름 이벤트 복장 · 물/얼음 검사의 해변 장비' },
     ]},
-  { id:'silvia', name:'실비아', emoji:'🛡️', cls:'sword', attr:'빛', aura:'#ffe08a', bonus:0.25, fx:'feather', fxEmoji:'✨',
+  { id:'silvia', name:'실비아', emoji:'🛡️', cls:'tanker', attr:'빛', aura:'#ffe08a', bonus:0.25, fx:'feather', fxEmoji:'✨',
     costumes:[
       { id:'silvia_default', name:'기본', img:'assets/char/base/rubia_base.png', sd:'assets/char/sd_custom/sd_amelia.png', price:0, desc:'성기사 기본 복장' },
       { id:'silvia_summer_event', name:'선샤인 가드', img:'assets/char/event/silvia_summer_cutout.png', sd:'assets/char/sd_custom/sd_amelia.png', price:1800, aura:'#ffe08a', bonus:0.08, fxEmoji:'✨', scene:'assets/bg/beach.png', artScale:1.08, desc:'여름 이벤트 복장 · 빛의 수호자 해변 장비' },
