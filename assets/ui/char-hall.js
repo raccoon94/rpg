@@ -45,6 +45,7 @@ function syncCharHallTabs(){
 function setCharHallTab(tab){
   charHallTab = tab;
   heroDetailIdx = null;
+  if(tab==='pet' && G.activePet>=0 && G.pets[G.activePet]) selectedCharPetIdx = G.activePet;
   if(tab==='gear') renderCharGear();
   else if(tab==='pet') renderCharPet();
   else renderChar();
@@ -121,6 +122,19 @@ function renderCharGearDetail(i){
       <div class="small" style="margin-top:5px">장착 ${equipped.length}/${itemCount(g)} · 남은 수량 ${gearAvailableCount(g)}</div>
     </div>
     <div class="card">
+      <div style="font-weight:bold;margin-bottom:7px">장비 능력치</div>
+      <div class="heroStatGrid">
+        <div class="heroStatCell"><div class="label">공격력</div><div class="value">${gearStats(g).atk.toLocaleString()}</div></div>
+        <div class="heroStatCell"><div class="label">체력</div><div class="value">${gearStats(g).hp.toLocaleString()}</div></div>
+        <div class="heroStatCell"><div class="label">방어력</div><div class="value">${gearStats(g).def.toLocaleString()}</div></div>
+        <div class="heroStatCell"><div class="label">공격속도</div><div class="value">${gearStats(g).spd}%</div></div>
+        <div class="heroStatCell"><div class="label">치명타</div><div class="value">${Math.round(gearStats(g).crit*100)}%</div></div>
+        <div class="heroStatCell"><div class="label">치명타 피해</div><div class="value">${Math.round(gearStats(g).critDmg*100)}%</div></div>
+      </div>
+      <div class="small" style="margin-top:7px;line-height:1.45">${g.desc}</div>
+    </div>
+    ${gearGrowthHtml(i,'char')}
+    <div class="card">
       <div style="font-weight:bold;margin-bottom:7px">장착 영웅 선택</div>
       ${heroes.length ? heroes.map(hero=>{
         const current = hero.gearUid===g.uid;
@@ -136,19 +150,6 @@ function renderCharGearDetail(i){
         </div>`;
       }).join('') : `<div class="small">이 장비를 장착할 수 있는 영웅이 없습니다.</div>`}
     </div>
-    <div class="card">
-      <div style="font-weight:bold;margin-bottom:7px">장비 능력치</div>
-      <div class="heroStatGrid">
-        <div class="heroStatCell"><div class="label">공격력</div><div class="value">${gearStats(g).atk.toLocaleString()}</div></div>
-        <div class="heroStatCell"><div class="label">체력</div><div class="value">${gearStats(g).hp.toLocaleString()}</div></div>
-        <div class="heroStatCell"><div class="label">방어력</div><div class="value">${gearStats(g).def.toLocaleString()}</div></div>
-        <div class="heroStatCell"><div class="label">공격속도</div><div class="value">${gearStats(g).spd}%</div></div>
-        <div class="heroStatCell"><div class="label">치명타</div><div class="value">${Math.round(gearStats(g).crit*100)}%</div></div>
-        <div class="heroStatCell"><div class="label">치명타 피해</div><div class="value">${Math.round(gearStats(g).critDmg*100)}%</div></div>
-      </div>
-      <div class="small" style="margin-top:7px;line-height:1.45">${g.desc}</div>
-    </div>
-    ${gearGrowthHtml(i,'char')}
     ${gearDismantleHtml(i,'char')}`;
 }
 function renderCharGear(){
