@@ -41,6 +41,11 @@ var HEROES = [
       { id:'kairon_default', name:'기본', img:'assets/char/base/kairon_base.png', sd:'assets/char/sd_custom/sd_lumiel.png', price:0, desc:'빙결 기사 기본 복장' },
       { id:'kairon_summer_event', name:'블루 썸머', img:'assets/char/event/kairon_summer_cutout.png', sd:'assets/char/sd_custom/sd_lumiel.png', price:1800, aura:'#4f8cff', bonus:0.08, fxEmoji:'💧', scene:'assets/bg/beach.png', artScale:1.42, desc:'여름 이벤트 복장 · 푸른 검의 해변 장비' },
     ]},
+  { id:'grant', name:'그란트', emoji:'🛡️', cls:'knight', attr:'대지', aura:'#c99a4a', bonus:0.22, fx:'earth', fxEmoji:'🪨',
+    costumes:[
+      { id:'grant_default', name:'기본', img:'assets/char/base/grant_base.png', sd:'assets/char/sd_custom/sd_grant.png', price:0, artScale:1.06, desc:'대지 수호자 기본 복장' },
+      { id:'grant_summer_event', name:'골든 비치', img:'assets/char/event/grant_summer_cutout.png', sd:'assets/char/sd_custom/sd_grant.png', price:1800, aura:'#e0b05a', bonus:0.08, fxEmoji:'🏖️', scene:'assets/bg/beach.png', artScale:1.18, desc:'여름 이벤트 복장 · 대지 수호자의 해변 장비' },
+    ]},
 ];
 
 // ---- Hero summon pool ----
@@ -53,6 +58,7 @@ var HERO_POOL = [
   {name:"에메리아", emoji:"🌿", cls:"healer", grade:"SR", atk:50},
   {name:"카이라", emoji:"🗡️", cls:"assassin", grade:"SR", atk:50},
   {name:"카이론", emoji:"⚔️", cls:"knight", grade:"SR", atk:50},
+  {name:"그란트", emoji:"🛡️", cls:"knight", grade:"SR", atk:50},
 ];
 
 // ---- World prologue ----
@@ -119,6 +125,12 @@ var CHAR_SKILLS = {
     {name:'빙영 스텝', fx:'🧊', mult:6, desc:'서리 그림자 이동 · 회피 증가'},
     {name:'아이스 가디언', fx:'🛡️', mult:5, desc:'빙결 방어막 · 방어력 강화와 재생'},
     {name:'빙천의 심판', fx:'❄️', mult:10, desc:'거대한 얼음 검성 강림'},
+  ]},
+  '그란트':{ color:'#c99a4a', skills:[
+    {name:'어스 브레이커', fx:'🪨', mult:6, desc:'대지를 울리는 망치 강타'},
+    {name:'스톤 가드', fx:'🛡️', mult:5, desc:'암석 방패 전개 · 방어력 강화'},
+    {name:'테라 임팩트', fx:'⚒️', mult:7, desc:'전방 분쇄 · 적 방어 약화'},
+    {name:'가이아 포트리스', fx:'⛰️', mult:10, desc:'대지의 성벽 소환 · 광역 진압'},
   ]},
 };
 

@@ -363,94 +363,130 @@ function removePartyHeroFromChar(uid, i){
 }
 function cleanHeroDismantleSelection(){
   if(!(heroDismantleSelected instanceof Set)) heroDismantleSelected = new Set();
-  const valid = new Set(G.heroes.map(h=>h.uid));
-  [...heroDismantleSelected].forEach(uid=>{ if(!valid.has(uid)) heroDismantleSelected.delete(uid); });
+  const selected = G.heroes.find(h=>h.uid===heroDismantleSelectedHeroUid);
+  if(!selected){
+    heroDismantleSelectedHeroUid = null;
+    heroDismantleAmount = 1;
+  } else {
+    const max = maxHeroDismantleAmount(selected);
+    if(max<=0){
+      heroDismantleSelectedHeroUid = null;
+      heroDismantleAmount = 1;
+    } else {
+      heroDismantleAmount = Math.max(1, Math.min(max, Math.floor(Number(heroDismantleAmount)||1)));
+    }
+  }
+  heroDismantleSelected.clear();
+  if(heroDismantleSelectedHeroUid) heroDismantleSelected.add(heroDismantleSelectedHeroUid);
   if(!G.heroes.length) heroDismantleMode = false;
 }
-function selectedHeroDismantleEntries(){
+function maxHeroDismantleAmount(hero){
+  if(!hero) return 0;
+  return Math.max(0, Math.min(itemCount(hero), totalHeroCopies()-1));
+}
+function selectedHeroDismantleEntry(){
   cleanHeroDismantleSelection();
-  return G.heroes
-    .map((hero,i)=>({hero,i}))
-    .filter(({hero})=>heroDismantleSelected.has(hero.uid));
+  const i = G.heroes.findIndex(h=>h.uid===heroDismantleSelectedHeroUid);
+  return i>=0 ? { hero:G.heroes[i], i } : null;
 }
 function selectedHeroDismantleReward(){
-  return selectedHeroDismantleEntries().reduce((sum,{hero})=>sum + heroDismantleReward(hero), 0);
+  const entry = selectedHeroDismantleEntry();
+  return entry ? heroDismantleReward(entry.hero) * heroDismantleAmount : 0;
 }
 function toggleHeroDismantleMode(){
   heroDismantleMode = !heroDismantleMode;
   heroDismantleSelected.clear();
+  heroDismantleSelectedHeroUid = null;
+  heroDismantleAmount = 1;
   partyPickUid = null;
   renderCharHeroList();
 }
 function cancelHeroDismantleMode(){
   heroDismantleMode = false;
   heroDismantleSelected.clear();
+  heroDismantleSelectedHeroUid = null;
+  heroDismantleAmount = 1;
   renderCharHeroList();
 }
 function toggleHeroDismantlePick(uid){
   if(!heroDismantleMode) return;
-  if(heroDismantleSelected.has(uid)) heroDismantleSelected.delete(uid);
-  else heroDismantleSelected.add(uid);
+  heroDismantleSelectedHeroUid = heroDismantleSelectedHeroUid===uid ? null : uid;
+  heroDismantleAmount = 1;
+  cleanHeroDismantleSelection();
+  renderCharHeroList();
+}
+function setHeroDismantleAmount(amount){
+  const entry = selectedHeroDismantleEntry();
+  if(!entry) return;
+  heroDismantleAmount = Math.max(1, Math.min(maxHeroDismantleAmount(entry.hero), Math.floor(Number(amount)||1)));
   renderCharHeroList();
 }
 function heroBulkDismantleHtml(){
   cleanHeroDismantleSelection();
-  const entries = selectedHeroDismantleEntries();
-  const selected = entries.length;
+  const entry = selectedHeroDismantleEntry();
+  const selected = !!entry;
   const reward = selectedHeroDismantleReward();
   const canEnter = G.heroes.length > 0 && totalHeroCopies() > 1;
   if(!heroDismantleMode){
     return `<div class="card heroBulkBar">
       <div class="row">
         <div style="flex:1">
-          <div style="font-weight:bold;color:#ffb3c1">다중 분해</div>
-          <div class="small">여러 영웅을 선택해 한 번에 ${HERO_DUST_ICON}영웅 결정으로 바꿀 수 있어요.</div>
+          <div style="font-weight:bold;color:#ffb3c1">중복 영웅 분해</div>
+          <div class="small">영웅을 선택한 뒤, 보유 개수 안에서 여러 개를 한 번에 분해할 수 있어요.</div>
         </div>
         <button class="btn" style="background:linear-gradient(135deg,#ff5e7a,#8b1e3f)" onclick="toggleHeroDismantleMode()" ${canEnter?'':'disabled'}>선택</button>
       </div>
       ${canEnter?'':'<div class="small" style="margin-top:5px">마지막 영웅은 분해할 수 없어요.</div>'}
     </div>`;
   }
+  const max = entry ? maxHeroDismantleAmount(entry.hero) : 0;
   return `<div class="card heroBulkBar">
-    <div style="font-weight:bold;color:#ffb3c1">다중 분해 모드</div>
-    <div class="small" style="margin-top:4px">선택 ${selected}명 · 예상 획득 ${HERO_DUST_ICON}<b>${reward.toLocaleString()}</b> · 각 영웅 1개씩 분해</div>
+    <div style="font-weight:bold;color:#ffb3c1">중복 영웅 분해 모드</div>
+    <div class="small" style="margin-top:4px">${entry?`선택: [${entry.hero.grade}] ${entry.hero.name} · 보유 ${itemCount(entry.hero)}개 · 분해 ${heroDismantleAmount}/${max}개`:'분해할 영웅을 선택하세요.'}</div>
+    ${entry?`<div class="heroDismantleStepper">
+      <button class="btn" onclick="setHeroDismantleAmount(heroDismantleAmount-1)" ${heroDismantleAmount<=1?'disabled':''}>-</button>
+      <div class="heroDismantleCount">${heroDismantleAmount.toLocaleString()}개<br><span>${HERO_DUST_ICON}${reward.toLocaleString()}</span></div>
+      <button class="btn" onclick="setHeroDismantleAmount(heroDismantleAmount+1)" ${heroDismantleAmount>=max?'disabled':''}>+</button>
+      <button class="btn" onclick="setHeroDismantleAmount(${max})" ${heroDismantleAmount>=max?'disabled':''}>최대</button>
+    </div>`:''}
     <div class="heroBulkActions">
-      <button class="btn" onclick="heroDismantleSelected.clear();renderCharHeroList()" ${selected?'':'disabled'}>선택 해제</button>
+      <button class="btn" onclick="heroDismantleSelectedHeroUid=null;heroDismantleAmount=1;heroDismantleSelected.clear();renderCharHeroList()" ${selected?'':'disabled'}>선택 해제</button>
       <button class="btn" onclick="cancelHeroDismantleMode()">취소</button>
       <button class="btn" style="background:linear-gradient(135deg,#ff5e7a,#8b1e3f)" onclick="dismantleSelectedHeroes()" ${selected?'':'disabled'}>분해</button>
     </div>
   </div>`;
 }
 function dismantleSelectedHeroes(){
-  const entries = selectedHeroDismantleEntries();
-  if(!entries.length) return;
-  if(totalHeroCopies() - entries.length < 1){
-    alert('마지막 영웅 1개는 남겨야 해요. 선택을 줄여주세요.');
+  const entry = selectedHeroDismantleEntry();
+  if(!entry) return;
+  const { hero, i } = entry;
+  const amount = Math.max(1, Math.min(maxHeroDismantleAmount(hero), Math.floor(Number(heroDismantleAmount)||1)));
+  if(amount<=0 || totalHeroCopies() - amount < 1){
+    alert('마지막 영웅 1개는 남겨야 해요. 분해 개수를 줄여주세요.');
     return;
   }
-  const reward = entries.reduce((sum,{hero})=>sum + heroDismantleReward(hero), 0);
-  const names = entries.map(({hero})=>`[${hero.grade}] ${hero.name}`).join(', ');
-  if(!confirm(`${entries.length}명의 영웅을 분해할까요?\n\n${names}\n\n획득: ${HERO_DUST_ICON} 영웅 결정 ${reward.toLocaleString()}개`)) return;
+  const reward = heroDismantleReward(hero) * amount;
+  if(!confirm(`[${hero.grade}] ${hero.name} 영웅 ${amount}개를 분해할까요?\n\n보유: ${itemCount(hero)}개\n획득: ${HERO_DUST_ICON} 영웅 결정 ${reward.toLocaleString()}개`)) return;
   G.heroDust = (G.heroDust||0) + reward;
-  entries.sort((a,b)=>b.i-a.i).forEach(({hero,i})=>{
-    const count = itemCount(hero);
-    if(count>1){
-      hero.count = count - 1;
-    } else {
-      if(Array.isArray(G.party)) G.party = G.party.map(id=>id===hero.uid ? null : id);
-      if(G.heroHp) delete G.heroHp[hero.uid];
-      G.heroes.splice(i,1);
-    }
-  });
+  const left = itemCount(hero) - amount;
+  if(left>0){
+    hero.count = left;
+  } else {
+    if(Array.isArray(G.party)) G.party = G.party.map(id=>id===hero.uid ? null : id);
+    if(G.heroHp) delete G.heroHp[hero.uid];
+    G.heroes.splice(i,1);
+  }
   selectedCharHeroIdx = null;
   heroDetailIdx = null;
   partyPickUid = null;
   heroDismantleSelected.clear();
+  heroDismantleSelectedHeroUid = null;
+  heroDismantleAmount = 1;
   heroDismantleMode = false;
   renderHeroRow();
   refreshTop();
   renderChar();
-  popReward('💠 영웅 일괄 분해 완료', `<div style="font-size:42px">${HERO_DUST_ICON}</div><div style="font-weight:bold">영웅 결정 +${reward.toLocaleString()}</div>`);
+  popReward('💠 영웅 분해 완료', `<div style="font-size:42px">${HERO_DUST_ICON}</div><div style="font-weight:bold">영웅 결정 +${reward.toLocaleString()}</div>`);
 }
 function renderCharHeroList(){
   const box = document.getElementById('charHeroList');

@@ -18,7 +18,7 @@ var HERO_DUST_ICON = '💠';
 var HERO_DUST_BY_GRADE = {N:1, R:3, SR:10, SSR:40, UR:120};
 var PET_DUST_ICON = '🐾';
 var PET_DUST_BY_GRADE = {N:1, R:3, SR:10, SSR:35, UR:100};
-var HERO_MAT = { 린:'wind', 루비아:'fire', 실비아:'water', 사피라:'water', 카엘:'fire', 에메리아:'wind', 카이라:'dark', 카이론:'water' };
+var HERO_MAT = { 린:'wind', 루비아:'fire', 실비아:'water', 사피라:'water', 카엘:'fire', 에메리아:'wind', 카이라:'dark', 카이론:'water', 그란트:'steel' };
 var ROLE_STAT_MULT = {
   gunner:{atk:1.28,hp:.78,def:.74},
   gun:{atk:1.28,hp:.78,def:.74},
