@@ -90,7 +90,7 @@ function renderCharGearList(){
         <div class="heroPower">${gearTypeInfo(gear).name} · ${gearClassText(gear)} · 전투력 ${gearPower(gear).toLocaleString()}</div>
         <div class="heroTags">
           <span class="miniTag">공격 ${gearStats(gear).atk.toLocaleString()}</span>
-          <span class="miniTag">치명 ${Math.round(gearStats(gear).crit*100)}%</span>
+          <span class="miniTag">치명 ${gearPercentText(gearStats(gear).crit)}</span>
           <span class="miniTag">방어 ${gearStats(gear).def.toLocaleString()}</span>
         </div>
       </div>
@@ -128,8 +128,8 @@ function renderCharGearDetail(i){
         <div class="heroStatCell"><div class="label">체력</div><div class="value">${gearStats(g).hp.toLocaleString()}</div></div>
         <div class="heroStatCell"><div class="label">방어력</div><div class="value">${gearStats(g).def.toLocaleString()}</div></div>
         <div class="heroStatCell"><div class="label">공격속도</div><div class="value">${gearStats(g).spd}%</div></div>
-        <div class="heroStatCell"><div class="label">치명타</div><div class="value">${Math.round(gearStats(g).crit*100)}%</div></div>
-        <div class="heroStatCell"><div class="label">치명타 피해</div><div class="value">${Math.round(gearStats(g).critDmg*100)}%</div></div>
+        <div class="heroStatCell"><div class="label">치명타</div><div class="value">${gearPercentText(gearStats(g).crit)}</div></div>
+        <div class="heroStatCell"><div class="label">치명타 피해</div><div class="value">${gearPercentText(gearStats(g).critDmg)}</div></div>
       </div>
       <div class="small" style="margin-top:7px;line-height:1.45">${g.desc}</div>
     </div>
@@ -193,7 +193,7 @@ function renderCharPetList(){
         <div class="heroFace g-bg-${p.grade}" style="border-color:${gradeColorOf(p.grade)}">${petVisual(p,'heroListImg')}</div>
         <div class="heroMeta">
           <div class="heroName txt-${p.grade}">[${p.grade}] ${p.name} Lv.${petLevel(p)} ${stackBadge(itemCount(p))} ${active?'<span style="font-size:10px;color:#3be38b">●장착</span>':''}</div>
-          <div class="heroPower">전투력 ${petPower(p).toLocaleString()} · ${petBuffText(p)}</div>
+          <div class="heroPower">펫 공격력 ${petAttackPower(p).toLocaleString()} · ${petBuffText(p)}</div>
         </div>
         <button class="btn ${active?'':'gem'}" onclick="event.stopPropagation();equipPetFromChar(${i})" ${active?'disabled':''}>${active?'장착중':'장착'}</button>
       </div>`;

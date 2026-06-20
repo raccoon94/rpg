@@ -2,6 +2,7 @@
 var GEAR_CATALOG_VERSION = '20260618';
 var GEAR_DUST_ICON = '🧩';
 var GEAR_DUST_BY_GRADE = {N:1, R:3, SR:10, SSR:35, UR:100};
+var GEAR_CRIT_SCALE = {N:1/16, R:1/8, SR:1/4, SSR:1/2, UR:1};
 var GEAR_TYPE_INFO = {
   sword:{name:'검', role:'밸런스형', icon:'⚔️', desc:'공격력과 안정성이 균형 잡힌 무기'},
   gun:{name:'총', role:'공격형', icon:'🔫', desc:'빠른 공격속도와 원거리 화력이 강한 무기'},
@@ -91,7 +92,7 @@ var GEAR_POOL = [];
         hp:Math.round(base.hp*scale),
         def:Math.round(base.def*scale),
         spd:base.spd*scale,
-        crit:base.crit,
+        crit:+(base.crit * (GEAR_CRIT_SCALE[grade] || 1)).toFixed(2),
         critDmg:Math.round(base.critDmg*scale),
         heal:Math.round((base.heal||0)*scale)
       });

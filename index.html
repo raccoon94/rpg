@@ -88,8 +88,14 @@
   #petCompanion { position:absolute; left:24.5%; top:38%; width:76px; height:76px; display:flex; align-items:flex-end; justify-content:center;
     font-size:58px; z-index:7; pointer-events:none; animation:bob 2s ease-in-out infinite; filter:drop-shadow(0 6px 6px #0008); }
   #petCompanion img { width:104px; height:104px; max-width:none; max-height:none; object-fit:contain; display:block; }
-  .petProj { position:absolute; font-size:22px; z-index:6; pointer-events:none; filter:drop-shadow(0 0 6px #ffd86688); }
-  .petProj img { width:30px; height:30px; object-fit:contain; display:block; }
+  #petCompanion.petCast { animation:petCast .36s ease-out; filter:drop-shadow(0 6px 6px #0008) drop-shadow(0 0 16px var(--petGlow,#ffd866)); }
+  @keyframes petCast { 0%,100%{transform:translateY(0) scale(1);} 45%{transform:translateY(-9px) scale(1.14);} }
+  .petProj { position:absolute; width:32px; height:32px; border-radius:50%; z-index:6; pointer-events:none;
+    display:flex; align-items:center; justify-content:center; font-size:22px; color:var(--petColor,#ffd866);
+    background:radial-gradient(circle at 35% 30%, #fff, currentColor 34%, #ffffff00 72%);
+    box-shadow:0 0 12px currentColor,0 0 24px currentColor; filter:drop-shadow(0 0 6px currentColor); }
+  .petProj::after { content:''; position:absolute; right:22px; width:36px; height:8px; border-radius:999px;
+    background:linear-gradient(90deg,transparent,currentColor); opacity:.75; filter:blur(2px); }
 
   /* 몬스터 */
   #enemy { position:relative; display:flex; flex-direction:column; align-items:center; }
@@ -975,12 +981,12 @@
 </div>
 
 <script src="assets/data/balance.js?v=10"></script>
-<script src="assets/data/heroes.js?v=12"></script>
+<script src="assets/data/heroes.js?v=13"></script>
 <script src="assets/data/pets.js?v=10"></script>
 <script src="assets/data/gears.js?v=1"></script>
-<script src="assets/logic/pet-helpers.js?v=10"></script>
-<script src="assets/logic/stats.js?v=10"></script>
-<script src="assets/ui/char-hall.js?v=12"></script>
+<script src="assets/logic/pet-helpers.js?v=11"></script>
+<script src="assets/logic/stats.js?v=11"></script>
+<script src="assets/ui/char-hall.js?v=13"></script>
 <script src="assets/ui/sound.js?v=14"></script>
 <script>
 // ===== 게임 상태 =====
@@ -1100,7 +1106,7 @@ const ACHIEVEMENTS = [
 // ===== 영웅 → 코스튬 구조 =====
 // 각 영웅(캐릭터)이 자기 코스튬들을 가짐. 코스튬 선택 시 그 영웅의 외형/배경 적용
 // Hero costume catalog data is loaded from assets/data.
-const AV = '?v=14';   // 이미지 캐시 버전 (그림 교체 시 숫자 올리면 새로 로드됨)
+const AV = '?v=15';   // 이미지 캐시 버전 (그림 교체 시 숫자 올리면 새로 로드됨)
 function heroObj(id){ return HEROES.find(h=>h.id===(id||G.hero)) || HEROES[0]; }
 const HERO_NAME_TO_COSTUME_ID = { 린:'lin', 루비아:'rubia', 사피라:'sapphira', 실비아:'silvia', 카엘:'kael', 에메리아:'emeria', 카이라:'kaira', 카이론:'kairon', 그란트:'grant' };
 function costumeHeroIdByName(name){ return HERO_NAME_TO_COSTUME_ID[name] || null; }
@@ -1819,7 +1825,7 @@ function showHeroDmg(slotIndex, amount){
   d.className = 'dmg';
   d.style.color = '#ff9aad';
   d.style.fontSize = '15px';
-  d.textContent = '-' + Math.ceil(amount).toLocaleString();
+  d.textContent = amount > 0 ? '-' + Math.ceil(amount).toLocaleString() : 'MISS';
   d.style.left = (15 + (slotIndex%2)*13) + '%';
   d.style.top = (45 + Math.floor(slotIndex/2)*12) + '%';
   b.appendChild(d);
@@ -1836,7 +1842,12 @@ function monsterAttack(){
   const candidates = monsterAttackType()==='melee' && frontLiving.length ? frontLiving : living;
   const target = candidates[Math.floor(Math.random()*candidates.length)];
   const raw = monsterAtk();
-  const dmg = Math.max(1, Math.floor(raw * 100 / (100 + heroDef(target.h))));
+  if(Math.random() < petEvasionBonus()){
+    showHeroDmg(target.i, 0);
+    renderHeroRow();
+    return;
+  }
+  const dmg = Math.max(1, Math.floor(raw * 100 / (100 + heroDef(target.h)) * petDamageTakenMult()));
   G.heroHp[target.h.uid] = Math.max(0, ensureHeroHp(target.h) - dmg);
   const el = document.querySelectorAll('#heroRow .heroSlot')[target.i];
   if(el){ el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit'); setTimeout(()=>el.classList.remove('hit'),220); }
@@ -1933,27 +1944,30 @@ function heroSkillPack(h){
 }
 function heroSkillCooldown(h, sk){
   const rank = GRADE_RANK[h.grade] ?? 0;
-  return Math.max(4500, 8800 + (sk.mult||5)*180 - rank*650);
+  const gearSpd = (typeof heroGearStats==='function' ? heroGearStats(h).spd || 0 : 0);
+  return Math.max(1800, ((8800 + (sk.mult||5)*180 - rank*650) * petCooldownMult()) / (1 + gearSpd/100));
 }
 function heroSkillPower(h){
   const partySize = Math.max(1, partyHeroes().length);
-  return (heroEffAtk(h) + G.atk/partySize) * skinMult() * (1 + synergyInfo().bonus) * attrSynergyMult();
+  return (heroEffAtk(h) + G.atk/partySize) * skinMult() * (1 + synergyInfo().bonus) * attrSynergyMult() * petSkillDmgMult() * petDamageMult();
 }
 function heroAttackType(h){
   const magic = ['mage','healer'];
   return magic.includes(h.cls) ? '마법' : '물리';
 }
 function heroCritRate(h){
-  return h.cls==='assassin' ? .20 : .10;
+  const gearCrit = (typeof heroGearStats==='function' ? heroGearStats(h).crit || 0 : 0);
+  return Math.min(.95, (h.cls==='assassin' ? .20 : .10) + gearCrit + huntCritBonus());
 }
 function heroCritDmg(h){
-  return h.cls==='assassin' ? 3.0 : 2.0;
+  const gearCritDmg = (typeof heroGearStats==='function' ? heroGearStats(h).critDmg || 0 : 0);
+  return ((h.cls==='assassin' ? 3.0 : 2.0) + gearCritDmg) * critDmgUpgradeMult();
 }
 function heroAttackSpeed(h){
   const base = {assassin:1.32, gunner:1.20, warrior:1.02, mage:.94, tanker:.86, healer:.90, knight:.96, sword:1.00, magic:.94, gun:1.16}[h.cls] || 1;
   const grade = 1 + (GRADE_RANK[h.grade]||0) * .035;
-  const pet = activePet()?.buff==='speed' ? 1 + petVal(activePet()) : 1;
-  return base * grade * pet;
+  const gearSpd = (typeof heroGearStats==='function' ? heroGearStats(h).spd || 0 : 0);
+  return base * grade * petSpeedMult() * (1 + gearSpd/100);
 }
 function heroStatDetailHtml(hero){
   const data = charData(hero.name);
@@ -2052,7 +2066,10 @@ function killMonster(){
     document.getElementById('battle').appendChild(ring); setTimeout(()=>ring.remove(),700);
   }
   G.kills++;
-  partyHeroes().forEach(h=>{ G.heroHp[h.uid] = Math.min(heroMaxHp(h), ensureHeroHp(h) + heroMaxHp(h)*0.14); });
+  partyHeroes().forEach(h=>{
+    const gearHeal = typeof heroGearStats==='function' ? heroGearStats(h).heal || 0 : 0;
+    G.heroHp[h.uid] = Math.min(heroMaxHp(h), ensureHeroHp(h) + (heroMaxHp(h)*0.14 + gearHeal) * petHealMult());
+  });
   if(G.kills >= stageKillGoal()){
     G.kills = 0;
     G.stage++;
@@ -2128,7 +2145,7 @@ function itemCount(x){ return Math.max(1, Math.floor(Number(x?.count)||1)); }
 function stackBadge(n){ return n>1 ? `<span style="display:inline-flex;align-items:center;justify-content:center;min-width:24px;padding:2px 7px;margin-left:4px;border-radius:999px;background:#0f1020;border:1px solid #ffd86688;color:#ffd866;font-size:11px;font-weight:900">x${n}</span>` : ''; }
 function heroStackKey(h){
   const e = h?.equip || {};
-  if(!h || heroLevel(h)!==1 || heroCap(h)!==10 || (e.무기||0)) return '';
+  if(!h || heroLevel(h)!==1 || heroCap(h)!==10 || (e.무기||0) || h.gearUid) return '';
   return `${h.name}|${h.grade}|${h.cls}|${h.atk||50}`;
 }
 function petStackKey(p){
@@ -2245,6 +2262,7 @@ function ensureGearState(){
     const base = gearBase(g.id);
     if(base){
       ['name','type','variant','img','role','desc','atk','hp','def','spd','crit','critDmg','heal'].forEach(k=>{ if(g[k]==null) g[k]=base[k]; });
+      g.crit = base.crit;
     }
     if(!HERO_GRADE_ORDER.includes(g.grade)) g.grade = base?.grade || 'N';
     g.level = Math.max(1, Math.min(HERO_MAX_LEVEL, g.level||1));
@@ -2263,6 +2281,10 @@ function ensureGearState(){
     const gear = G.gears.find(g=>g.uid===h.gearUid);
     if(h.gearUid && !gearCompatibleHero(gear, h)) h.gearUid = '';
   });
+  for(let i=0; i<(G.heroes||[]).length; i++){
+    const hero = G.heroes[i];
+    if(hero && hero.gearUid && itemCount(hero)>1) splitHeroStack(i);
+  }
   if(G.gears.length && !(G.heroes||[]).some(h=>h.gearUid)){
     const starter = G.gears[G.activeGear] || G.gears[0];
     const hero = (G.heroes||[]).find(h=>gearCompatibleHero(starter,h));
@@ -2274,10 +2296,24 @@ function clonePlain(obj){ return JSON.parse(JSON.stringify(obj)); }
 function splitHeroStack(i){
   const hero = G.heroes[i];
   if(!hero || itemCount(hero)<=1) return i;
-  hero.count = itemCount(hero) - 1;
+  const count = itemCount(hero);
+  const isPlaced = Array.isArray(G.party) && G.party.includes(hero.uid);
+  const hasGear = !!hero.gearUid || !!(hero.equip && hero.equip.무기);
+  if(isPlaced || hasGear){
+    const rest = clonePlain(hero);
+    rest.uid = newHeroUid();
+    rest.count = count - 1;
+    rest.gearUid = '';
+    hero.count = 1;
+    G.heroes.splice(i+1, 0, rest);
+    ensureHeroHp(hero);
+    return i;
+  }
+  hero.count = count - 1;
   const one = clonePlain(hero);
   one.uid = newHeroUid();
   one.count = 1;
+  one.gearUid = '';
   G.heroes.splice(i+1, 0, one);
   ensureHeroHp(one);
   if(heroDetailIdx===i) heroDetailIdx = i+1;
@@ -3728,7 +3764,8 @@ function petLevel(p){ return Math.max(1, Math.min(HERO_MAX_LEVEL, p.level||1)); 
 function petCap(p){ return Math.max(10, Math.min(HERO_MAX_LEVEL, p.cap||10)); }
 function petAscCount(p){ return Math.max(0, Math.floor(petCap(p)/10)-1); }
 function petGradeMult(p){ return HERO_GRADE_MULT[p.grade] || 1; }
-function petPower(p){ return Math.round((80 + petLevel(p)*18 + petAscCount(p)*160) * petGradeMult(p)); }
+function petAttackPower(p){ return Math.round((80 + petLevel(p)*18 + petAscCount(p)*160) * petGradeMult(p)); }
+function petPower(p){ return petAttackPower(p); }
 function petLevelCost(p){ return Math.floor(120 * Math.pow(petLevel(p), 1.38) * petGradeMult(p)); }
 function petTransCost(p){
   const gradeUp = petLevel(p)>=HERO_MAX_LEVEL && p.grade!=='UR';
@@ -3764,15 +3801,15 @@ function petGrowthHtml(i, mode='panel'){
   return `<div class="card" style="border-color:${gradeColorOf(p.grade)}">
     <div style="font-weight:bold">펫 성장 <span class="txt-${p.grade}">[${p.grade}] Lv.${lv}/${cap}</span></div>
     <div class="growGrid">
-      <div class="growPill">펫 전투력<br><b style="color:#ffd866">${petPower(p).toLocaleString()}</b></div>
-      <div class="growPill">대표 효과<br><b style="color:#7fd0ff">${(PET_BUFF[p.buff]?.label)||'능력치'}</b></div>
+      <div class="growPill">펫 공격력<br><b style="color:#ffd866">${petAttackPower(p).toLocaleString()}</b></div>
+      <div class="growPill">자동 버프<br><b style="color:#7fd0ff">${(PET_BUFF[p.buff]?.label)||'능력치'}</b></div>
     </div>
     <div class="row" style="margin-top:8px">
       <button class="btn gold" onclick="upPetLevel(${i},'${mode}')" ${(!canLevel||G.gold<lvCost)?'disabled':''}>${canLevel?`<span class="goldIcon"></span>${lvCost.toLocaleString()} 레벨업`:'초월 필요'}</button>
       <button class="btn gem" onclick="transcendPet(${i},'${mode}')" ${(!canTrans||G.gold<tr.gold||dustHave<tr.dust)?'disabled':''}>${maxed?'최대치':tr.gradeUp?`${nextGrade} 등급업`:'초월'}</button>
     </div>
     <div class="small" style="margin-top:6px">
-      레벨업: 골드 소비, 능력치 상승 · 초월: ${PET_DUST_ICON}펫 결정 ${dustHave}/${tr.dust} + <span class="goldIcon"></span>${tr.gold.toLocaleString()}
+      레벨업: 골드 소비, 펫 공격력 상승 · 초월: ${PET_DUST_ICON}펫 결정 ${dustHave}/${tr.dust} + <span class="goldIcon"></span>${tr.gold.toLocaleString()}
       ${tr.gradeUp&&!maxed?` · 성공 시 ${nextGrade} 1레벨로 승급`:''}
     </div>
   </div>`;
@@ -3845,7 +3882,11 @@ function summonPetShop(count=1){
 function equipPet(i){ G.activePet=i; refreshTop(); currentScreen ? renderScreen() : renderPanel(); updatePet(); }
 function refreshPetViews(mode='panel'){
   refreshTop(); updatePet();
-  if(mode==='char') renderCharPet();
+  if(mode==='char'){
+    const keepIdx = selectedCharPetIdx;
+    if(G.pets[keepIdx] && typeof renderCharPetDetail === 'function') renderCharPetDetail(keepIdx);
+    else renderCharPet();
+  }
   else if(currentScreen==='pet') renderScreen();
   else renderPanel();
 }
@@ -3912,7 +3953,7 @@ function viewPet(){
       <div class="heroFace g-bg-${p.grade}" style="border-color:${gradeColorOf(p.grade)}">${petVisual(p,'heroListImg')}</div>
       <div class="heroMeta">
         <div class="heroName txt-${p.grade}">[${p.grade}] ${p.name} Lv.${petLevel(p)} ${stackBadge(itemCount(p))} ${active?'<span style="font-size:10px;color:#3be38b">●장착</span>':''}</div>
-        <div class="heroPower">전투력 ${petPower(p).toLocaleString()} · ${petBuffText(p)}</div>
+        <div class="heroPower">펫 공격력 ${petAttackPower(p).toLocaleString()} · ${petBuffText(p)}</div>
         ${p.skill?`<div class="heroPower">스킬: ${p.skill}</div>`:''}
       </div>
       <button class="btn ${active?'':'gem'}" onclick="equipPet(${i})" ${active?'disabled':''}>${active?'장착중':'장착'}</button>
@@ -4139,14 +4180,46 @@ function buyGuildShop(id){
   renderScreen();
   popReward('🛡️ 길드 상점', `<div style="font-weight:bold">${item.title} 구매 완료</div><div class="small">${rewardText(reward)}</div>`);
 }
+function petProjectileStyle(p){
+  const text = `${p.name||''} ${p.stats||''} ${p.skill||''}`;
+  if(/화염|불|용암|폭발|화상/.test(text)) return {fx:'🔥', color:'#ff6b3d'};
+  if(/빙결|얼음|아이스|서리/.test(text)) return {fx:'❄️', color:'#7fd0ff'};
+  if(/번개|전격|천둥|감전/.test(text)) return {fx:'⚡', color:'#ffe66b'};
+  if(/자연|숲|꽃|생명|바람|질풍/.test(text)) return {fx:'✦', color:'#7ee889'};
+  if(/암흑|심연|유령|사신|저주|그림자/.test(text)) return {fx:'◆', color:'#c084fc'};
+  if(/빛|신성|성기사|천상/.test(text)) return {fx:'✦', color:'#fff0a8'};
+  if(/대지|암석|골렘|가이아/.test(text)) return {fx:'●', color:'#c9a25a'};
+  if(/물|아쿠아|해달/.test(text)) return {fx:'💧', color:'#5fd0ff'};
+  const byBuff = {
+    atk:{fx:'✦', color:'#ffcf66'}, crit:{fx:'◆', color:'#ff8ab4'}, gold:{fx:'●', color:'#ffd866'},
+    hp:{fx:'✚', color:'#3be38b'}, def:{fx:'●', color:'#9fb0ff'}, heal:{fx:'✚', color:'#8fffc1'},
+    speed:{fx:'⚡', color:'#ffe66b'}, magic:{fx:'◆', color:'#c084fc'}, skill:{fx:'✦', color:'#9fe9ff'}
+  };
+  return byBuff[p.buff] || {fx:'✦', color:'#ffd866'};
+}
 function petAttack(){
   const p=activePet(); if(!p) return;
   if(document.getElementById('home').style.display==='flex') return; // 홈에선 패스
   const b=document.getElementById('battle');
-  const proj=document.createElement('div'); proj.className='petProj'; proj.innerHTML=p.img ? `<img src="${p.img}${AV}" alt="${p.name}">` : p.emoji;
-  proj.style.left='24%'; proj.style.top='54%'; b.appendChild(proj);
-  proj.animate([{left:'24%',top:'54%',opacity:1},{left:'68%',top:'38%',opacity:1},{opacity:0}],{duration:320,easing:'ease-in'});
-  setTimeout(()=>{ proj.remove(); dealDamage(totalAtk()*0.4*huntDamageMult(), false); }, 320);
+  const petEl = document.getElementById('petCompanion');
+  const shot = petProjectileStyle(p);
+  if(petEl){
+    petEl.style.setProperty('--petGlow', shot.color);
+    petEl.classList.remove('petCast'); void petEl.offsetWidth; petEl.classList.add('petCast');
+  }
+  const proj=document.createElement('div');
+  proj.className='petProj';
+  proj.textContent=shot.fx;
+  proj.style.setProperty('--petColor', shot.color);
+  proj.style.left='28%'; proj.style.top='50%';
+  b.appendChild(proj);
+  proj.animate([
+    {left:'28%',top:'50%',opacity:0,transform:'scale(.55) rotate(0deg)'},
+    {left:'38%',top:'47%',opacity:1,transform:'scale(1.05) rotate(80deg)'},
+    {left:'68%',top:'38%',opacity:1,transform:'scale(.88) rotate(220deg)'},
+    {left:'71%',top:'36%',opacity:0,transform:'scale(1.35) rotate(280deg)'}
+  ],{duration:430,easing:'cubic-bezier(.2,.8,.2,1)'});
+  setTimeout(()=>{ proj.remove(); dealDamage(petAttackPower(p)*huntDamageMult(), false); }, 410);
 }
 
 // 홈/화면 상단 재화 표시 + 알림 뱃지
@@ -4585,9 +4658,13 @@ function viewHeroDetail(i){
   return h;
 }
 function upHeroEquip(i,k){
-  const hero=G.heroes[i]; if(!hero.equip) hero.equip={무기:0}; const lv=hero.equip[k] || 0;
+  let hero=G.heroes[i]; if(!hero) return;
+  if(!hero.equip) hero.equip={무기:0}; const lv=hero.equip[k] || 0;
   const cost=Math.floor(50*Math.pow(1.5,lv));
   if(G.gem<cost){ alert("💎 보석이 부족해요! 상점에서 광고를 보거나 충전하세요."); return; }
+  i = splitHeroStack(i);
+  hero = G.heroes[i]; if(!hero) return;
+  if(!hero.equip) hero.equip={무기:0};
   G.gem-=cost; hero.equip[k]=(hero.equip[k]||0)+1;
   refreshTop(); renderPanel();
 }
@@ -4628,8 +4705,12 @@ function gearStats(g){
   const m = gearGrowthMult(g);
   return {
     atk:Math.round((g.atk||0)*m), hp:Math.round((g.hp||0)*m), def:Math.round((g.def||0)*m),
-    spd:Math.round((g.spd||0)*m), crit:(g.crit||0)/100, critDmg:(g.critDmg||0)/100, heal:Math.round((g.heal||0)*m)
+    spd:Math.round(g.spd||0), crit:(g.crit||0)/100, critDmg:(g.critDmg||0)/100, heal:Math.round(g.heal||0)
   };
+}
+function gearPercentText(v){
+  const p = Math.max(0, (v||0) * 100);
+  return (p>0 && p<10 ? p.toFixed(1) : Math.round(p).toString()) + '%';
 }
 function gearPower(g){
   const s = gearStats(g);
@@ -4695,7 +4776,7 @@ function gearVisual(g, cls=''){
 }
 function gearStatsText(g){
   const s = gearStats(g);
-  return `공격 ${s.atk.toLocaleString()} · 체력 ${s.hp.toLocaleString()} · 방어 ${s.def.toLocaleString()} · 속도 ${s.spd}% · 치명 ${Math.round(s.crit*100)}% · 치피 ${Math.round(s.critDmg*100)}%${s.heal?` · 회복 ${s.heal}`:''}`;
+  return `공격 ${s.atk.toLocaleString()} · 체력 ${s.hp.toLocaleString()} · 방어 ${s.def.toLocaleString()} · 속도 ${s.spd}% · 치명 ${gearPercentText(s.crit)} · 치피 ${gearPercentText(s.critDmg)}${s.heal?` · 회복 ${s.heal}`:''}`;
 }
 function gearGrowthHtml(i, mode='panel'){
   const g = G.gears[i]; if(!g) return '';
@@ -4743,13 +4824,19 @@ function equipGear(i, mode='panel'){
 }
 function equipGearToHero(gearIndex, heroUid, mode='panel'){
   const gear = G.gears[gearIndex];
-  const hero = G.heroes.find(h=>h.uid===heroUid);
+  let heroIndex = G.heroes.findIndex(h=>h.uid===heroUid);
+  if(heroIndex<0) return;
+  let hero = G.heroes[heroIndex];
   if(!gear || !hero || !gearCompatibleHero(gear, hero)) return;
+  if(itemCount(G.heroes[heroIndex])>1) heroIndex = splitHeroStack(heroIndex);
+  hero = G.heroes[heroIndex];
   if(hero.gearUid !== gear.uid && gearAvailableCount(gear, hero.uid) <= 0){
     alert('이 장비는 보유 수량만큼 이미 장착 중이에요.');
     return;
   }
   hero.gearUid = gear.uid;
+  if(!G.heroHp) G.heroHp = {};
+  G.heroHp[hero.uid] = heroMaxHp(hero);
   G.activeGear = gearIndex;
   selectedCharGearIdx = gearIndex;
   if(mode==='panel') gearDetailIdx = gearIndex;
@@ -4766,6 +4853,7 @@ function unequipHeroGear(heroUid, mode='panel'){
   const hero = G.heroes.find(h=>h.uid===heroUid);
   if(!hero) return;
   hero.gearUid = '';
+  ensureHeroHp(hero);
   refreshTop();
   renderHeroRow();
   if(mode==='charHero'){
@@ -4862,7 +4950,7 @@ function viewGear(){
         <div class="heroPower">${gearTypeInfo(g).icon} ${gearTypeInfo(g).name} · ${gearClassText(g)} · 전투력 ${gearPower(g).toLocaleString()}</div>
         <div class="heroTags">
           <span class="miniTag">공격 ${gearStats(g).atk.toLocaleString()}</span>
-          <span class="miniTag">치명 ${Math.round(gearStats(g).crit*100)}%</span>
+          <span class="miniTag">치명 ${gearPercentText(gearStats(g).crit)}</span>
           <span class="miniTag">방어 ${gearStats(g).def.toLocaleString()}</span>
         </div>
       </div>
@@ -4897,8 +4985,8 @@ function viewGearDetail(i){
         <div class="heroStatCell"><div class="label">체력</div><div class="value">${gearStats(g).hp.toLocaleString()}</div></div>
         <div class="heroStatCell"><div class="label">방어력</div><div class="value">${gearStats(g).def.toLocaleString()}</div></div>
         <div class="heroStatCell"><div class="label">공격속도</div><div class="value">${gearStats(g).spd}%</div></div>
-        <div class="heroStatCell"><div class="label">치명타</div><div class="value">${Math.round(gearStats(g).crit*100)}%</div></div>
-        <div class="heroStatCell"><div class="label">치명타 피해</div><div class="value">${Math.round(gearStats(g).critDmg*100)}%</div></div>
+        <div class="heroStatCell"><div class="label">치명타</div><div class="value">${gearPercentText(gearStats(g).crit)}</div></div>
+        <div class="heroStatCell"><div class="label">치명타 피해</div><div class="value">${gearPercentText(gearStats(g).critDmg)}</div></div>
       </div>
       <div class="small" style="margin-top:7px;line-height:1.45">${g.desc}</div>
     </div>
@@ -5165,11 +5253,16 @@ function viewStat(){
   const attrSyn = attrSynergyInfo();
   const attrMatch = attrMatchupInfo();
   const equippedGears = party.map(h=>equippedGearForHero(h)).filter(Boolean);
+  const gearHpTotal = party.reduce((s,h)=>s+(heroGearStats(h).hp||0),0);
+  const gearSpdAvg = typeof weightedPartyGearStat==='function' ? weightedPartyGearStat('spd') : 0;
+  const gearCritAvg = typeof weightedPartyGearStat==='function' ? weightedPartyGearStat('crit') : 0;
+  const petBonus = petPartyBonus();
+  const petBonusText = pet ? petBonusSummary(petBonus) : '';
   const percent = v => Math.round(v*100);
   const partySize = Math.max(1, party.length);
   const sharedAtk = G.atk / partySize;
   const sharedAtkText = Math.round(sharedAtk).toLocaleString();
-  const atkMult = skinMult() * synergyMult() * attrSynergyMult() * petAtkMult() * guildMult();
+  const atkMult = skinMult() * synergyMult() * attrSynergyMult() * guildMult() * petDamageMult();
   const critRateText = `${percent(totalCritRate())}%`;
   const critDmgText = `x${totalCritDmgMult().toFixed(2)}`;
   const attrCountText = Object.entries(attrSyn.counts).map(([a,n])=>`${a} ${n}`).join(' · ') || '없음';
@@ -5184,6 +5277,7 @@ function viewStat(){
   const heroAppliedAtk = h => Math.round((heroEffAtk(h) + sharedAtk) * atkMult);
   const heroStatsHtml = party.length ? party.map(h=>{
     const hAttrs = heroAttributes(h);
+    const heroCritText = `${percent(heroCritRate(h))}% / x${heroCritDmg(h).toFixed(2)}`;
     return `<div class="statHeroItem">
       <div class="statHeroFace g-bg-${h.grade}" style="border-color:${heroCls(h).color}">${heroSdVisual(h,'heroListImg')}</div>
       <div class="statHeroMeta">
@@ -5192,9 +5286,9 @@ function viewStat(){
           ${heroStatCell('공격력', heroAppliedAtk(h).toLocaleString())}
           ${heroStatCell('체력', heroMaxHp(h).toLocaleString())}
           ${heroStatCell('방어력', heroDef(h).toLocaleString())}
-          ${heroStatCell('치명타', `${critRateText} / ${critDmgText}`)}
+          ${heroStatCell('치명타', heroCritText)}
         </div>
-        <div class="statHeroNote">영웅 ${heroEffAtk(h).toLocaleString()} + 공용 ${sharedAtkText} · ${equippedGearForHero(h)?'장비 '+equippedGearForHero(h).name:'장비 없음'} · 펫, 시너지, 길드, 코스튬 반영</div>
+        <div class="statHeroNote">영웅 ${heroEffAtk(h).toLocaleString()} + 공용 ${sharedAtkText} · ${equippedGearForHero(h)?'장비 '+equippedGearForHero(h).name:'장비 없음'} · 펫, 시너지, 길드, 코스튬, 특수강화 반영</div>
       </div>
     </div>`;
   }).join('') : `<div class="card small statHelp">배치된 영웅이 없습니다. 영웅 탭에서 파티를 편성하면 영웅별 능력치가 표시됩니다.</div>`;
@@ -5210,15 +5304,15 @@ function viewStat(){
     <div class="card small statHelp" style="margin-top:-2px;margin-bottom:10px">공격력은 영웅 능력치 + 영웅별 장착 장비 + 공용 기본공격력에 코스튬, 펫, 시너지, 길드 보너스를 반영한 값입니다.</div>
     <div class="statGridList">
       ${statCard('속성', attrs.length ? attrs.join(' / ') : '대지', '배치 영웅 기준 적용 속성')}
-      ${statCard('치명타 보너스', `${critRateText} / ${critDmgText}`, `확률: 기본 ${percent(G.critRate)}% + 펫 ${percent(petCritBonus())}% + 특수강화 ${percent(huntCritBonus())}%`)}
+      ${statCard('치명타 보너스', `${critRateText} / ${critDmgText}`, `확률: 기본 ${percent(G.critRate)}% + 펫 ${percent(petCritBonus())}% + 특수강화 ${percent(huntCritBonus())}% + 장비는 착용 영웅 전투 비중만 반영 · 치피 펫 +${percent(petCritDmgBonus())}%`)}
       ${statCard('속성 데미지', `+${percent(attrDmgMult()-1)}%`, `특수강화 속성공격력 Lv.${G.attrPower} / ${SPECIAL_MAX_LEVEL}`)}
       ${statCard('속성 상성', `+${percent(attrMatch.bonus)}%`, `${attrMatch.heroes.length?attrMatch.heroes.join(', '):'상성 영웅 없음'} → ${attrMatch.monster} 몬스터`, true)}
       ${statCard('속성 시너지', `+${percent(attrSyn.bonus)}%`, `동속성 ${attrSyn.sameStacks}단계 · 조합 ${attrSyn.pairStacks}단계 · ${attrCountText}`, true)}
     </div>
     <h3 style="margin-top:12px">적용 보너스</h3>
     <div class="statGridList">
-      ${statCard('펫', pet ? `${pet.name} · ${petBuffText(pet)}` : '착용 없음', '', true)}
-      ${statCard('장비', equippedGears.length ? `장착 ${equippedGears.length}개 · 공격 +${gearAtkTotal().toLocaleString()} · 방어 +${gearDefTotal().toLocaleString()}` : '착용 없음', equippedGears.map(g=>`[${g.grade}] ${g.name}`).join(' / '), true)}
+      ${statCard('펫', pet ? `${pet.name} · 펫 공격력 ${petAttackPower(pet).toLocaleString()}` : '착용 없음', petBonusText || (pet ? petBuffText(pet) : ''), true)}
+      ${statCard('장비', equippedGears.length ? `장착 ${equippedGears.length}개 · 공격 +${gearAtkTotal().toLocaleString()} · 체력 +${gearHpTotal.toLocaleString()} · 방어 +${gearDefTotal().toLocaleString()}` : '착용 없음', equippedGears.length ? `속도 평균 +${percent(gearSpdAvg)}% · 치명 평균 +${gearPercentText(gearCritAvg)} · ${equippedGears.map(g=>`[${g.grade}] ${g.name}`).join(' / ')}` : '', true)}
       ${statCard('특수강화', `치확 +${percent(huntCritBonus())}% · 치피 x${critDmgUpgradeMult().toFixed(2)} · 보스 +${percent(bossPowerBonus())}% · 속성 +${percent(attrDmgMult()-1)}%`, '', true)}
       ${statCard('코스튬/시너지/길드', `코스튬 +${percent(skinMult()-1)}% · 시너지 +${percent(syn.bonus)}% · 길드 ${G.guild?.joined?'+'+percent(guildAtkBonus())+'%':'없음'}`, syn.bonus>0 ? `${CLASSES[syn.cls]?.name||'직업'} ${syn.count}명 시너지` : '같은 직업 3명부터 시너지 적용', true)}
       ${statCard('속성 상성표', attrAdvText, '', true)}

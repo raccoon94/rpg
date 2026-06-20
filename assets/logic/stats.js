@@ -75,15 +75,21 @@ function heroRawAtk(h){
   const mult = heroGradeMult(h);
   return Math.round(((h.atk||50) * mult + (heroLevel(h)-1) * 12 * mult + heroAscCount(h) * 120 * mult) * roleStatMult(h, 'atk'));
 }
-function heroEffAtk(h){ return Math.round((heroRawAtk(h) + heroGearStats(h).atk) * (1 + heroAffinity(h)*0.003)); }
+function heroEffAtk(h){ return Math.round((heroRawAtk(h) + heroGearStats(h).atk) * (1 + heroAffinity(h)*0.003) * petHeroAtkMult(h)); }
 function heroMaxHp(h){
   const mult = heroGradeMult(h);
   const role = roleStatMult(h, 'hp');
   const gearHp = heroGearStats(h).hp || 0;
   return Math.round(((520 + heroLevel(h)*72 + heroAscCount(h)*680 + (h.atk||50)*5) * mult * role + gearHp) * petHpMult());
 }
+function weightedPartyGearStat(key){
+  const party = partyHeroes();
+  const total = party.reduce((s,h)=>s + Math.max(1, heroEffAtk(h)), 0);
+  if(!total) return 0;
+  return party.reduce((s,h)=>s + (heroGearStats(h)[key]||0) * Math.max(1, heroEffAtk(h)) / total, 0);
+}
 function gearDefTotal(){ return partyHeroes().reduce((s,h)=>s+(heroGearStats(h).def||0),0); }
-function gearCritDmgMult(){ return 1 + Math.max(0, ...partyHeroes().map(h=>heroGearStats(h).critDmg||0)); }
+function gearCritDmgMult(){ return 1 + weightedPartyGearStat('critDmg'); }
 function heroDef(h){
   const mult = heroGradeMult(h);
   const role = roleStatMult(h, 'def');
@@ -144,7 +150,7 @@ function guildAtkBonus(){
   return 0.10 + Math.max(0, (G.guild.researchAtk||0)) * 0.02;
 }
 function guildMult(){ return 1 + guildAtkBonus(); }
-function totalAtk(){ return Math.round((G.atk + heroAtkTotal()) * skinMult() * synergyMult() * attrSynergyMult() * petAtkMult() * guildMult()); }
+function totalAtk(){ return Math.round((G.atk + heroAtkTotal()) * skinMult() * synergyMult() * attrSynergyMult() * guildMult() * petDamageMult()); }
 const HUNT_MAX_LEVEL = 1000;
 const SPEED_MAX_LEVEL = 100;
 const SPECIAL_MAX_LEVEL = 100;
@@ -169,11 +175,11 @@ function specialCostMany(level, maxLevel, amount){
 function passMult(){ return G.adPass ? 1.5 : 1; }            // 광고 패스 자동사냥 1.5배
 function tapMult(){ return 1.5 * (1 + (G.tapPower-1)*0.10); } // 터치 공격력 배수
 function autoMult(){ return (1 + (G.autoPower-1)*0.08) * passMult(); }  // 자동 공격력 배수
-function autoInterval(){ return Math.max(100, 600 - (G.autoSpeed-1)*5); } // 공격속도 (ms)
+function autoInterval(){ return Math.max(100, (600 - (G.autoSpeed-1)*5) / (1 + weightedPartyGearStat('spd')/100)); } // 공격속도 (ms)
 function huntCritBonus(){ return ((G.critChance||1)-1) * (0.50/(SPECIAL_MAX_LEVEL-1)); }
 function critDmgUpgradeMult(){ return 1 + ((G.critDmgPower||1)-1) * (1.00/(SPECIAL_MAX_LEVEL-1)); }
-function totalCritRate(){ return Math.min(.95, G.critRate + petCritBonus() + huntCritBonus() + Math.max(0, ...partyHeroes().map(h=>heroGearStats(h).crit||0))); }
-function totalCritDmgMult(){ return G.critDmg * critDmgUpgradeMult() * gearCritDmgMult(); }
+function totalCritRate(){ return Math.min(.95, G.critRate + petCritBonus() + huntCritBonus() + weightedPartyGearStat('crit')); }
+function totalCritDmgMult(){ return G.critDmg * critDmgUpgradeMult() * gearCritDmgMult() * (1 + petCritDmgBonus()); }
 function bossPowerBonus(){ return ((G.bossPower||1)-1) * (1.00/(SPECIAL_MAX_LEVEL-1)); }
 function bossDmgMult(){ return isBoss ? 1 + bossPowerBonus() : 1; }
 function attrDmgMult(){ return 1 + ((G.attrPower||1)-1) * (0.75/(SPECIAL_MAX_LEVEL-1)); }
